@@ -1,12 +1,19 @@
 # Сборка WiFiBeaconScanner.exe (переносной) и WiFiBeaconScanner-Setup-<версия>.exe (установщик) на Windows.
-#   - тег версии (git tag v0.7.0 && git push origin v0.7.0): сборка + GitHub Release с обоими файлами;
-#   - вручную (Actions → Release → Run workflow): сборка, файлы лежат в артефакте запуска.
+#   - Actions → Release → Run workflow с галочкой «publish»: сборка + GitHub Release v<версия из __init__.py>,
+#     тег создаётся на собранном коммите;
+#   - тег версии (git tag v0.7.0 && git push origin v0.7.0): то же самое;
+#   - Run workflow без галочки: только сборка, файлы лежат в артефакте запуска.
 name: Release
 
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Опубликовать GitHub Release v<версия из wifi_beacon_scanner/__init__.py>"
+        type: boolean
+        default: false
 
 env:
   PYTHONUTF8: "1"     # кириллица в выводе Python на Windows
@@ -23,12 +30,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Tag matches version in wifi_beacon_scanner/__init__.py
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Version and tag
+        id: ver
         shell: pwsh
         run: |
           $v = python -c "import wifi_beacon_scanner; print(wifi_beacon_scanner.__version__)"
-          if ("v$v" -ne "${{ github.ref_name }}") { throw "tag ${{ github.ref_name }} does not match version $v" }
+          $tag = ""
+          if ("${{ github.ref_type }}" -eq "tag") {
+            if ("v$v" -ne "${{ github.ref_name }}") { throw "tag ${{ github.ref_name }} does not match version $v" }
+            $tag = "${{ github.ref_name }}"
+          } elseif ("${{ inputs.publish }}" -eq "true") {
+            $tag = "v$v"
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          Write-Output "version $v, release tag '$tag'"
 
       - name: Unit tests
         run: |
@@ -75,11 +91,12 @@ jobs:
           if-no-files-found: error
 
       - name: GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.ver.outputs.tag != ''
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          $tag = "${{ steps.ver.outputs.tag }}"
           $setup = (Get-ChildItem dist/installer/*.exe | Select-Object -First 1).FullName
-          $notes = "Установщик: $(Split-Path $setup -Leaf). Переносная версия без установки: WiFiBeaconScanner.exe. Что нового - в CHANGELOG.md."
-          gh release create "${{ github.ref_name }}" $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --title "Wi-Fi Beacon Scanner ${{ github.ref_name }}" --notes "$notes"
+          python tools/release_notes.py ${{ steps.ver.outputs.version }} --setup (Split-Path $setup -Leaf) --out release-notes.md
+          gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md

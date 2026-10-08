@@ -176,15 +176,12 @@ MCS, с которым реально идут кадры, виден тольк
 
 Версия задаётся в одном месте: `wifi_beacon_scanner/__init__.py`. Изменения описываются в [CHANGELOG.md](CHANGELOG.md).
 
-**Выпуск версии (основной путь).** Поднять версию в `__init__.py`, дописать CHANGELOG, закоммитить и поставить тег:
-
-    git tag v0.7.0
-    git push origin v0.7.0
-
-Workflow [Release](.github/workflows/release.yml) на чистом Windows прогонит тесты, скачает базу вендоров,
-соберёт переносной exe и установщик, проверит, что собранный exe запускается, и опубликует всё в Releases.
-Тег должен совпадать с версией в `__init__.py`, иначе сборка остановится. Сборку без релиза можно запустить
-вручную: Actions → Release → Run workflow, файлы будут в артефакте запуска.
+**Выпуск версии (основной путь).** Поднять версию в `__init__.py`, дописать раздел в CHANGELOG, закоммитить
+в `main`, затем Actions → Release → Run workflow с галочкой «publish». Workflow [Release](.github/workflows/release.yml)
+на чистом Windows прогонит тесты, скачает базу вендоров, соберёт переносной exe и установщик, проверит
+собранный exe (запуск, скан, выгрузка PDF и Excel) и опубликует релиз `v<версия>` с текстом из CHANGELOG.
+Тег создаётся на собранном коммите. Можно и тегом из консоли (`git tag v0.7.0 && git push origin v0.7.0`),
+тег должен совпадать с версией в `__init__.py`. Без галочки получится только сборка, файлы будут в артефакте запуска.
 
 **Локально на Windows.** Нужны Python 3 и Inno Setup 6.3+ (https://jrsoftware.org/isdl.php):
 
@@ -229,6 +226,7 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     build.bat, build_installer.bat     сборка exe и установщика
     .github/workflows/                 CI (тесты) и Release (сборка exe, установщик, GitHub Release)
     tools/smoke_exe.py                 проверка собранного exe в Release: запуск, скан, выгрузка PDF и Excel
+    tools/release_notes.py             текст релиза из CHANGELOG.md
     tests/                   unittest
 
 ## Известные ограничения
