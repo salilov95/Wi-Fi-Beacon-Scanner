@@ -98,7 +98,7 @@ class WifiServer(ThreadingHTTPServer):
 
 class Handler(BaseHTTPRequestHandler):
     server: WifiServer  # type: ignore[assignment]
-    server_version = "wifi_diag"
+    server_version = "wifi_beacon_scanner"
 
     def log_message(self, fmt: str, *args: Any) -> None:  # тише в консоли
         pass

@@ -12,13 +12,13 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag import pdf, report
-from wifi_diag.backends import DemoBackend
-from wifi_diag.model import Snapshot
-from wifi_diag.rules import analyze, channel_utilization
-from wifi_diag.web.server import make_server
-from wifi_diag.web.state import AppState
-from wifi_diag.xlsx import build_xlsx
+from wifi_beacon_scanner import pdf, report
+from wifi_beacon_scanner.backends import DemoBackend
+from wifi_beacon_scanner.model import Snapshot
+from wifi_beacon_scanner.rules import analyze, channel_utilization
+from wifi_beacon_scanner.web.server import make_server
+from wifi_beacon_scanner.web.state import AppState
+from wifi_beacon_scanner.xlsx import build_xlsx
 
 from ie_builder import *  # noqa: F401,F403
 from test_web import Client
@@ -108,7 +108,7 @@ class ExportApiTests(unittest.TestCase):
 
     @unittest.skipIf(not CHROME or shutil.which("pdftotext") is None, "нет Chromium или pdftotext")
     def test_pdf_export(self):
-        with mock.patch.dict(os.environ, {"WIFI_DIAG_PDF_BROWSER": CHROME}):
+        with mock.patch.dict(os.environ, {"WIFI_BEACON_SCANNER_PDF_BROWSER": CHROME}):
             st, hd, raw = self.c.req("POST", "/api/export/pdf", {"scope": "all"})
         self.assertEqual(st, 200, raw[:200])
         self.assertTrue(raw.startswith(b"%PDF"))
@@ -117,7 +117,7 @@ class ExportApiTests(unittest.TestCase):
             with open(p, "wb") as fh:
                 fh.write(raw)
             text = subprocess.run(["pdftotext", "-layout", p, "-"], capture_output=True, timeout=60).stdout.decode("utf-8")
-        for needle in ("Wi-Fi: отчёт диагностики", "Загрузка каналов", "Подключение ноутбука", "Все BSS", "CORP"):
+        for needle in ("Wi-Fi Beacon Scanner: отчёт", "Загрузка каналов", "Подключение ноутбука", "Все BSS", "CORP"):
             self.assertIn(needle, text)
 
     @unittest.skipUnless(sys.platform == "win32" and pdf.find_browser(), "только Windows с Edge")

@@ -14,7 +14,7 @@ import math
 import time
 from typing import Any, Dict, List, Optional, Sequence
 
-FORMAT = "wifi_diag.survey"
+FORMAT = "wifi_beacon_scanner.survey"
 VERSION = 1
 MAX_PLAN_BYTES = 8 * 1024 * 1024
 MAX_POINTS = 2000

@@ -1,9 +1,9 @@
 """CLI.
 
-  python -m wifi_diag interfaces
-  python -m wifi_diag scan    --ssid CORP --save snap.json --html report.html --csv bss.csv
-  python -m wifi_diag analyze snap.json --ssid CORP --html report.html
-  python -m wifi_diag gui     [--ssid CORP] [--demo [snap.json]]
+  python -m wifi_beacon_scanner interfaces
+  python -m wifi_beacon_scanner scan    --ssid CORP --save snap.json --html report.html --csv bss.csv
+  python -m wifi_beacon_scanner analyze snap.json --ssid CORP --html report.html
+  python -m wifi_beacon_scanner gui     [--ssid CORP] [--demo [snap.json]]
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .rules import Thresholds, analyze
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="wifi_diag", description="Диагностика Wi-Fi по beacon/probe IE")
+    p = argparse.ArgumentParser(prog="wifi_beacon_scanner", description="Диагностика Wi-Fi по beacon/probe IE")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp: argparse.ArgumentParser) -> None:
@@ -56,7 +56,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         import logging
         logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
         from .web.server import serve
-        from .web.state import AppState, default_prefs_path
+        from .web.state import AppState, default_prefs_path, legacy_prefs_path
         if args.demo is not None:
             base = None
             if args.demo:
@@ -68,7 +68,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         db = oui.load_default(args.manuf)
         if db is None:
             print("предупреждение: файл manuf не найден, вендоры не определяются (укажи --manuf)", file=sys.stderr)
-        serve(AppState(backend, db, args.ssid, prefs_path=default_prefs_path()), port=args.port,
+        serve(AppState(backend, db, args.ssid, prefs_path=default_prefs_path(),
+                       legacy_prefs_path=legacy_prefs_path()), port=args.port,
               open_browser=not args.no_browser, exit_when_closed=False if args.keep_running else None)
         return 0
 

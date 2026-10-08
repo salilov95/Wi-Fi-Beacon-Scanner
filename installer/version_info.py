@@ -1,5 +1,5 @@
 """Пишет файл версии для PyInstaller (--version-file): номер версии и описание видны
-в свойствах WifiDiag.exe и в инвентаризации ПО. Номер берётся из wifi_diag/__init__.py.
+в свойствах WiFiBeaconScanner.exe и в инвентаризации ПО. Номер берётся из wifi_beacon_scanner/__init__.py.
 
 Запуск из корня проекта:  python installer/version_info.py build/version_info.txt
 Печатает номер версии (его подхватывает build_installer.bat).
@@ -10,7 +10,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from wifi_diag import __version__  # noqa: E402
+from wifi_beacon_scanner import __version__  # noqa: E402
 
 TEMPLATE = """VSVersionInfo(
   ffi=FixedFileInfo(filevers={t}, prodvers={t}, mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0,
@@ -18,11 +18,11 @@ TEMPLATE = """VSVersionInfo(
   kids=[
     StringFileInfo([StringTable('040904B0', [
       StringStruct('CompanyName', 'salilov95'),
-      StringStruct('FileDescription', 'WifiDiag - Wi-Fi scanner and diagnostics'),
+      StringStruct('FileDescription', 'Wi-Fi Beacon Scanner'),
       StringStruct('FileVersion', '{v}'),
-      StringStruct('InternalName', 'WifiDiag'),
-      StringStruct('OriginalFilename', 'WifiDiag.exe'),
-      StringStruct('ProductName', 'WifiDiag'),
+      StringStruct('InternalName', 'WiFiBeaconScanner'),
+      StringStruct('OriginalFilename', 'WiFiBeaconScanner.exe'),
+      StringStruct('ProductName', 'Wi-Fi Beacon Scanner'),
       StringStruct('ProductVersion', '{v}')])]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]

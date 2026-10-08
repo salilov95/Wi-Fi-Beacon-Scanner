@@ -8,10 +8,10 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag.backends import DemoBackend
-from wifi_diag.model import Snapshot
-from wifi_diag.web.server import app_url, make_server
-from wifi_diag.web.state import AppState
+from wifi_beacon_scanner.backends import DemoBackend
+from wifi_beacon_scanner.model import Snapshot
+from wifi_beacon_scanner.web.server import app_url, make_server
+from wifi_beacon_scanner.web.state import AppState
 
 from ie_builder import *  # noqa: F401,F403
 
@@ -226,7 +226,7 @@ class WebTests(unittest.TestCase):
 
 class PrefsTests(unittest.TestCase):
     def test_sanitize_drops_unknown_and_hostile_values(self):
-        from wifi_diag.web.state import sanitize_prefs
+        from wifi_beacon_scanner.web.state import sanitize_prefs
         dirty = {"theme": '"><script>alert(1)</script>', "density": "compact", "cols": ["rssi", "<b>", 5, "trend"],
                  "panelH": 99999, "tab": "nope", "group": "yes", "evil": 1, "focus": ["  CORP ", "", 3], "v": 2}
         self.assertEqual(sanitize_prefs(dirty), {"density": "compact", "cols": ["rssi", "trend"], "focus": ["CORP"], "v": 2})
@@ -260,6 +260,20 @@ class PrefsTests(unittest.TestCase):
             with open(path, "w", encoding="utf-8") as f:
                 f.write("{not json")
             self.assertEqual(AppState(DemoBackend(seed=1), None, prefs_path=path).prefs, {})  # битый файл не роняет
+
+    def test_prefs_taken_from_old_app_folder_once(self):
+        import json as _json
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            old, new = os.path.join(d, "WifiDiag", "prefs.json"), os.path.join(d, "WiFiBeaconScanner", "prefs.json")
+            os.makedirs(os.path.dirname(old))
+            with open(old, "w", encoding="utf-8") as f:
+                _json.dump({"theme": "solar", "focus": ["CORP"]}, f)
+            st = AppState(DemoBackend(seed=1), None, prefs_path=new, legacy_prefs_path=old)
+            self.assertEqual((st.prefs["theme"], st.focus), ("solar", ["CORP"]))
+            st.set_prefs({"theme": "dark"})
+            self.assertTrue(os.path.exists(new))
+            self.assertEqual(AppState(DemoBackend(seed=1), None, prefs_path=new, legacy_prefs_path=old).prefs["theme"], "dark")
 
 
 if __name__ == "__main__":

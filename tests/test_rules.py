@@ -6,9 +6,9 @@ import os
 import tempfile
 import unittest
 
-from wifi_diag import oui, report
-from wifi_diag.model import Snapshot
-from wifi_diag.rules import CRITICAL, INFO, WARNING, Thresholds, analyze
+from wifi_beacon_scanner import oui, report
+from wifi_beacon_scanner.model import Snapshot
+from wifi_beacon_scanner.rules import CRITICAL, INFO, WARNING, Thresholds, analyze
 
 from ie_builder import *  # noqa: F401,F403
 
@@ -197,7 +197,7 @@ class OutputTests(unittest.TestCase):
 
 class AdviceTests(unittest.TestCase):
     def test_channel_advice_prefers_free_channel(self):
-        from wifi_diag.rules import channel_advice
+        from wifi_beacon_scanner.rules import channel_advice
         bss = [make_bss("02:00:00:00:0c:01", "a", CH1, -50, rsn_ie([2])),
                make_bss("02:00:00:00:0c:02", "b", CH1, -60, rsn_ie([2]))]
         rows = channel_advice(bss, "2.4")
@@ -207,7 +207,7 @@ class AdviceTests(unittest.TestCase):
         self.assertEqual(channel_advice(bss, "6"), [])
 
     def test_wide_5ghz_bss_covers_all_its_channels(self):
-        from wifi_diag.rules import channel_advice
+        from wifi_beacon_scanner.rules import channel_advice
         wide = make_bss("02:00:00:00:0d:10", "w", CH36, -50, ht_op_ie(36, True, 1) + vht_op_ie(1, 42))   # 80 МГц: 36-48
         self.assertEqual(wide.center_channel, 42)
         rows = {r["channel"]: r for r in channel_advice([wide], "5")}
@@ -219,14 +219,14 @@ class AdviceTests(unittest.TestCase):
         self.assertEqual((rows[36], rows[40]), (1, 0))
 
     def test_24ghz_overlap_window(self):
-        from wifi_diag.rules import channel_advice
+        from wifi_beacon_scanner.rules import channel_advice
         mk = lambda f: make_bss("02:00:00:00:0d:12", "x", f, -50, ht_op_ie(1))
         cnt = lambda f: {r["channel"]: r["count"] for r in channel_advice([mk(f)], "2.4")}
         self.assertEqual(cnt(2_432_000), {1: 1, 6: 1, 11: 0})     # канал 5 задевает и 1, и 6
         self.assertEqual(cnt(2_437_000), {1: 0, 6: 1, 11: 0})     # канал 6 не задевает 1 и 11
 
     def test_busy_channel_is_not_recommended_even_if_quiet(self):
-        from wifi_diag.rules import channel_advice
+        from wifi_beacon_scanner.rules import channel_advice
         bss = [make_bss("02:00:00:00:0d:01", "quiet-but-busy", CH11, -80, rsn_ie([2]) + qbss_ie(30, 204)),  # 80%
                make_bss("02:00:00:00:0d:02", "loud", CH1, -45, rsn_ie([2]) + qbss_ie(3, 25)),
                make_bss("02:00:00:00:0d:03", "mid", CH6, -60, rsn_ie([2]) + qbss_ie(3, 25))]
@@ -237,7 +237,7 @@ class AdviceTests(unittest.TestCase):
 
 class DiffTests(unittest.TestCase):
     def test_diff_added_removed_changed_rssi(self):
-        from wifi_diag.diff import diff_snapshots
+        from wifi_beacon_scanner.diff import diff_snapshots
         old = [make_bss("02:00:00:00:0e:01", "CORP", CH1, -50, ent_ies(ft=False)),
                make_bss("02:00:00:00:0e:02", "CORP", CH6, -60, ent_ies()),
                make_bss("02:00:00:00:0e:03", "gone", CH11, -70, rsn_ie([2]))]
@@ -255,7 +255,7 @@ class DiffTests(unittest.TestCase):
         self.assertEqual(d["same"], 1)
 
     def test_identical_snapshots_have_empty_diff(self):
-        from wifi_diag.diff import diff_snapshots
+        from wifi_beacon_scanner.diff import diff_snapshots
         a = [make_bss("02:00:00:00:0e:05", "x", CH1, -50, rsn_ie([2]))]
         d = diff_snapshots(a, a)
         self.assertEqual((d["added"], d["removed"], d["changed"], d["rssi"]), ([], [], [], []))
@@ -263,7 +263,7 @@ class DiffTests(unittest.TestCase):
 
 class UtilizationTests(unittest.TestCase):
     def test_per_channel_max_levels_and_no_data(self):
-        from wifi_diag.rules import channel_utilization
+        from wifi_beacon_scanner.rules import channel_utilization
         bss = [make_bss("02:00:00:00:10:01", "a", CH6, -50, qbss_ie(10, 204)),     # 80%
                make_bss("02:00:00:00:10:02", "b", CH6, -60, qbss_ie(3, 51)),      # 20%
                make_bss("02:00:00:00:10:03", "c", CH1, -60, qbss_ie(2, 64)),      # 25%
@@ -279,7 +279,7 @@ class UtilizationTests(unittest.TestCase):
         self.assertEqual(u["no_data"], [{"band": "5", "channel": 36, "bss": 1}])
 
     def test_levels_boundaries(self):
-        from wifi_diag.rules import util_level
+        from wifi_beacon_scanner.rules import util_level
         self.assertEqual([util_level(x)[0] for x in (0, 29.9, 30, 49.9, 50, 69.9, 70, 100)],
                          ["low", "low", "mid", "mid", "high", "high", "crit", "crit"])
 
