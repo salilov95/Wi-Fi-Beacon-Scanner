@@ -1,0 +1,33 @@
+name: Ошибка
+description: Программа работает не так, как ожидалось
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Перед отправкой проверьте, что в скриншотах и файлах нет SSID и BSSID, которые нельзя показывать.
+  - type: input
+    id: version
+    attributes:
+      label: Версия программы
+      placeholder: "0.7.0 (видно в свойствах WiFiBeaconScanner.exe)"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Windows и адаптер Wi-Fi
+      placeholder: "Windows 11 23H2, Intel Wi-Fi 6 AX201, драйвер 22.250"
+  - type: textarea
+    id: what
+    attributes:
+      label: Что произошло и что ожидали
+      description: Шаги, чтобы повторить.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Журнал программы
+      description: Последние строки `%LOCALAPPDATA%\WiFiBeaconScanner\wifi-beacon-scanner.log`.
+      render: text
