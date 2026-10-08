@@ -7,9 +7,9 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag.backends import DemoBackend
-from wifi_diag.web.server import Lifeline, make_server
-from wifi_diag.web.state import AppState
+from wifi_beacon_scanner.backends import DemoBackend
+from wifi_beacon_scanner.web.server import Lifeline, make_server
+from wifi_beacon_scanner.web.state import AppState
 
 from test_web import Client
 
@@ -80,7 +80,7 @@ class ByeEndpointTests(unittest.TestCase):
 
 class VersionInfoTests(unittest.TestCase):
     def test_version_file(self):
-        from wifi_diag import __version__
+        from wifi_beacon_scanner import __version__
         with tempfile.TemporaryDirectory() as d:
             out = os.path.join(d, "v.txt")
             r = subprocess.run([sys.executable, os.path.join(ROOT, "installer", "version_info.py"), out],
@@ -99,11 +99,11 @@ class VersionInfoTests(unittest.TestCase):
             self.assertNotIn(b"\n", data.replace(b"\r\n", b""), name)
 
     def test_iss_has_fixed_appid_and_paths(self):
-        with open(os.path.join(ROOT, "installer", "WifiDiag.iss"), encoding="utf-8") as f:
+        with open(os.path.join(ROOT, "installer", "WiFiBeaconScanner.iss"), encoding="utf-8") as f:
             iss = f.read()
         self.assertIn("AppId={{E8295D65-7A8A-4314-88BF-2F9104398348}", iss)
-        self.assertIn('Source: "..\\dist\\WifiDiag\\*"', iss)
-        self.assertTrue(os.path.exists(os.path.join(ROOT, "assets", "wifidiag.ico")))
+        self.assertIn('Source: "..\\dist\\WiFiBeaconScanner\\*"', iss)
+        self.assertTrue(os.path.exists(os.path.join(ROOT, "assets", "wifi-beacon-scanner.ico")))
 
 
 if __name__ == "__main__":

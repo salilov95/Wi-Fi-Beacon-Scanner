@@ -5,7 +5,7 @@ from __future__ import annotations
 import struct
 from typing import Iterable, Optional
 
-from wifi_diag.model import Bss
+from wifi_beacon_scanner.model import Bss
 
 
 def ie(eid: int, body: bytes) -> bytes:

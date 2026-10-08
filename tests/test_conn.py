@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag.conn import ConnSample, ConnTracker
+from wifi_beacon_scanner.conn import ConnSample, ConnTracker
 
 A, B, C = "aa:00:00:00:00:01", "aa:00:00:00:00:02", "aa:00:00:00:00:03"
 
@@ -122,7 +122,7 @@ class WinStructsTests(unittest.TestCase):
 
     def test_sizes_and_helpers(self):
         import ctypes
-        from wifi_diag import winstructs as ws
+        from wifi_beacon_scanner import winstructs as ws
         if ctypes.sizeof(ctypes.c_void_p) == 8:
             self.assertEqual(ws.sizes(), ws.EXPECTED_SIZES_X64)
         self.assertEqual(ws.WLAN_CONNECTION_ATTRIBUTES.wlanAssociationAttributes.offset, 520)

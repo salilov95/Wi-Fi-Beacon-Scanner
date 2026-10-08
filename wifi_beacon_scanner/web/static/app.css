@@ -332,3 +332,12 @@ details.raw{margin-top:12px}
 .lane{display:inline-block;width:16px;height:6px;border-radius:1px;margin-right:6px;vertical-align:middle}
 svg.dash{vertical-align:middle;margin-right:6px}
 svg.dash line{stroke:var(--fg)}
+
+/* ноутбук 1366-1500 px: шапка в одну строку */
+@media (max-width:1500px){
+  .brand{font-size:15px}
+  #focus{width:130px}
+  #load{padding-left:8px;padding-right:8px}
+}
+@media (max-width:1400px){#status{display:none}}
+@media (max-width:1300px){#iface{max-width:150px}#focus{width:100px}.brand{font-size:14px}}

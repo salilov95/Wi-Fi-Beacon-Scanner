@@ -4,8 +4,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 
-from wifi_diag.ie import iter_elements, parse_ies
-from wifi_diag.model import freq_to_band, freq_to_channel
+from wifi_beacon_scanner.ie import iter_elements, parse_ies
+from wifi_beacon_scanner.model import freq_to_band, freq_to_channel
 
 from ie_builder import *  # noqa: F401,F403
 
@@ -110,7 +110,7 @@ class FrequencyTests(unittest.TestCase):
 
 class DescribeTests(unittest.TestCase):
     def test_tree_decodes_names_and_fields(self):
-        from wifi_diag.ie import describe_ies
+        from wifi_beacon_scanner.ie import describe_ies
         data = ssid_ie("CORP") + rsn_ie([1, 3], pairwise=[4], mfpc=True) + ht_op_ie(36, True, 1)
         tree = describe_ies(data)
         self.assertEqual(tree[0]["name"], "SSID")
@@ -121,7 +121,7 @@ class DescribeTests(unittest.TestCase):
         self.assertTrue(all(isinstance(v, str) for t in tree for _, v in t["fields"]))
 
     def test_broken_ie_does_not_break_tree(self):
-        from wifi_diag.ie import describe_ies
+        from wifi_beacon_scanner.ie import describe_ies
         tree = describe_ies(ie(48, b"\x01\x00") + ie(127, b"\x00"))
         self.assertEqual([t["id"] for t in tree], [48, 127])
 

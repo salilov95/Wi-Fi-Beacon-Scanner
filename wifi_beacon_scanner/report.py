@@ -180,8 +180,8 @@ def render_html(snap: Snapshot, findings: Sequence[Finding], focus: Sequence[str
     out.append("<!doctype html><html lang='ru'><head><meta charset='utf-8'>"
                "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; style-src 'unsafe-inline'; img-src data:\">"
                "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-               "<title>Wi-Fi: отчёт диагностики</title><style>%s</style></head><body><main>" % _CSS)
-    out.append("<h1>Wi-Fi: отчёт диагностики</h1>")
+               "<title>Wi-Fi Beacon Scanner: отчёт</title><style>%s</style></head><body><main>" % _CSS)
+    out.append("<h1>Wi-Fi Beacon Scanner: отчёт</h1>")
     out.append("<div class='mut'>Снято: %s · адаптер: %s · BSS в отчёте: %d%s</div>" % (
         e(snap.taken_at), e(snap.interface or "-"), len(snap.bss),
         (" · мои SSID: " + e(", ".join(focus))) if focus else ""))

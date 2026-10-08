@@ -30,12 +30,23 @@ PREF_TABS = {"channels", "overview", "util", "signal", "conn", "survey", "findin
 _COL_RE = re.compile(r"^[a-z_]{1,24}$")
 
 
-def default_prefs_path() -> str:
-    """Где хранить настройки вида: %APPDATA%\\WifiDiag\\prefs.json, на других ОС ~/.config/wifi_diag."""
+LEGACY_APP_DIR = "WifiDiag"         # так программа называлась до 0.7.0
+
+
+def legacy_prefs_path() -> Optional[str]:
+    """Настройки версий до 0.7.0 (WifiDiag): если новых ещё нет, берём их, чтобы не потерять «Мои SSID» и тему."""
     if sys.platform == "win32":
         base = os.environ.get("APPDATA") or os.path.expanduser("~")
-        return os.path.join(base, "WifiDiag", "prefs.json")
+        return os.path.join(base, LEGACY_APP_DIR, "prefs.json")
     return os.path.join(os.path.expanduser("~"), ".config", "wifi_diag", "prefs.json")
+
+
+def default_prefs_path() -> str:
+    """Где хранить настройки вида: %APPDATA%\\WiFiBeaconScanner\\prefs.json, на других ОС ~/.config/wifi_beacon_scanner."""
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or os.path.expanduser("~")
+        return os.path.join(base, "WiFiBeaconScanner", "prefs.json")
+    return os.path.join(os.path.expanduser("~"), ".config", "wifi_beacon_scanner", "prefs.json")
 
 
 def sanitize_prefs(d: Any) -> Dict[str, Any]:
@@ -131,8 +142,9 @@ def bss_to_dict(b: Bss) -> Dict[str, Any]:
 
 class AppState:
     def __init__(self, backend: Backend, oui: Optional[OuiDb], focus: Optional[List[str]] = None,
-                 prefs_path: Optional[str] = None) -> None:
+                 prefs_path: Optional[str] = None, legacy_prefs_path: Optional[str] = None) -> None:
         self.prefs_path = prefs_path
+        self.legacy_prefs_path = legacy_prefs_path
         self.prefs: Dict[str, Any] = self._load_prefs()
         if not focus:
             focus = self.prefs.get("focus")     # «Мои SSID» с прошлого запуска
@@ -159,8 +171,11 @@ class AppState:
     def _load_prefs(self) -> Dict[str, Any]:
         if not self.prefs_path:
             return {}
+        path = self.prefs_path
+        if not os.path.exists(path) and self.legacy_prefs_path and os.path.exists(self.legacy_prefs_path):
+            path = self.legacy_prefs_path        # первый запуск после переименования; сохранится уже по новому пути
         try:
-            with open(self.prefs_path, "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 return sanitize_prefs(json.load(f))
         except (OSError, ValueError):
             return {}

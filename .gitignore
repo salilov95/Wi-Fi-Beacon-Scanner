@@ -16,4 +16,10 @@ snap*.json
 *.survey.json
 
 # база вендоров кладётся при сборке, в репозиторий не нужна
-wifi_diag/data/manuf
+wifi_beacon_scanner/data/manuf
+
+# окружения и пакеты
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/

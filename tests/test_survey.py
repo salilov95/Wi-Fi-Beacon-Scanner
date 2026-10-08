@@ -8,10 +8,10 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag.backends import DemoBackend
-from wifi_diag.survey import Survey
-from wifi_diag.web.server import make_server
-from wifi_diag.web.state import AppState
+from wifi_beacon_scanner.backends import DemoBackend
+from wifi_beacon_scanner.survey import Survey
+from wifi_beacon_scanner.web.server import make_server
+from wifi_beacon_scanner.web.state import AppState
 
 from ie_builder import *  # noqa: F401,F403
 from test_web import Client

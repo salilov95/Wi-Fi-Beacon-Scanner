@@ -1,9 +1,9 @@
 @echo off
 setlocal
-rem Build the WifiDiag installer: PyInstaller (one folder, no console window) + Inno Setup.
+rem Build the WiFiBeaconScanner installer: PyInstaller (one folder, no console window) + Inno Setup.
 rem Run from the project folder (where run_gui.py is).
 rem Needs: Python 3 for Windows, Inno Setup 6.3 or newer (https://jrsoftware.org/isdl.php).
-rem Result: dist\installer\WifiDiag-Setup-<version>.exe
+rem Result: dist\installer\WiFiBeaconScanner-Setup-<version>.exe
 rem Python is taken from the PY variable, by default the "py" launcher, then "python".
 
 cd /d "%~dp0"
@@ -28,14 +28,14 @@ echo Version %VER%
 %PY% -m pip install --upgrade pyinstaller || goto :err
 
 set EXTRA=
-if exist wifi_diag\data\manuf set EXTRA=--add-data "wifi_diag\data\manuf;wifi_diag\data"
+if exist wifi_beacon_scanner\data\manuf set EXTRA=--add-data "wifi_beacon_scanner\data\manuf;wifi_beacon_scanner\data"
 
-%PY% -m PyInstaller --noconfirm --clean --onedir --windowed --name WifiDiag --icon assets\wifidiag.ico --version-file build\version_info.txt --add-data "wifi_diag\web\static;wifi_diag\web\static" %EXTRA% run_gui.py || goto :err
+%PY% -m PyInstaller --noconfirm --clean --onedir --windowed --name WiFiBeaconScanner --icon assets\wifi-beacon-scanner.ico --version-file build\version_info.txt --add-data "wifi_beacon_scanner\web\static;wifi_beacon_scanner\web\static" %EXTRA% run_gui.py || goto :err
 
-"%ISCC%" /Qp /DAppVersion=%VER% installer\WifiDiag.iss || goto :err
+"%ISCC%" /Qp /DAppVersion=%VER% installer\WiFiBeaconScanner.iss || goto :err
 
 echo.
-echo Done: dist\installer\WifiDiag-Setup-%VER%.exe
+echo Done: dist\installer\WiFiBeaconScanner-Setup-%VER%.exe
 exit /b 0
 
 :err

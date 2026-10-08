@@ -56,7 +56,7 @@ def _app_path(exe: str) -> Optional[str]:
 
 def candidates() -> List[str]:
     out: List[str] = []
-    env = os.environ.get(ENV_BROWSER) or os.environ.get("WIFI_DIAG_PDF_BROWSER")
+    env = os.environ.get(ENV_BROWSER)
     if env:
         out.append(env)
     if sys.platform == "win32":

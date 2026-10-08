@@ -6,16 +6,16 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from wifi_diag import report
-from wifi_diag.backends import DemoBackend
-from wifi_diag.ie import describe_ies, parse_ies
-from wifi_diag.mcs import capability, phy_rate, rate_to_mcs, vht_valid
-from wifi_diag.model import Snapshot
-from wifi_diag.synth import (
+from wifi_beacon_scanner import report
+from wifi_beacon_scanner.backends import DemoBackend
+from wifi_beacon_scanner.ie import describe_ies, parse_ies
+from wifi_beacon_scanner.mcs import capability, phy_rate, rate_to_mcs, vht_valid
+from wifi_beacon_scanner.model import Snapshot
+from wifi_beacon_scanner.synth import (
     ds_ie, he_cap_ie, he_op_ie, ht_cap_ie, ht_op_ie, make_bss, rates_ie, vht_cap_ie, vht_op_ie,
 )
-from wifi_diag.web.state import AppState
-from wifi_diag.xlsx import build_xlsx
+from wifi_beacon_scanner.web.state import AppState
+from wifi_beacon_scanner.xlsx import build_xlsx
 
 
 def r1(x):
@@ -127,7 +127,7 @@ class OutputTests(unittest.TestCase):
         st.refresh_interfaces()
         st.snapshot = st.backend.scan(0, 0)
         b5 = next(b for b in st.snapshot.bss if b.ssid == "CORP" and b.band == "5")
-        from wifi_diag.web.state import bss_to_dict
+        from wifi_beacon_scanner.web.state import bss_to_dict
         d = bss_to_dict(b5)
         self.assertEqual((d["phy"], d["mcs"], d["nss"], d["rate"]), ("HE", 11, 2, 1201.0))
         rx, tx = st._estimate_mcs({"bssid": b5.bssid, "rx_mbps": 1201.0, "tx_mbps": 720.6})
