@@ -1,0 +1,90 @@
+# Сборка WiFiBeaconScanner.exe (переносной) и WiFiBeaconScanner-Setup-<версия>.exe (установщик) на Windows.
+#   - тег версии (git tag v0.7.0 && git push origin v0.7.0): сборка + GitHub Release с обоими файлами;
+#   - вручную (Actions → Release → Run workflow): сборка, файлы лежат в артефакте запуска.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tag matches version in wifi_beacon_scanner/__init__.py
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $v = python -c "import wifi_beacon_scanner; print(wifi_beacon_scanner.__version__)"
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "tag ${{ github.ref_name }} does not match version $v" }
+
+      - name: Unit tests
+        run: |
+          python -m pip install openpyxl
+          python -m unittest discover -s tests
+
+      # База вендоров (колонка «Вендор»). Не скачалась - собираем без неё, программа это переживёт.
+      - name: Vendor database (optional)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force wifi_beacon_scanner/data | Out-Null
+          Invoke-WebRequest https://www.wireshark.org/download/automated/data/manuf -OutFile wifi_beacon_scanner/data/manuf
+
+      - name: Inno Setup 6
+        shell: pwsh
+        run: choco upgrade innosetup --no-progress -y
+
+      - name: Build portable exe and installer
+        shell: cmd
+        env:
+          PY: python
+        run: |
+          call build.bat || exit /b 1
+          call build_installer.bat || exit /b 1
+
+      - name: Smoke test of the built exe
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\WiFiBeaconScanner\WiFiBeaconScanner.exe -ArgumentList "--demo","--no-browser" -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) { Get-Content "$env:LOCALAPPDATA\WiFiBeaconScanner\wifi-beacon-scanner.log" -ErrorAction SilentlyContinue; throw "exe exited with code $($p.ExitCode)" }
+          $log = Get-Content "$env:LOCALAPPDATA\WiFiBeaconScanner\wifi-beacon-scanner.log" -Raw
+          Write-Output $log
+          if ($log -notmatch "http://127\.0\.0\.1:\d+/") { throw "server did not start" }
+          Stop-Process -Id $p.Id -Force
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          $files = @(Get-ChildItem dist/installer/*.exe) + @(Get-Item dist/WiFiBeaconScanner.exe)
+          $files | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name } | Set-Content dist/SHA256SUMS.txt
+          Get-Content dist/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WiFiBeaconScanner
+          path: |
+            dist/installer/*.exe
+            dist/WiFiBeaconScanner.exe
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $setup = (Get-ChildItem dist/installer/*.exe | Select-Object -First 1).FullName
+          $notes = "Установщик: $(Split-Path $setup -Leaf). Переносная версия без установки: WiFiBeaconScanner.exe. Что нового - в CHANGELOG.md."
+          gh release create "${{ github.ref_name }}" $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --title "Wi-Fi Beacon Scanner ${{ github.ref_name }}" --notes "$notes"

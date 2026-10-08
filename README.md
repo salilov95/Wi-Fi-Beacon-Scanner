@@ -1,16 +1,40 @@
-# wifi_diag
+# Wi-Fi Beacon Scanner
 
-Версия 0.6.0.
+[![CI](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml/badge.svg)](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml)
 
-Приложение для диагностики Wi-Fi на Windows (аналог WinFi): сканирует эфир, разбирает Information
-Elements из beacon/probe response и показывает не только таблицу сетей, но и список находок
-с подсказкой «что проверить». Зависимостей нет, нужен только Python 3.8+.
+Wi-Fi сканер и диагностика для Windows 10/11 (по образцу WinFi). Сканирует эфир, разбирает Information Elements
+из beacon/probe response (RSN, 802.11k/r/v, HT/VHT/HE, MCS, QBSS Load), показывает таблицу сетей, графики,
+журнал собственного подключения ноутбука, карту покрытия по плану этажа и список находок с подсказкой
+«что проверить». Отчёты в PDF, Excel, HTML, CSV. Написано на Python без внешних зависимостей.
 
-## Запуск приложения с окном
+## Скачать
 
-    python -m wifi_diag gui --ssid ИМЯ_СЕТИ
+Страница [Releases](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases):
 
-Откроется окно Edge без адресной строки (если Edge не найден, откроется браузер по умолчанию).
+- `WiFiBeaconScanner-Setup-<версия>.exe` - установщик (Program Files, ярлык в «Пуске», штатное удаление);
+- `WiFiBeaconScanner.exe` - переносная версия одним файлом, без установки;
+- `SHA256SUMS.txt` - контрольные суммы.
+
+Тихая установка для раздачи на много ноутбуков (SCCM, Intune, GPO, PDQ):
+
+    WiFiBeaconScanner-Setup-0.7.0.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+
+Тихое удаление:
+
+    "C:\Program Files\Wi-Fi Beacon Scanner\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+
+Без прав администратора можно поставить только себе: добавь `/CURRENTUSER`. Новая версия ставится поверх
+старой: запущенная программа закрывается, настройки (`%APPDATA%\WiFiBeaconScanner`) сохраняются.
+
+Файлы не подписаны сертификатом. При ручном запуске скачанного файла SmartScreen покажет «Windows защитила
+компьютер» → «Подробнее» → «Выполнить в любом случае»; при раздаче через SCCM/Intune/GPO этого окна нет.
+Чтобы предупреждения не было совсем, нужен сертификат подписи кода (корпоративный PKI или OV/EV) и `signtool`.
+
+Установленная версия работает без консоли и завершается сама, когда закрыто окно. Журнал программы:
+`%LOCALAPPDATA%\WiFiBeaconScanner\wifi-beacon-scanner.log` - его и присылать, если что-то не так.
+
+## Возможности
+
 Экран сверху вниз:
 
 - **Сводка одной строкой.** Число BSS и SSID, разбивка по диапазонам, лучший сигнал, самая загруженная точка,
@@ -48,12 +72,12 @@ Elements из beacon/probe response и показывает не только т
   - «Сравнение»: что изменилось относительно базового скана.
 
 Меню «Вид»: тема (как в системе, светлая, тёмная, Nord, Solarized, тёплая бумага, контрастная),
-плотность строк, набор колонок. Настройки вида и «Мои SSID» хранятся в `%APPDATA%\WifiDiag\prefs.json`
+плотность строк, набор колонок. Настройки вида и «Мои SSID» хранятся в `%APPDATA%\WiFiBeaconScanner\prefs.json`
 и переживают перезапуск.
 
 Клавиши: `F5` сканировать, `/` поиск, `1`–`9` вкладки, стрелки по строкам, `Esc` сброс поиска и подсветки.
 
-Экспорт: отчёт в PDF (печатает Microsoft Edge, отдельные библиотеки не нужны), отчёт в Excel (листы: сводка, BSS,
+Экспорт: отчёт в PDF (печатает Microsoft Edge, отдельные библиотеки не нужны; если печать без окна запрещена, программа предложит открыть отчёт и сохранить его в PDF через Ctrl+P), отчёт в Excel (листы: сводка, BSS,
 находки, загрузка каналов, история, журнал подключения, обход), HTML-отчёт, таблица CSV, история замеров CSV (время, RSSI, загрузка по каждому BSS), снапшот JSON.
 В меню экспорта выбирается, какие сети включить: «как в таблице сейчас» (с фильтрами и «Только мои»),
 «только мои SSID» или «все сети». Находки считаются по всему эфиру, но в отчёт попадают только те,
@@ -61,33 +85,40 @@ Elements из beacon/probe response и показывает не только т
 «Открыть снапшот» загружает сохранённый скан. «Авто» повторяет скан по таймеру и накапливает историю.
 
 Как это устроено: Python запускает сервер на `127.0.0.1` (наружу не виден), окно - это интерфейс к нему.
-Доступ закрыт одноразовым токеном, адрес с токеном печатается в консоли. «Выход» останавливает программу.
+Доступ закрыт одноразовым токеном. Закрыл окно или нажал «Выход» - программа завершилась.
 
-Посмотреть интерфейс без сканирования (демо-данные, можно и не на Windows):
+## Запуск из исходников
 
-    python -m wifi_diag gui --demo
+Нужен Python 3.8+ для Windows. Из папки проекта:
 
-## Первый запуск (по шагам, с проверками)
+    python -m wifi_beacon_scanner gui --ssid ИМЯ_СЕТИ
 
-Все команды выполняются из папки проекта (там, где лежит `wifi_diag`).
+Откроется окно Edge без адресной строки (если Edge не найден - браузер по умолчанию).
+Посмотреть интерфейс без сканирования (демо-данные, работает и не на Windows):
+
+    python -m wifi_beacon_scanner gui --demo
+
+Или установить как пакет: `pip install .`, после чего доступна команда `wifi-beacon-scanner gui`.
+
+### Первый запуск по шагам, с проверками
 
 **1. Проверь, что тесты проходят на твоей машине**
 
     python -m unittest discover -s tests
 
-Ожидается `Ran 106 tests ... OK`. Зачем: так ты убеждаешься, что парсер работает одинаково
+Ожидается `OK` в конце (часть тестов пропускается, если нет Chromium или LibreOffice). Зачем: так ты убеждаешься, что парсер работает одинаково
 у тебя и у меня, до того как доверять результатам скана.
 
 **2. Проверь, что адаптер виден**
 
-    python -m wifi_diag interfaces
+    python -m wifi_beacon_scanner interfaces
 
 Ожидается строка вида `0: Intel(R) Wi-Fi 6 AX201 ...`. Если пусто или ошибка - сканировать
 нечем, дальше идти нет смысла.
 
 **3. Первый скан, только сохранить сырые данные**
 
-    python -m wifi_diag scan --save snap.json
+    python -m wifi_beacon_scanner scan --save snap.json
 
 Зачем сначала `--save`: снапшот содержит сырые байты IE, по нему можно воспроизвести разбор
 на любой ОС и найти ошибки парсера на реальных данных. Если в выводе `BSS в эфире: 0`,
@@ -95,14 +126,14 @@ Elements из beacon/probe response и показывает не только т
 
 **4. Нормальный отчёт по «своей» сети**
 
-    python -m wifi_diag scan --ssid ИМЯ_СЕТИ --html report.html --csv bss.csv --save snap.json
+    python -m wifi_beacon_scanner scan --ssid ИМЯ_СЕТИ --html report.html --csv bss.csv --save snap.json
 
 Открой `report.html`. Флаг `--ssid` можно указывать несколько раз: проблемы конфигурации и
 слабого сигнала считаются только для этих сетей, чужие учитываются как помеха на канале.
 
 **5. Разбор снапшота без сканирования (на любой ОС)**
 
-    python -m wifi_diag analyze snap.json --ssid ИМЯ_СЕТИ --html report.html
+    python -m wifi_beacon_scanner analyze snap.json --ssid ИМЯ_СЕТИ --html report.html
 
 ## MCS: что берётся из beacon, а что оценивается
 
@@ -124,12 +155,6 @@ MCS, с которым реально идут кадры, виден тольк
 несколько (MCS 4 на 2 потока и MCS 8 на 1 поток почти равны), первым показан вариант с шириной BSS и двумя
 потоками, остальные в подсказке. EHT (Wi-Fi 7) MCS пока не разбирается: для таких AP показан HE-потолок.
 
-## Вендоры (колонка «Вендор»)
-
-Нужен файл `manuf` из Wireshark. Ищется автоматически в `wifi_diag/data/manuf`,
-`C:\Program Files\Wireshark\manuf`, `C:\Program Files (x86)\Helge Keck\WinFi\vendors.txt`;
-иначе укажи `--manuf путь`.
-
 ## Что проверяется
 
 | Группа | Коды |
@@ -139,39 +164,76 @@ MCS, с которым реально идут кадры, виден тольк
 | Радио | `RF_WEAK`, `RF_UTIL`, `RF_COCHANNEL`, `RF_24_NONSTD`, `RF_24_40MHZ`, `RF_24_OVERLAP`, `RF_DFS` |
 | Гигиена | `HYG_BASIC_RATES`, `HYG_HT_PROT`, `HYG_LEGACY_PHY`, `HYG_24_ONLY`, `HYG_HIDDEN` |
 
-Пороги лежат в `Thresholds` (`wifi_diag/rules.py`); из CLI пока меняется только `--weak-rssi`.
+Пороги лежат в `Thresholds` (`wifi_beacon_scanner/rules.py`); из CLI пока меняется только `--weak-rssi`.
+
+## Вендоры (колонка «Вендор»)
+
+Нужен файл `manuf` из Wireshark. Ищется автоматически в `wifi_beacon_scanner/data/manuf`,
+`C:\Program Files\Wireshark\manuf`, `C:\Program Files (x86)\Helge Keck\WinFi\vendors.txt`;
+иначе укажи `--manuf путь`.
+
+## Сборка
+
+Версия задаётся в одном месте: `wifi_beacon_scanner/__init__.py`. Изменения описываются в [CHANGELOG.md](CHANGELOG.md).
+
+**Выпуск версии (основной путь).** Поднять версию в `__init__.py`, дописать CHANGELOG, закоммитить и поставить тег:
+
+    git tag v0.7.0
+    git push origin v0.7.0
+
+Workflow [Release](.github/workflows/release.yml) на чистом Windows прогонит тесты, скачает базу вендоров,
+соберёт переносной exe и установщик, проверит, что собранный exe запускается, и опубликует всё в Releases.
+Тег должен совпадать с версией в `__init__.py`, иначе сборка остановится. Сборку без релиза можно запустить
+вручную: Actions → Release → Run workflow, файлы будут в артефакте запуска.
+
+**Локально на Windows.** Нужны Python 3 и Inno Setup 6.3+ (https://jrsoftware.org/isdl.php):
+
+    build_installer.bat      установщик: dist\installer\WiFiBeaconScanner-Setup-<версия>.exe
+    build.bat                переносной exe: dist\WiFiBeaconScanner.exe
+
+PyInstaller собирает программу в папку (`--onedir`, без консоли, с иконкой и версией в свойствах файла),
+Inno Setup упаковывает её по сценарию `installer\WiFiBeaconScanner.iss`. Если есть `wifi_beacon_scanner\data\manuf`,
+база вендоров вкладывается в сборку.
+
+Антивирусы иногда ругаются на PyInstaller-сборки (ложное срабатывание). Сборка в папку (установщик)
+вызывает это реже, чем однофайловый exe.
+
+**Тесты:**
+
+    python -m unittest discover -s tests
+
+[CI](.github/workflows/ci.yml) гоняет их на Windows и Linux при каждом push и pull request.
 
 ## Структура
 
-    wifi_diag/ie.py          разбор IE (RSN, 11k/r/v, HT/VHT/HE, QBSS Load, ...)
-    wifi_diag/model.py       Bss и Snapshot (JSON)
-    wifi_diag/rules.py       правила диагностики
-    wifi_diag/report.py      HTML / CSV / консоль
-    wifi_diag/oui.py         вендор по BSSID (manuf)
-    wifi_diag/scanner_win.py wlanapi.dll через ctypes (только Windows)
-    wifi_diag/backends.py    источники данных: Windows и демо
-    wifi_diag/diff.py        сравнение двух снапшотов (до/после)
-    wifi_diag/conn.py        журнал подключения: роуминги, обрывы, пинг-понг, залипание
-    wifi_diag/conn_win.py    опрос подключения и уведомления WLAN (только Windows)
-    wifi_diag/winstructs.py  структуры Native Wifi API для ctypes
-    wifi_diag/survey.py      обход по плану этажа (точки, проект)
-    wifi_diag/mcs.py         MCS и PHY-скорости 802.11n/ac/ax, оценка MCS по скорости
-    wifi_diag/xlsx.py        запись .xlsx без библиотек
-    wifi_diag/pdf.py         PDF через Edge/Chromium headless
-    wifi_diag/synth.py       сборка синтетических IE по спецификации (тесты и демо)
-    wifi_diag/web/           сервер (stdlib) и интерфейс (HTML/CSS/JS без внешних библиотек)
+    wifi_beacon_scanner/ie.py          разбор IE (RSN, 11k/r/v, HT/VHT/HE, QBSS Load, ...)
+    wifi_beacon_scanner/model.py       Bss и Snapshot (JSON)
+    wifi_beacon_scanner/rules.py       правила диагностики
+    wifi_beacon_scanner/report.py      HTML / CSV / консоль
+    wifi_beacon_scanner/oui.py         вендор по BSSID (manuf)
+    wifi_beacon_scanner/scanner_win.py wlanapi.dll через ctypes (только Windows)
+    wifi_beacon_scanner/backends.py    источники данных: Windows и демо
+    wifi_beacon_scanner/diff.py        сравнение двух снапшотов (до/после)
+    wifi_beacon_scanner/conn.py        журнал подключения: роуминги, обрывы, пинг-понг, залипание
+    wifi_beacon_scanner/conn_win.py    опрос подключения и уведомления WLAN (только Windows)
+    wifi_beacon_scanner/winstructs.py  структуры Native Wifi API для ctypes
+    wifi_beacon_scanner/survey.py      обход по плану этажа (точки, проект)
+    wifi_beacon_scanner/mcs.py         MCS и PHY-скорости 802.11n/ac/ax, оценка MCS по скорости
+    wifi_beacon_scanner/xlsx.py        запись .xlsx без библиотек
+    wifi_beacon_scanner/pdf.py         PDF через Edge/Chromium headless
+    wifi_beacon_scanner/synth.py       сборка синтетических IE по спецификации (тесты и демо)
+    wifi_beacon_scanner/web/           сервер (stdlib) и интерфейс (HTML/CSS/JS без внешних библиотек)
     run_gui.py               точка входа для exe
     installer/               сценарий Inno Setup и файл версии для exe
     assets/                  иконка
-    build.bat, build_installer.bat, .github/workflows/build.yml   сборка
+    build.bat, build_installer.bat     сборка exe и установщика
+    .github/workflows/                 CI (тесты) и Release (сборка exe, установщик, GitHub Release)
     tests/                   unittest
 
 ## Известные ограничения
 
-- **Не проверено на реальном железе.** Парсер, правила и сервер покрыты тестами, интерфейс прогнан
-  в Chromium на демо-данных (консоль без ошибок, враждебный SSID не исполняется). Но
-  `scanner_win.py` и запуск через Edge `--app` в облаке проверить нельзя: сверена только раскладка
-  структур (`sizeof(WLAN_BSS_ENTRY) == 360`). Первый реальный скан и есть проверка.
+- Скан и окно проверены на реальном ноутбуке. Журнал подключения (уведомления WLAN) на реальном Windows
+  ещё не проверялся, см. раздел ниже.
 - Это не monitor mode: мы видим то, что отдаёт служба WLAN AutoConfig. Ретрансмиты, EAPOL,
   roaming-кадры так не увидеть.
 - Windows ограничивает частоту сканов; `WlanScan` может вернуть ошибку, тогда читается кэш.
@@ -182,69 +244,6 @@ MCS, с которым реально идут кадры, виден тольк
 - Номера Extension ID для Wi-Fi 7 (EHT: 106/108) нужно сверить с актуальной редакцией
   802.11be, пока определение «Wi-Fi 7» не подтверждено реальной AP.
 - Снапшот содержит SSID и BSSID всех сетей в округе: перед отправкой кому-либо проверь, что это допустимо.
-
-## Установщик (для раздачи на много ноутбуков)
-
-Готовый установщик: `WifiDiag-Setup-<версия>.exe`. Ставит программу в `C:\Program Files\WifiDiag`,
-создаёт ярлык в меню «Пуск» (на рабочем столе - по галочке), появляется в «Приложения и возможности»,
-удаляется штатно. Новая версия ставится поверх старой: запущенная программа закрывается, настройки
-пользователя (`%APPDATA%\WifiDiag`) сохраняются. Windows 10 и 11, x64 (на ARM-ноутбуках работает через эмуляцию).
-
-Тихая установка (SCCM, Intune, GPO, PDQ):
-
-    WifiDiag-Setup-0.6.0.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
-
-Тихое удаление:
-
-    "C:\Program Files\WifiDiag\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
-
-Без прав администратора можно поставить только себе: добавь `/CURRENTUSER`.
-
-Установленная версия работает без консоли. Окно закрыли - программа завершается сама (через несколько
-секунд; перезагрузка страницы её не завершает). Сообщения и ошибки пишутся в
-`%LOCALAPPDATA%\WifiDiag\wifidiag.log` - его и присылать, если что-то не так. Установленная версия
-открывает только окно; команды `scan`, `analyze`, `interfaces` запускай через `python -m wifi_diag`.
-Если нужно, чтобы программа не завершалась при закрытии окна, запусти её с `--keep-running`.
-
-**Подпись.** Установщик и exe не подписаны сертификатом. При ручном запуске скачанного файла Windows
-SmartScreen покажет «Windows защитила компьютер» → «Подробнее» → «Выполнить в любом случае». При раздаче
-через SCCM/Intune/GPO это окно не появляется. Чтобы предупреждения не было совсем, нужен сертификат
-подписи кода (обычно его выдаёт корпоративный PKI или покупается OV/EV-сертификат) и `signtool` после сборки.
-
-### Как собрать установщик
-
-**Вариант 1, на своём компьютере.** Нужны Python 3 для Windows и Inno Setup 6.3+
-(https://jrsoftware.org/isdl.php, ставится один раз). В папке проекта:
-
-    build_installer.bat
-
-Результат: `dist\installer\WifiDiag-Setup-<версия>.exe`. Внутри: PyInstaller собирает программу в папку
-(`--onedir`, без консоли, с иконкой и версией в свойствах файла), Inno Setup упаковывает её в установщик
-по сценарию `installer\WifiDiag.iss`. Версия берётся из `wifi_diag\__init__.py`.
-
-**Вариант 2, в GitHub Actions (когда проект на GitHub).** Workflow `.github/workflows/build.yml` на
-чистом Windows прогоняет тесты, скачивает базу вендоров, собирает переносной exe и установщик.
-Запуск вручную: вкладка Actions → build → Run workflow, файлы - в артефакте сборки. Выпуск версии:
-
-    git tag v0.6.0
-    git push origin v0.6.0
-
-Тогда установщик и переносной exe прикладываются к странице Releases. Тег должен совпадать с версией
-в `wifi_diag\__init__.py`, иначе сборка остановится.
-
-### Переносной exe (без установки)
-
-    build.bat
-
-Получится `dist\WifiDiag.exe` - один файл с консолью, запускается откуда угодно. Если рядом с проектом
-есть `wifi_diag\data\manuf`, он вкладывается в exe; иначе вендоры берутся из `WinFi\vendors.txt` или
-из файла, указанного через `--manuf`.
-
-Антивирусы иногда ругаются на PyInstaller-сборки (ложное срабатывание). Сборка в папку (установщик)
-вызывает это реже, чем однофайловый exe. Если всё же ругается, добавь программу в исключения.
-
-Собрать exe и установщик в облаке я не могу: там нет Windows и доступа к PyPI. Сценарии проверены
-по синтаксису и тестами, сама сборка проверяется первым запуском `build_installer.bat` или GitHub Actions.
 
 ## Журнал подключения: как он работает и что не проверено
 
@@ -257,3 +256,7 @@ SmartScreen покажет «Windows защитила компьютер» → �
 Номера кодов уведомлений по заголовкам mingw-w64 начинаются с 0, по странице Microsoft для ACM - с 0x1000;
 программа принимает оба варианта. Внизу вкладки есть «Сырые уведомления Windows» - если какое-то событие
 не распознаётся, там видно, что именно пришло. На реальном Windows журнал ещё не проверялся.
+
+## Лицензия
+
+[MIT](LICENSE)
