@@ -450,7 +450,7 @@ function renderSignal() {
     : `<span class="dot" style="background:${seriesColor(s.i)}"></span>`;
   const legend = '<div class="legend">' + ser.map((s) =>
     `<span data-bssid="${esc(s.b.bssid)}">${mark(s)}` +
-    `<span class="mono">${esc(s.b.bssid)}</span>&nbsp;${esc(s.b.band)} ГГц, канал ${s.b.channel}, ${sigSpan(s.b.rssi, ' дБм')}</span>`).join('') +
+    `<span class="mono">${esc(s.b.bssid)}</span>&nbsp;${esc(s.b.band)} ГГц, канал ${s.b.channel},&nbsp;${sigSpan(s.b.rssi, ' дБм')}</span>`).join('') +
     (byLevel ? sigScaleLegend() : '') + '</div>';
   return head + g + legend;
 }
