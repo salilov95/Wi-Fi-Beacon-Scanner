@@ -90,6 +90,8 @@ kbd{font:12px var(--mono);border:1px solid var(--line);border-bottom-width:2px;b
 
 .banner{padding:8px 14px;background:var(--hl);border-bottom:1px solid var(--line);flex:0 0 auto}
 .banner.err{color:var(--bad)}
+.banner button.small{margin-left:10px}
+.bclose{float:right;border:0;background:none;color:inherit;font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
 
 /* ---------- сводка одной строкой ---------- */
 .strip{display:flex;align-items:baseline;gap:6px 22px;flex-wrap:wrap;padding:7px 14px;background:var(--surface2);

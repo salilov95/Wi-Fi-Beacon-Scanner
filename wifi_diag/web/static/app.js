@@ -1220,11 +1220,26 @@ function renderViewMenu() {
 }
 
 // ---------- сеть ----------
-function banner(msg, isErr) {
+// src: откуда сообщение. Плашки «scan» и «link» снимает сама программа, когда проблема ушла;
+// остальные ошибки (экспорт, обход) висят, пока их не закроют или не появится новое сообщение.
+function banner(msg, isErr, action, src) {
   const b = $('banner');
   b.hidden = !msg;
   b.className = 'banner' + (isErr ? ' err' : '');
+  b.dataset.src = src || '';
   b.textContent = msg || '';
+  if (msg && action) {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'small'; btn.textContent = action.label;
+    btn.addEventListener('click', action.run);
+    b.append(' ', btn);
+  }
+  if (msg && isErr && !src) {
+    const x = document.createElement('button');
+    x.type = 'button'; x.className = 'bclose'; x.title = 'Закрыть'; x.textContent = '×';
+    x.addEventListener('click', () => banner(''));
+    b.append(x);
+  }
 }
 let noteTimer = null;
 function note(msg) { banner(msg, false); clearTimeout(noteTimer); noteTimer = setTimeout(() => { if ($('banner').textContent === msg) banner(''); }, 2500); }
@@ -1245,9 +1260,9 @@ function handleState(d) {
   $('scan').disabled = d.scanning;
   $('scan').textContent = d.scanning ? 'Сканирую…' : 'Сканировать';
   $('status').textContent = d.taken_at ? `обновлено ${fmtTime(d.taken_at)}` : '';
-  if (d.error) banner('Ошибка скана: ' + d.error, true);
-  else if (d.interfaces_error && !d.taken_at) banner('Адаптеры недоступны: ' + d.interfaces_error, true);
-  else if ($('banner').classList.contains('err')) banner('');
+  if (d.error) banner('Ошибка скана: ' + d.error, true, null, 'scan');
+  else if (d.interfaces_error && !d.taken_at) banner('Адаптеры недоступны: ' + d.interfaces_error, true, null, 'scan');
+  else if (['scan', 'link'].includes($('banner').dataset.src)) banner('');
   if (document.activeElement !== $('focus')) $('focus').value = d.focus.join(', ');
   const cs = d.conn && d.conn.samples, sv = d.survey || {};
   const sig = JSON.stringify([d.scan_count, d.scanning, d.error, d.taken_at, d.focus, d.weak_rssi, S.sel, d.baseline,
@@ -1264,7 +1279,7 @@ async function refresh() {
     handleState(r.data);
     return true;
   } catch (e) {
-    banner('Нет связи с программой: ' + e.message, true);
+    banner('Нет связи с программой: ' + e.message, true, null, 'link');
     return false;
   }
 }
@@ -1301,17 +1316,35 @@ async function doDownload(path, fallback) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
+// Запасной путь для PDF: открыть HTML-отчёт в отдельном окне, дальше Ctrl+P → «Сохранить как PDF».
+async function openPrintable(body) {
+  const w = window.open('', '_blank');
+  const r = await api('/api/export/html', body, true);
+  if (!r.ok) { if (w) w.close(); banner('Не удалось подготовить отчёт: HTTP ' + r.status, true); return; }
+  const url = URL.createObjectURL(new Blob([await r.text()], {type: 'text/html'}));
+  if (w) w.location = url; else window.open(url, '_blank');
+  banner('Отчёт открыт в новом окне: нажми Ctrl+P и выбери «Сохранить как PDF».', false);
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
+
 async function doExport(fmt) {
   if (fmt === 'journal') return doDownload('/api/export/journal', 'wifi-journal.csv');
   if (fmt === 'pdf') banner('Готовлю PDF через Edge, это займёт несколько секунд…', false);
   // «Как в таблице» передаёт ровно те строки, что видны сейчас: с фильтрами, поиском и «Только мои»
   const sc = P.expScope || 'table';
   const body = sc === 'table' ? {scope: 'list', bssids: visibleBss().map((b) => b.bssid)} : {scope: sc};
-  const r = await api('/api/export/' + fmt, body, true);
+  let r;
+  try {
+    r = await api('/api/export/' + fmt, body, true);
+  } catch (e) {
+    banner('Экспорт не удался: программа не ответила (' + e.message + ')', true);
+    return;
+  }
   if (!r.ok) {
-    let msg = 'HTTP ' + r.status;
-    try { msg = (await r.json()).error || msg; } catch (e) { /* не JSON */ }
-    banner('Экспорт не удался: ' + msg, true);
+    let msg = 'HTTP ' + r.status, fallback = '';
+    try { const j = await r.json(); msg = j.error || msg; fallback = j.fallback || ''; } catch (e) { /* не JSON */ }
+    banner('Экспорт не удался: ' + msg, true, fallback === 'html' && fmt === 'pdf'
+      ? {label: 'Открыть отчёт для печати (Ctrl+P → «Сохранить как PDF»)', run: () => openPrintable(body)} : null);
     return;
   }
   if (fmt === 'pdf') banner('');

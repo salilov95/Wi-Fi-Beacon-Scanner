@@ -53,6 +53,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.cmd == "gui":
         from . import backends
+        import logging
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
         from .web.server import serve
         from .web.state import AppState, default_prefs_path
         if args.demo is not None:

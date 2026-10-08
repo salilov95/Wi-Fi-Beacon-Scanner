@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import secrets
 import shutil
@@ -25,10 +26,12 @@ from typing import Any, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from .. import report
-from ..pdf import html_to_pdf
+from ..pdf import PdfError, html_to_pdf
 from ..rules import channel_utilization
 from ..model import Snapshot
 from .state import PREF_THEMES, AppState
+
+log = logging.getLogger(__name__)
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 STATIC_FILES = {
@@ -256,6 +259,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(400, {"error": str(e)})
         except (KeyError, TypeError, AttributeError) as e:
             return self._json(400, {"error": "неверный запрос (%s: %s)" % (type(e).__name__, e)})
+        except Exception as e:  # noqa: BLE001 - окно должно получить ответ, а не оборванное соединение
+            log.exception("ошибка обработки %s", path)
+            return self._json(500, {"error": "внутренняя ошибка (%s: %s), подробности в журнале программы" % (type(e).__name__, e)})
         return self._json(404, {"error": "not found"})
 
     def _export(self, fmt: str, scope: str = "all", bssids: Optional[List[str]] = None) -> None:
@@ -288,8 +294,11 @@ class Handler(BaseHTTPRequestHandler):
         elif fmt == "pdf":
             try:
                 data = html_to_pdf(report.render_html(snap, findings, focus, note, **extra))
-            except RuntimeError as e:
-                return self._json(500, {"error": str(e)})
+            except PdfError as e:
+                return self._json(500, {"error": str(e), "fallback": "html"})
+            except Exception as e:  # noqa: BLE001
+                log.exception("печать PDF")
+                return self._json(500, {"error": "PDF не получился (%s: %s)" % (type(e).__name__, e), "fallback": "html"})
             ctype, fname = "application/pdf", "wifi-report%s.pdf" % suffix
         elif fmt == "xlsx":
             data = report.build_xlsx_report(snap, findings, focus, note, history=hist, **extra)
