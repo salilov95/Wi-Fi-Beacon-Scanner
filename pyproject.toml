@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wifi-beacon-scanner"
+dynamic = ["version"]
+description = "Wi-Fi сканер для Windows: разбор beacon, диагностика, журнал подключения, обход по плану этажа, отчёты PDF/Excel"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "salilov95" }]
+requires-python = ">=3.8"
+dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Environment :: Web Environment",
+    "Topic :: System :: Networking :: Monitoring",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+Homepage = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"
+Issues = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/issues"
+Changelog = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/blob/main/CHANGELOG.md"
+
+[project.scripts]
+wifi-beacon-scanner = "wifi_beacon_scanner.__main__:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "wifi_beacon_scanner.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["wifi_beacon_scanner*"]
+
+[tool.setuptools.package-data]
+wifi_beacon_scanner = ["web/static/*"]
