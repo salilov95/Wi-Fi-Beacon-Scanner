@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, List, Optional, Tuple
@@ -40,6 +41,44 @@ CSP = ("default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';
        "img-src 'self' data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
 
 
+class Lifeline:
+    """Понимает, что окно закрыто, и программе пора выйти. В установленной версии консоли нет,
+    поэтому без этого процесс оставался бы висеть в фоне после закрытия окна.
+
+    Окно опрашивает /api/state раз в секунду (свёрнутое окно Edge может замедлить опрос до раза в минуту).
+    При закрытии страница шлёт /api/bye; если за bye_grace_s не пришло новых запросов (перезагрузка
+    страницы их пришлёт), выходим. Запасные пути: окно молчит idle_s или так и не открылось за first_s.
+    """
+
+    def __init__(self, idle_s: float = 900, first_s: float = 300, bye_grace_s: float = 5,
+                 clock=time.monotonic) -> None:
+        self.idle_s, self.first_s, self.bye_grace_s, self.clock = idle_s, first_s, bye_grace_s, clock
+        self._lock = threading.Lock()
+        self.started = clock()
+        self.last: Optional[float] = None
+        self.bye_at: Optional[float] = None
+
+    def touch(self) -> None:
+        with self._lock:
+            self.last = self.clock()
+
+    def bye(self) -> None:
+        with self._lock:
+            self.bye_at = self.clock()
+
+    def should_exit(self) -> Optional[str]:
+        now = self.clock()
+        with self._lock:
+            last, bye_at = self.last, self.bye_at
+        if bye_at is not None and (last is None or last <= bye_at) and now - bye_at >= self.bye_grace_s:
+            return "окно закрыто"
+        if last is None:
+            return "окно так и не открылось" if now - self.started >= self.first_s else None
+        if now - last >= self.idle_s:
+            return "окно не отвечает %d мин" % (self.idle_s // 60)
+        return None
+
+
 class WifiServer(ThreadingHTTPServer):
     daemon_threads = True
 
@@ -47,6 +86,7 @@ class WifiServer(ThreadingHTTPServer):
         super().__init__(addr, Handler)
         self.state = state
         self.token = token
+        self.lifeline = Lifeline()
 
     @property
     def port(self) -> int:
@@ -121,6 +161,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, data, ctype)
         if not self._token_ok():
             return self._json(403, {"error": "bad token"})
+        self.server.lifeline.touch()
         st = self.server.state
         if u.path == "/api/state":
             return self._json(200, st.to_dict())
@@ -153,6 +194,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(403, {"error": "bad token"})
         st = self.server.state
         path = urlparse(self.path).path
+        if path == "/api/bye":                 # окно закрывается (или перезагружается)
+            self.server.lifeline.bye()
+            return self._json(200, {"ok": True})
+        self.server.lifeline.touch()
         try:
             body = self._body_json()
             if path == "/api/scan":
@@ -294,13 +339,26 @@ def open_window(url: str) -> None:
     webbrowser.open(url)
 
 
-def serve(state: AppState, port: int = 0, open_browser: bool = True) -> None:
+def _watchdog(server: WifiServer, stop: threading.Event) -> None:
+    while not stop.wait(1.0):
+        why = server.lifeline.should_exit()
+        if why:
+            print("завершение: %s" % why)
+            server.shutdown()
+            return
+
+
+def serve(state: AppState, port: int = 0, open_browser: bool = True, exit_when_closed: Optional[bool] = None) -> None:
+    """exit_when_closed: выйти, когда окно закрыто. По умолчанию включено, если окно открываем мы сами."""
     server = make_server(state, port)
     state.refresh_interfaces()
     state.start_monitors()
     url = app_url(server)
     print("Интерфейс: %s" % url)
     print("Остановить: кнопка «Выход» в окне или Ctrl+C")
+    stop = threading.Event()
+    if open_browser if exit_when_closed is None else exit_when_closed:
+        threading.Thread(target=_watchdog, args=(server, stop), name="watchdog", daemon=True).start()
     if open_browser:
         open_window(url)
     try:
@@ -308,5 +366,6 @@ def serve(state: AppState, port: int = 0, open_browser: bool = True) -> None:
     except KeyboardInterrupt:
         pass
     finally:
+        stop.set()
         state.stop_monitors()
         server.server_close()

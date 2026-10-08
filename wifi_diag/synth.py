@@ -82,24 +82,47 @@ def ht_cap_ie(streams: int = 2) -> bytes:
     return ie(45, struct.pack("<HB", 0x01EF, 0x17) + mcs + b"\x00" * 10)
 
 
-def ht_op_ie(primary: int, width40: bool = False, sec_offset: int = 0, protection: int = 0) -> bytes:
+def ht_op_ie(primary: int, width40: bool = False, sec_offset: int = 0, protection: int = 0,
+             basic_mcs: int = 0) -> bytes:
     b1 = (sec_offset & 3) | (0x04 if width40 else 0)
-    return ie(61, bytes([primary, b1, protection & 3, 0, 0]) + b"\x00" * 16)
+    return ie(61, bytes([primary, b1, protection & 3, 0, 0, 0]) + struct.pack("<I", basic_mcs) + b"\x00" * 12)
 
 
-def vht_cap_ie(streams: int = 2) -> bytes:
-    mcs_map = 0
+def vht_cap_ie(streams: int = 2, val: int = 2, caps: int = 0x0F8259B2) -> bytes:
+    m = mcs_map(streams, val)
+    return ie(191, struct.pack("<IHHHH", caps, m, 0, m, 0))
+
+
+def vht_op_ie(width: int, seg0: int, seg1: int = 0, basic: int = 0xFFFC) -> bytes:
+    return ie(192, bytes([width, seg0, seg1]) + struct.pack("<H", basic))
+
+
+def mcs_map(streams: int, val: int) -> int:
+    """MCS map VHT/HE: val на первые streams потоков, остальные 3 (не поддержан)."""
+    m = 0
     for i in range(8):
-        mcs_map |= (2 if i < streams else 3) << (2 * i)
-    return ie(191, struct.pack("<IHHHH", 0x0F8259B2, mcs_map, 0, mcs_map, 0))
+        m |= (val if i < streams else 3) << (2 * i)
+    return m
 
 
-def vht_op_ie(width: int, seg0: int, seg1: int = 0) -> bytes:
-    return ie(192, bytes([width, seg0, seg1, 0, 0]))
+def he_cap_ie(streams: int = 2, val: int = 2, w160: bool = False) -> bytes:
+    """HE Capabilities: MAC caps (6), PHY caps (11), HE-MCS map <=80 (Rx, Tx), при w160 ещё карты для 160.
+    val: 0 = MCS 0-7, 1 = 0-9, 2 = 0-11."""
+    phy = bytearray(11)
+    phy[0] = 0x02 | 0x04 | (0x08 if w160 else 0)      # Channel Width Set: 40 в 2.4, 40/80 в 5, 160 в 5
+    m = mcs_map(streams, val)
+    maps = struct.pack("<HH", m, m) + (struct.pack("<HH", m, m) if w160 else b"")
+    return ie(255, bytes([35]) + b"\x00" * 6 + bytes(phy) + maps)
 
 
-def he_cap_ie() -> bytes:
-    return ie(255, bytes([35]) + b"\x00" * 20)
+def he_op_ie(color: int = 5, basic: int = 0xFFFC, six: Optional[tuple] = None) -> bytes:
+    """HE Operation. six = (primary, width_code, ccfs0, ccfs1) добавляет 6 GHz Operation Information."""
+    params = (1 << 17) if six else 0
+    body = bytes([36]) + params.to_bytes(3, "little") + bytes([color & 0x3F]) + struct.pack("<H", basic)
+    if six:
+        p, w, c0, c1 = six
+        body += bytes([p, w & 3, c0, c1, 6])
+    return ie(255, body)
 
 
 def vendor_ie(oui: bytes, typ: int, data: bytes = b"") -> bytes:

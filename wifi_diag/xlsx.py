@@ -3,6 +3,10 @@
 Умеет то, что нужно для отчёта: несколько листов, строка заголовка жирным с заливкой, закреплённая
 первая строка, автофильтр, ширина колонок по содержимому. Строки пишутся как inline strings.
 Из текста вырезаются символы, недопустимые в XML: SSID приходят из эфира и могут содержать что угодно.
+
+Колонки сигнала и загрузки получают цветовую шкалу (условное форматирование, Excel пересчитывает его сам):
+RSSI от красного (−85 и ниже) через жёлтый (−67) к зелёному (−50 и выше), загрузка наоборот: 0% зелёный,
+50% жёлтый, от 75% красный. Колонка определяется по заголовку.
 """
 from __future__ import annotations
 
@@ -42,6 +46,39 @@ def _cell(ref: str, v: Any, style: int) -> str:
     return '<c r="%s" t="inlineStr"%s><is><t xml:space="preserve">%s</t></is></c>' % (ref, st, _text(v))
 
 
+RED, YELLOW, GREEN = "FFF8696B", "FFFFEB84", "FF63BE7B"
+# (признак в заголовке, точки шкалы, цвета)
+SCALES = [
+    (re.compile(r"rssi", re.I), ("-85", "-67", "-50"), (RED, YELLOW, GREEN)),
+    (re.compile(r"загрузка|util", re.I), ("0", "50", "75"), (GREEN, YELLOW, RED)),
+]
+
+
+def scale_for(header: Any):
+    h = str(header or "")
+    for rx, pts, cols in SCALES:
+        if rx.search(h):
+            return pts, cols
+    return None
+
+
+def _scales_xml(rows: Sequence[Sequence[Any]]) -> str:
+    if len(rows) < 2:
+        return ""
+    out, prio = [], 1
+    for ci, h in enumerate(rows[0]):
+        sc = scale_for(h)
+        if not sc:
+            continue
+        pts, cols = sc
+        ref = "%s2:%s%d" % (_col(ci), _col(ci), len(rows))
+        out.append('<conditionalFormatting sqref="%s"><cfRule type="colorScale" priority="%d"><colorScale>%s%s</colorScale>'
+                   '</cfRule></conditionalFormatting>' % (ref, prio, "".join('<cfvo type="num" val="%s"/>' % p for p in pts),
+                                                          "".join('<color rgb="%s"/>' % c for c in cols)))
+        prio += 1
+    return "".join(out)
+
+
 def _sheet_xml(rows: Sequence[Sequence[Any]]) -> str:
     ncols = max((len(r) for r in rows), default=0)
     widths = [8] * ncols
@@ -63,6 +100,7 @@ def _sheet_xml(rows: Sequence[Sequence[Any]]) -> str:
     out.append("</sheetData>")
     if len(rows) > 1 and ncols:
         out.append('<autoFilter ref="A1:%s%d"/>' % (_col(ncols - 1), len(rows)))
+        out.append(_scales_xml(rows))
     out.append("</worksheet>")
     return "".join(out)
 
