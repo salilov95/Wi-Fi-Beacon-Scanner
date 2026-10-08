@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wi-Fi Diag</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="bar">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M2.5 8.2a11 11 0 0 1 15 0"/><path d="M5.3 11.2a7 7 0 0 1 9.4 0"/><path d="M8 14.1a3 3 0 0 1 4 0"/><circle cx="10" cy="16.6" r=".6" fill="currentColor"/>
+      </svg>
+      Wi-Fi Diag
+    </div>
+    <label class="fld">Адаптер
+      <select id="iface"></select>
+    </label>
+    <button id="scan" class="primary" type="button">Сканировать</button>
+    <label class="chk"><input type="checkbox" id="auto"> Авто
+      <select id="interval" aria-label="Интервал автоскана">
+        <option value="5">5 с</option>
+        <option value="10" selected>10 с</option>
+        <option value="30">30 с</option>
+        <option value="60">60 с</option>
+      </select>
+    </label>
+    <label class="fld">Мои SSID
+      <input id="focus" type="text" placeholder="CORP, CORP-Guest" autocomplete="off" spellcheck="false">
+    </label>
+    <span class="grow"></span>
+    <span id="status" class="status" role="status"></span>
+    <button id="load" type="button">Открыть снапшот</button>
+    <span class="menu">
+      <button type="button" data-menu="exportMenu" aria-haspopup="true">Экспорт ▾</button>
+      <div class="menu-list exp" id="exportMenu" hidden>
+        <div class="mtitle">Какие сети включить</div>
+        <label class="chk"><input type="radio" name="expScope" value="table"> Как в таблице сейчас <span class="mut" id="ecTable"></span></label>
+        <label class="chk" id="ecFocusWrap"><input type="radio" name="expScope" value="focus"> Только мои SSID <span class="mut" id="ecFocus"></span></label>
+        <label class="chk"><input type="radio" name="expScope" value="all"> Все сети <span class="mut" id="ecAll"></span></label>
+        <div class="mtitle">Формат</div>
+        <button type="button" data-fmt="pdf">Отчёт (PDF)</button>
+        <button type="button" data-fmt="xlsx">Отчёт (Excel)</button>
+        <button type="button" data-fmt="html">Отчёт (HTML)</button>
+        <button type="button" data-fmt="csv">Таблица (CSV)</button>
+        <button type="button" data-fmt="history">История замеров (CSV)</button>
+        <button type="button" data-fmt="json">Снапшот (JSON)</button>
+        <button type="button" data-fmt="journal">Журнал подключения (CSV)</button>
+      </div>
+    </span>
+    <span class="menu">
+      <button type="button" data-menu="viewMenu" aria-haspopup="true">Вид ▾</button>
+      <div class="menu-list wide" id="viewMenu" hidden>
+        <div class="mtitle">Тема</div>
+        <div class="themes" id="themes"></div>
+        <div class="mtitle">Строки таблицы</div>
+        <label class="chk"><input type="radio" name="density" value="normal"> Обычные</label>
+        <label class="chk"><input type="radio" name="density" value="compact"> Плотные</label>
+        <div class="mtitle">Колонки</div>
+        <div class="cols" id="colList"></div>
+        <div class="mtitle">Клавиши</div>
+        <div class="keys">
+          <span><kbd>F5</kbd></span><span>сканировать</span>
+          <span><kbd>/</kbd></span><span>поиск по таблице</span>
+          <span><kbd>1</kbd> … <kbd>9</kbd></span><span>вкладки</span>
+          <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>строки таблицы</span>
+          <span><kbd>Esc</kbd></span><span>сбросить поиск и подсветку</span>
+        </div>
+      </div>
+    </span>
+    <button id="quit" type="button" class="ghost">Выход</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+    <input type="file" id="baseFile" accept=".json,application/json" hidden>
+    <input type="file" id="planFile" accept="image/png,image/jpeg" hidden>
+    <input type="file" id="projFile" accept=".json,application/json" hidden>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+  <section class="strip" id="strip" aria-label="Сводка"></section>
+
+  <section class="filters">
+    <label class="chk"><input type="checkbox" class="band" value="2.4" checked> 2.4</label>
+    <label class="chk"><input type="checkbox" class="band" value="5" checked> 5</label>
+    <label class="chk"><input type="checkbox" class="band" value="6" checked> 6 ГГц</label>
+    <select id="minRssi" aria-label="Минимальный сигнал">
+      <option value="-200">Любой сигнал</option>
+      <option value="-67">от −67 дБм</option>
+      <option value="-75">от −75 дБм</option>
+      <option value="-85">от −85 дБм</option>
+    </select>
+    <select id="secFilter" aria-label="Безопасность">
+      <option value="">Любая защита</option>
+      <option value="open">Открытые</option>
+      <option value="legacy">Устаревшие (WEP, WPA1, TKIP)</option>
+      <option value="personal">Personal</option>
+      <option value="ent">Enterprise</option>
+      <option value="wpa3">WPA3 и OWE</option>
+    </select>
+    <input id="q" type="search" placeholder="Поиск: SSID, BSSID, вендор" autocomplete="off" spellcheck="false">
+    <label class="chk"><input type="checkbox" id="group"> По SSID</label>
+    <label class="chk" id="onlyFocusWrap" hidden><input type="checkbox" id="onlyFocus"> Только мои</label>
+    <span class="grow"></span>
+    <span id="count" class="mut"></span>
+  </section>
+
+  <div class="tablewrap" id="tablewrap">
+    <table id="tbl">
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" class="empty" hidden></div>
+  </div>
+  <div class="resizer" id="rz" title="Потяни, чтобы изменить высоту" role="separator"></div>
+
+  <section class="panel" id="panel">
+    <nav class="tabs" id="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="channels">Каналы</button>
+      <button type="button" role="tab" data-tab="overview">Обзор</button>
+      <button type="button" role="tab" data-tab="util">Утилизация</button>
+      <button type="button" role="tab" data-tab="signal">Сигнал во времени</button>
+      <button type="button" role="tab" data-tab="conn">Подключение</button>
+      <button type="button" role="tab" data-tab="survey">Обход</button>
+      <button type="button" role="tab" data-tab="findings">Находки<span class="cnt" id="cntFind"></span></button>
+      <button type="button" role="tab" data-tab="beacon">Beacon</button>
+      <button type="button" role="tab" data-tab="compare">Сравнение<span class="cnt" id="cntDiff"></span></button>
+      <span class="grow"></span>
+      <button type="button" id="maxBtn" class="ghost small">Развернуть</button>
+    </nav>
+    <div class="panelbody" id="panelBody"></div>
+  </section>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

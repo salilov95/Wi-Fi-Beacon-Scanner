@@ -1,0 +1,19 @@
+# сборка
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+
+# выгрузки и проекты: в них SSID, BSSID и планы этажей - в публичный репозиторий их не кладём
+wifi-*.json
+wifi-*.csv
+wifi-*.xlsx
+wifi-*.pdf
+wifi-*.html
+wifi-*.png
+snap*.json
+*.survey.json
+
+# база вендоров кладётся при сборке, в репозиторий не нужна
+wifi_diag/data/manuf
