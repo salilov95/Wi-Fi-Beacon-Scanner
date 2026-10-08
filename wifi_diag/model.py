@@ -73,6 +73,10 @@ class Bss:
         """Центр занимаемой полосы в номерах каналов (для графика). Для 20 МГц = основной канал."""
         i = self.info
         w = i.width_mhz
+        if i.he6_width is not None:
+            if w == 20:
+                return float(self.channel)
+            return float(i.he6_ccfs1 if w >= 160 and i.he6_ccfs1 else i.he6_ccfs0 or self.channel)
         if w >= 160 and i.vht_seg1 and abs(i.vht_seg1 - i.vht_seg0) == 8:
             return float(i.vht_seg1)
         if w >= 80 and i.vht_seg0:

@@ -8,6 +8,7 @@ import time
 from typing import List, Optional
 
 from .conn import ConnSample, ConnTracker
+from .mcs import phy_rate
 from .demo import build_demo_snapshot
 from .model import Bss, Snapshot, now_iso
 
@@ -92,6 +93,12 @@ class DemoBackend(Backend):
         return Snapshot(taken_at=now_iso(), interface=self.base.interface, bss=out)
 
 
+def _demo_rate(rssi: float, back: int) -> float:
+    """Скорость как у настоящего HE-подключения 2x2, 80 МГц: MCS падает с сигналом (примерно 3 дБ на ступень)."""
+    mcs = max(0, min(11, int((rssi + 82) / 3)) - back)
+    return round(phy_rate("HE", mcs, 2, 80), 1)
+
+
 class DemoConnMonitor(threading.Thread):
     """Демо-журнал: сначала мгновенно «проигрывает» 5 минут истории с роумингами, обрывом,
     пинг-понгом и залипанием, потом раз в секунду добавляет живые замеры. Причины помечены «демо»."""
@@ -101,7 +108,7 @@ class DemoConnMonitor(threading.Thread):
         super().__init__(name="demo-conn")
         self.tracker, self.lock = tracker, lock
         self.rng = random.Random(seed)
-        corp = sorted([b for b in base.bss if b.ssid == "CORP"], key=lambda b: -b.rssi)
+        corp = sorted([b for b in base.bss if b.ssid == "CORP" and b.band == "5"], key=lambda b: -b.rssi)
         self.aps = [(b.bssid, b.rssi, b.channel) for b in corp] or [("02:00:00:00:00:01", -55, 36)]
         self._halt = threading.Event()
 
@@ -112,7 +119,7 @@ class DemoConnMonitor(threading.Thread):
         bssid, _, ch = self.aps[i % len(self.aps)]
         return ConnSample(t=t, state="connected", ssid="CORP", bssid=bssid, rssi=int(round(rssi)),
                           quality=max(0, min(100, int(2 * (rssi + 100)))), channel=ch,
-                          rx_mbps=round(max(6.0, 866 + 12 * (rssi + 45)), 1), tx_mbps=round(max(6.0, 780 + 11 * (rssi + 45)), 1),
+                          rx_mbps=_demo_rate(rssi, 0), tx_mbps=_demo_rate(rssi, 1),
                           auth="WPA2 (RSNA)", cipher="CCMP", onex=True, profile="CORP")
 
     def _prefill(self, now: float) -> None:

@@ -15,6 +15,7 @@ from ..backends import Backend
 from ..conn import ConnTracker
 from ..diff import diff_snapshots
 from ..ie import describe_ies
+from ..mcs import PHY_ORDER, capability, mcs_text, rate_to_mcs
 from ..model import Bss, Snapshot
 from ..oui import OuiDb
 from ..rules import Thresholds, analyze, channel_advice, channel_utilization
@@ -58,6 +59,8 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["svOpacity"] = round(float(so), 2)
     if d.get("sigMode") in ("lines", "heat"):
         out["sigMode"] = d["sigMode"]
+    if d.get("sigColor") in ("level", "bss"):
+        out["sigColor"] = d["sigColor"]
     for k in ("group", "heatAll"):
         if isinstance(d.get(k), bool):
             out[k] = d[k]
@@ -80,6 +83,7 @@ def printable_ascii(data: bytes) -> str:
 
 def bss_to_dict(b: Bss) -> Dict[str, Any]:
     i = b.info
+    cap = capability(i)
     pmf = ""
     if i.rsn is not None:
         pmf = "required" if i.rsn.mfp_required else "capable" if i.rsn.mfp_capable else "no"
@@ -103,6 +107,11 @@ def bss_to_dict(b: Bss) -> Dict[str, Any]:
         "gen": b.generation_label,
         "gen_n": i.generation,
         "streams": i.max_streams,
+        "phy": cap["phy"],
+        "mcs": cap["mcs"],
+        "nss": cap["nss"],
+        "rate": None if cap["rate"] is None else round(cap["rate"], 1),
+        "bss_color": i.he_bss_color,
         "k": i.dot11k,
         "nr": i.neighbor_report,
         "r": i.dot11r,
@@ -336,7 +345,24 @@ class AppState:
         cur = d["current"]
         if cur and cur.get("bssid") and self.oui is not None:
             cur["vendor"] = self.oui.lookup(cur["bssid"]) or ""
+        if cur and cur.get("bssid"):
+            cur["rx_mcs"], cur["tx_mcs"] = self._estimate_mcs(cur)
         return d
+
+    def _estimate_mcs(self, cur: Dict[str, Any]):
+        """Оценка MCS подключения по скорости приёма/передачи от Windows. Стандарт и ширину берём у BSS из скана."""
+        snap = self.snapshot
+        b = next((x for x in snap.bss if x.bssid == cur["bssid"]), None) if snap else None
+        if b is None:
+            return [], []
+        cap = capability(b.info)
+        phy = cap["phy"] if cap["phy"] in PHY_ORDER else "HT"
+        out = []
+        for rate in (cur.get("rx_mbps"), cur.get("tx_mbps")):
+            nss = cap["nss"] or 1
+            out.append([dict(c, text=mcs_text(c)) for c in rate_to_mcs(rate, phy, cap["width"], b.band,
+                                                                      max_nss=nss, likely_nss=min(nss, 2))])
+        return out[0], out[1]
 
     # ---- сериализация ----
     def to_dict(self) -> Dict[str, Any]:

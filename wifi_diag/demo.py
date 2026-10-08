@@ -6,7 +6,7 @@ from typing import List
 
 from .model import Bss, Snapshot, now_iso
 from .synth import (
-    country_ie, ext_caps_ie, he_cap_ie, ht_cap_ie, ht_op_ie, make_bss, mobility_domain_ie, qbss_ie, rates_ie,
+    country_ie, ext_caps_ie, he_cap_ie, he_op_ie, ht_cap_ie, ht_op_ie, make_bss, mobility_domain_ie, qbss_ie, rates_ie,
     rm_caps_ie, rsn_ie, tim_ie, vendor_ie, vht_cap_ie, vht_op_ie, wpa1_ie,
 )
 
@@ -15,6 +15,10 @@ F24 = {1: 2_412_000, 6: 2_437_000, 11: 2_462_000, 3: 2_422_000, 9: 2_452_000}
 
 def _f5(ch: int) -> int:
     return 5_000_000 + ch * 5000
+
+
+def _f6(ch: int) -> int:
+    return 5_950_000 + ch * 5000
 
 
 def build_demo_snapshot() -> Snapshot:
@@ -37,7 +41,7 @@ def build_demo_snapshot() -> Snapshot:
                             + ht_cap_ie(2) + ht_op_ie(ch24)))
         bss.append(make_bss("00:e0:fc:10:%02x:02" % mac, "CORP", _f5(ch5), rssi5,
                             common + extra + ht_cap_ie(2) + ht_op_ie(ch5, True, 1) + vht_cap_ie(2)
-                            + vht_op_ie(1, c5) + he_cap_ie()))
+                            + vht_op_ie(1, c5) + he_cap_ie() + he_op_ie(color=mac)))
 
     corp(0x01, 1, -48, 36, -45, 42, util=(14, 60))
     corp(0x02, 6, -55, 52, -52, 58, util=(9, 40))
@@ -45,6 +49,13 @@ def build_demo_snapshot() -> Snapshot:
     corp(0x04, 1, -72, 149, -66, 155, ft=False, k=False, v=False)  # точка с «забытым» профилем
     corp(0x05, 6, -77, 44, -70, 42, tkip=True, util=(5, 25))
     corp(0x06, 11, -83, 132, -80, 138)
+
+    # 6 ГГц: HT/VHT Operation тут нет, ширина и центр канала берутся из HE Operation (6 GHz Operation Information)
+    six = rsn_ie([1, 3], mfpc=True, mfpr=True) + ru + tim_ie(1) + mobility_domain_ie(0x4F52) + rm_caps_ie() + ext_caps_ie()
+    bss.append(make_bss("00:e0:fc:10:01:03", "CORP", _f6(37), -57,
+                        six + qbss_ie(6, 30) + he_cap_ie(2, 2, w160=True) + he_op_ie(1, six=(37, 2, 39, 0))))
+    bss.append(make_bss("00:e0:fc:10:02:03", "CORP", _f6(69), -64,
+                        six + qbss_ie(3, 18) + he_cap_ie(2, 2, w160=True) + he_op_ie(2, six=(69, 3, 71, 79))))
 
     guest = rsn_ie([8], mfpc=True, mfpr=True)
     bss.append(make_bss("00:e0:fc:20:01:01", "CORP-Guest", F24[1], -49, b"" + ru + ht_cap_ie() + ht_op_ie(1),

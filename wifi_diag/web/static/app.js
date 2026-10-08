@@ -26,7 +26,7 @@ const THEMES = [
   {id: 'paper', name: 'Тёплая бумага', c: ['#efe8da', '#faf6ec', '#2d6a52']},
   {id: 'contrast', name: 'Контрастная', dark: 1, c: ['#000000', '#161616', '#ffd60a']},
 ];
-const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', heatAll: false, v: 0};
+const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', sigColor: 'level', heatAll: false, v: 0};
 try { Object.assign(P, JSON.parse(localStorage.getItem('wd_prefs') || '{}')); } catch (e) { /* без сохранения */ }
 // Порт у приложения каждый раз новый, а localStorage привязан к адресу, поэтому настройки ещё и
 // отправляются программе: она хранит их в файле и возвращает при следующем запуске.
@@ -51,6 +51,45 @@ applyTheme();
 const ssidColor = (s) => `hsl(${hueOf(s)} ${DARK ? '70% 64%' : '62% 42%'})`;
 const seriesColor = (i) => `hsl(${(i * 47 + 210) % 360} ${DARK ? '72% 66%' : '65% 44%'})`;
 
+// Сигнал везде в одной шкале: от красного (плохо) к зелёному (хорошо). Те же точки, что на карте обхода и в отчётах.
+const SIG_STOPS = [[-85, 0], [-75, 25], [-67, 55], [-60, 95], [-50, 130]];
+function sigHue(r) {
+  if (r <= SIG_STOPS[0][0]) return SIG_STOPS[0][1];
+  for (let k = 1; k < SIG_STOPS.length; k++) {
+    const [a, ha] = SIG_STOPS[k - 1], [b, hb] = SIG_STOPS[k];
+    if (r <= b) return Math.round(ha + (hb - ha) * (r - a) / (b - a));
+  }
+  return SIG_STOPS[SIG_STOPS.length - 1][1];
+}
+// текст темнее заливки: жёлто-зелёный на белом иначе не читается
+const sigText = (r) => `hsl(${sigHue(r)} ${DARK ? '75% 62%' : '80% 30%'})`;
+const sigFill = (r, a) => `hsl(${sigHue(r)} ${DARK ? '68% 50%' : '72% 44%'}${a == null ? '' : ' / ' + a})`;
+const sigSpan = (r, suffix) => r == null ? '—' : `<b class="sig" style="color:${sigText(r)}">${r}${suffix || ''}</b>`;
+// зоны качества для фона графиков: [верх, низ, подпись]
+const SIG_ZONES = [[-30, -50, 'отлично'], [-50, -60, 'хорошо'], [-60, -67, 'рабочий'], [-67, -75, 'слабый'], [-75, -85, 'плохо'], [-85, -100, 'на грани']];
+
+// Фон по уровню и вертикальный градиент для линий: цвет линии в точке = цвет её уровня
+function sigBackdrop(id, y, x0, x1) {
+  const top = y(-30), bot = y(-100);
+  const stops = [-30, -50, -55, -60, -64, -67, -71, -75, -80, -85, -100]
+    .map((r) => `<stop offset="${((y(r) - top) / (bot - top)).toFixed(4)}" stop-color="${sigFill(r)}"/>`).join('');
+  let g = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bot}">${stops}</linearGradient></defs>`;
+  for (const [a, b, label] of SIG_ZONES) {
+    g += `<rect x="${x0}" y="${y(a).toFixed(1)}" width="${(x1 - x0).toFixed(1)}" height="${(y(b) - y(a)).toFixed(1)}" style="fill:${sigFill((a + b) / 2, DARK ? 0.10 : 0.08)}"><title>${a}…${b} дБм: ${label}</title></rect>`;
+  }
+  return g;
+}
+// цвета BSS для полосы под графиком подключения: без красного и зелёного, чтобы не спорить со шкалой сигнала
+const LANE_HUES = [215, 275, 190, 300, 240, 200, 260, 285];
+const laneColor = (i) => `hsl(${LANE_HUES[i % LANE_HUES.length]} ${DARK ? '60% 66%' : '55% 46%'})`;
+const DASHES = ['', '7 4', '2 3', '10 3 2 3', '4 4', '1 2', '12 4', '6 2 2 2 2 2', '3 6', '8 8'];
+
+function sigScaleLegend() {
+  const stops = [-90, -85, -75, -67, -60, -50, -40].map((r) => `${sigFill(r)} ${((r + 90) / 50 * 100).toFixed(0)}%`).join(', ');
+  return `<span class="sgscale"><span class="mut">слабее</span><span class="sgbar" style="background:linear-gradient(90deg, ${stops})"></span>` +
+    '<span class="mut">сильнее</span><span class="sgticks">−90 · −85 · −75 · −67 · −60 · −50 · −40 дБм</span></span>';
+}
+
 let TOKEN = new URLSearchParams(location.search).get('t');
 try {
   if (TOKEN) sessionStorage.setItem('wd_t', TOKEN); else TOKEN = sessionStorage.getItem('wd_t');
@@ -68,7 +107,7 @@ async function api(path, body, raw) {
 }
 
 // ---------- состояние ----------
-const OPEN_IE = [45, 48, 61, 191, 192];   // какие IE раскрыты по умолчанию
+const OPEN_IE = [45, 48, 61, 191, 192, 255];   // какие IE раскрыты по умолчанию
 const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'compare'];
 const S = {
   data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '',
@@ -83,7 +122,9 @@ const COLS = [
   {k: 'rssi', t: 'RSSI, дБм', num: 1, on: 1}, {k: 'trend', t: 'Тренд', on: 1}, {k: 'rssi_avg', t: 'RSSI мин / ср / макс', num: 1},
   {k: 'seen_pct', t: 'Виден, %', num: 1},
   {k: 'security', t: 'Безопасность', on: 1}, {k: 'akm', t: 'AKM'}, {k: 'ciphers', t: 'Шифры'}, {k: 'pmf', t: 'PMF'},
-  {k: 'gen_n', t: 'Wi-Fi', on: 1}, {k: 'streams', t: 'Потоки', num: 1}, {k: 'krv', t: 'k·r·v', on: 1},
+  {k: 'gen_n', t: 'Wi-Fi', on: 1}, {k: 'streams', t: 'Потоки', num: 1},
+  {k: 'mcs', t: 'Макс. MCS', on: 1}, {k: 'rate', t: 'Макс. PHY, Мбит/с', num: 1, on: 1}, {k: 'bss_color', t: 'BSS Color', num: 1},
+  {k: 'krv', t: 'k·r·v', on: 1},
   {k: 'util', t: 'Загрузка', num: 1, on: 1}, {k: 'stations', t: 'Станций', num: 1, on: 1},
   {k: 'country', t: 'Страна', on: 1}, {k: 'beacon', t: 'Beacon, TU', num: 1}, {k: 'dtim', t: 'DTIM', num: 1},
   {k: 'quality', t: 'Качество, %', num: 1},
@@ -91,6 +132,7 @@ const COLS = [
 function normalizePrefs() {
   if (!Array.isArray(P.cols)) P.cols = COLS.filter((c) => c.on).map((c) => c.k);
   if (!(P.v >= 2)) { if (!P.cols.includes('trend')) P.cols.push('trend'); P.v = 2; }   // колонка появилась в этой версии
+  if (P.v < 3) { for (const k of ['mcs', 'rate']) if (!P.cols.includes(k)) P.cols.push(k); P.v = 3; }
 }
 normalizePrefs();
 const shownCols = () => COLS.filter((c) => c.fixed || P.cols.includes(c.k));
@@ -99,6 +141,7 @@ function sortVal(b, k) {
   if (k === 'krv') return (b.k ? 1 : 0) + (b.r ? 1 : 0) + (b.v ? 1 : 0);
   if (k === 'band') return parseFloat(b.band);
   if (k === 'trend') { const h = S.data.history[b.bssid] || []; return h.length > 1 ? h[h.length - 1][1] - h[0][1] : 0; }
+  if (k === 'mcs') return b.mcs == null ? -1 : b.gen_n * 1000 + b.mcs * 10 + b.nss;
   const v = b[k];
   if (Array.isArray(v)) return v.join(',').toLowerCase();
   if (v == null) return -1e9;
@@ -142,7 +185,6 @@ function visibleBss() {
 }
 
 // ---------- таблица ----------
-function rssiClass(r) { return r >= -60 ? 'good' : r >= -75 ? 'mid' : 'bad'; }
 
 function cell(b, k) {
   switch (k) {
@@ -154,9 +196,12 @@ function cell(b, k) {
     case 'bssid': return `<td class="mono">${esc(b.bssid)}${b.random_mac ? '<span class="tag" title="Локально администрируемый MAC">L</span>' : ''}</td>`;
     case 'rssi': {
       const w = clamp((b.rssi + 100) / 70 * 100, 0, 100);
-      const c = rssiClass(b.rssi);
-      return `<td class="num"><span class="rssi"><span class="v ${c}">${b.rssi}</span><span class="meter ${c}"><i style="width:${w}%"></i></span></span></td>`;
+      return `<td class="num"><span class="rssi"><span class="v" style="color:${sigText(b.rssi)}">${b.rssi}</span>` +
+        `<span class="meter" style="color:${sigFill(b.rssi)}"><i style="width:${w}%"></i></span></span></td>`;
     }
+    case 'mcs': return `<td title="${esc(mcsTitle(b))}">${b.mcs == null ? (b.phy === 'legacy' ? '<span class="mut">legacy</span>' : '') : `${esc(b.phy)} ${b.mcs} <span class="mut">×${b.nss}</span>`}</td>`;
+    case 'rate': return `<td class="num" title="${esc(mcsTitle(b))}">${b.rate == null ? '' : Math.round(b.rate)}</td>`;
+    case 'bss_color': return `<td class="num">${b.bss_color == null ? '' : b.bss_color}</td>`;
     case 'trend': return spark(b);
     case 'rssi_avg': return `<td class="num">${b.rssi_min} / ${Math.round(b.rssi_avg)} / ${b.rssi_max}</td>`;
     case 'security': return `<td><span class="sec s-${secClass(b)}">${esc(b.security)}</span></td>`;
@@ -174,6 +219,11 @@ function cell(b, k) {
   }
 }
 
+function mcsTitle(b) {
+  if (b.mcs == null) return b.rate ? `legacy, до ${b.rate} Мбит/с` : '';
+  return `${b.phy}: MCS 0–${b.mcs}, потоков ${b.nss}, ${b.width} МГц → до ${b.rate} Мбит/с (потолок PHY по beacon, не текущая скорость)`;
+}
+
 // Мини-график RSSI за последние сканы. Шкала не уже 6 дБ, чтобы шум ±1-2 дБ не выглядел как скачок.
 function spark(b) {
   const pts = (S.data.history[b.bssid] || []).slice(-30);
@@ -186,7 +236,7 @@ function spark(b) {
   const d = vs.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
   return `<td><svg class="spark" width="${W}" height="${H}" role="img" aria-label="RSSI за ${pts.length} сканов: от ${mn} до ${mx} дБм">` +
     `<title>за ${pts.length} сканов: от ${mn} до ${mx} дБм</title><path d="${d}"/>` +
-    `<circle cx="${x(vs.length - 1).toFixed(1)}" cy="${y(vs[vs.length - 1]).toFixed(1)}" r="2.2"/></svg></td>`;
+    `<circle cx="${x(vs.length - 1).toFixed(1)}" cy="${y(vs[vs.length - 1]).toFixed(1)}" r="2.4" style="fill:${sigFill(vs[vs.length - 1])}"/></svg></td>`;
 }
 
 function renderHead() {
@@ -251,7 +301,7 @@ function renderStrip() {
   el.innerHTML =
     it('BSS', d.bss.length) + it('SSID', ssids) +
     it('2.4 ГГц', cnt('2.4')) + it('5 ГГц', cnt('5')) + (cnt('6') ? it('6 ГГц', cnt('6')) : '') +
-    it('Лучший сигнал', best.rssi, 'дБм, ' + esc(best.ssid)) +
+    it('Лучший сигнал', `<span style="color:${sigText(best.rssi)}">${best.rssi}</span>`, 'дБм, ' + esc(best.ssid)) +
     (loaded ? it('Макс. загрузка', loaded.util.toFixed(0) + '%', `канал ${loaded.channel}, ${esc(loaded.ssid)}`) : '') +
     `<button type="button" class="it" data-goto="findings" title="Открыть находки"><span class="mut">Находки</span>` +
     `<b class="bad">${c.critical}</b><b class="mid">${c.warning}</b><b>${c.info}</b></button>`;
@@ -351,13 +401,16 @@ function renderSignal() {
   const modeSeg = `<span class="seg"><button type="button" data-sig="lines" class="${P.sigMode === 'heat' ? '' : 'on'}">Линии</button>` +
     `<button type="button" data-sig="heat" class="${P.sigMode === 'heat' ? 'on' : ''}">Тепловая карта</button></span>`;
   if (P.sigMode === 'heat') return renderHeat(modeSeg);
+  const byLevel = P.sigColor !== 'bss';
+  const colorSeg = `<span class="seg" title="Как красить линии"><button type="button" data-sigcolor="level" class="${byLevel ? 'on' : ''}">Цвет по уровню</button>` +
+    `<button type="button" data-sigcolor="bss" class="${byLevel ? '' : 'on'}">Цвет по BSS</button></span>`;
   const sel = S.data.bss.find((b) => b.bssid === S.sel);
   if (!sel) return `<div class="toolbar">${modeSeg}</div><p class="mut">Выбери строку в таблице: покажу уровень сигнала всех BSS этого SSID.</p>`;
   const group = [sel].concat(S.data.bss.filter((b) => b.ssid === sel.ssid && b.bssid !== sel.bssid)).slice(0, 10);
   const ser = group.map((b, i) => ({b, i, pts: S.data.history[b.bssid] || []}));
   const withPts = ser.filter((s) => s.pts.length >= 2);
-  const head = `<div class="toolbar">${modeSeg}<b>${esc(sel.ssid)}</b>` +
-    `<span class="mut">выбранная BSS: мин ${sel.rssi_min}, среднее ${Math.round(sel.rssi_avg)}, макс ${sel.rssi_max} дБм; видна в ${sel.seen_pct}% сканов</span>` +
+  const head = `<div class="toolbar">${modeSeg}${colorSeg}<b>${esc(sel.ssid)}</b>` +
+    `<span class="mut">выбранная BSS: мин ${sigSpan(sel.rssi_min)}, среднее ${sigSpan(Math.round(sel.rssi_avg))}, макс ${sigSpan(sel.rssi_max)} дБм; видна в ${sel.seen_pct}% сканов</span>` +
     `<span class="grow"></span><button type="button" class="small" data-hist="1">Скачать историю (CSV)</button></div>`;
   if (!withPts.length) return head + '<p class="mut">Нужно минимум два скана. Включи «Авто», и график начнёт заполняться.</p>';
   const allT = [].concat(...ser.map((s) => s.pts.map((p) => p[0])));
@@ -370,7 +423,7 @@ function renderSignal() {
   const span = Math.max(tmax - tmin, 1);
   const x = (t) => L + (t - tmin) / span * (W - L - R);
   const y = (r) => T + (-30 - clamp(r, -100, -30)) / 70 * (H - T - B);
-  let g = svgOpen(W, H);
+  let g = svgOpen(W, H) + (byLevel ? sigBackdrop('sgS', y, L, W - R) : '');
   for (let r = -30; r >= -100; r -= 10) {
     g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(r)}" y2="${y(r)}"/><text x="${L - 6}" y="${y(r) + 4}" text-anchor="end">${r}</text>`;
   }
@@ -380,19 +433,25 @@ function renderSignal() {
   }
   for (const s of ser.slice().reverse()) {
     if (!s.pts.length) continue;
-    const col = seriesColor(s.i), isSel = s.b.bssid === S.sel;
+    const isSel = s.b.bssid === S.sel;
+    const col = byLevel ? 'url(#sgS)' : seriesColor(s.i);
     let d = '', prev = null;
     for (const [t, r] of s.pts) {
       d += (prev === null || t - prev > gap ? 'M' : 'L') + x(t).toFixed(1) + ',' + y(r).toFixed(1) + ' ';
       prev = t;
     }
-    g += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${isSel ? 2.8 : 1.4}" opacity="${isSel ? 1 : 0.8}"/>`;
-    if (s.pts.length <= 60) g += s.pts.map(([t, r]) => `<circle cx="${x(t).toFixed(1)}" cy="${y(r).toFixed(1)}" r="${isSel ? 3 : 2}" fill="${col}"><title>${esc(s.b.bssid)}: ${r} дБм, ${Math.round(tmax - t)} с назад</title></circle>`).join('');
+    const dash = byLevel && DASHES[s.i % DASHES.length] ? ` stroke-dasharray="${DASHES[s.i % DASHES.length]}"` : '';
+    g += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${isSel ? 3 : 1.6}"${dash} opacity="${isSel ? 1 : 0.85}"/>`;
+    if (s.pts.length <= 60) g += s.pts.map(([t, r]) => `<circle cx="${x(t).toFixed(1)}" cy="${y(r).toFixed(1)}" r="${isSel ? 3 : 2}" style="fill:${byLevel ? sigFill(r) : seriesColor(s.i)}"><title>${esc(s.b.bssid)}: ${r} дБм, ${Math.round(tmax - t)} с назад</title></circle>`).join('');
   }
   g += '</svg>';
+  const mark = (s) => byLevel
+    ? `<svg class="dash" width="26" height="8" aria-hidden="true"><line x1="1" x2="25" y1="4" y2="4"${DASHES[s.i % DASHES.length] ? ` stroke-dasharray="${DASHES[s.i % DASHES.length]}"` : ''} stroke-width="${s.b.bssid === S.sel ? 3 : 2}"/></svg>`
+    : `<span class="dot" style="background:${seriesColor(s.i)}"></span>`;
   const legend = '<div class="legend">' + ser.map((s) =>
-    `<span data-bssid="${esc(s.b.bssid)}"><span class="dot" style="background:${seriesColor(s.i)}"></span>` +
-    `<span class="mono">${esc(s.b.bssid)}</span>&nbsp;${esc(s.b.band)} ГГц, канал ${s.b.channel}, ${s.b.rssi} дБм</span>`).join('') + '</div>';
+    `<span data-bssid="${esc(s.b.bssid)}">${mark(s)}` +
+    `<span class="mono">${esc(s.b.bssid)}</span>&nbsp;${esc(s.b.band)} ГГц, канал ${s.b.channel}, ${sigSpan(s.b.rssi, ' дБм')}</span>`).join('') +
+    (byLevel ? sigScaleLegend() : '') + '</div>';
   return head + g + legend;
 }
 
@@ -407,7 +466,7 @@ function hbars(title, rows) {
   const max = Math.max(1, ...rows.map((r) => r.n));
   const body = rows.length ? rows.map((r) =>
     `<div class="hb" title="${esc(r.label)}: ${r.n}"><span class="hlab">${esc(r.label)}</span>` +
-    `<span class="htrack"><i style="width:${(r.n / max * 100).toFixed(1)}%"></i></span><span class="hval">${r.n}</span></div>`).join('')
+    `<span class="htrack"><i style="width:${(r.n / max * 100).toFixed(1)}%${r.color ? ';background:' + r.color : ''}"></i></span><span class="hval">${r.n}</span></div>`).join('')
     : '<div class="mut">нет данных</div>';
   return `<div class="ov"><div class="sub">${esc(title)}</div>${body}</div>`;
 }
@@ -453,9 +512,9 @@ function bssOverTime() {
 
 function renderOverview() {
   const all = S.data.bss;
-  const sig = [['от −50 (отличный)', -50, 0], ['−50…−60 (хороший)', -60, -50], ['−60…−67 (рабочий)', -67, -60],
-    ['−67…−75 (слабый)', -75, -67], ['−75…−85 (плохой)', -85, -75], ['ниже −85 (на грани)', -200, -85]]
-    .map(([label, lo, hi]) => ({label, n: all.filter((b) => b.rssi >= lo && (hi === 0 || b.rssi < hi)).length}));
+  const sig = [['от −50 (отличный)', -50, 0, -45], ['−50…−60 (хороший)', -60, -50, -55], ['−60…−67 (рабочий)', -67, -60, -64],
+    ['−67…−75 (слабый)', -75, -67, -71], ['−75…−85 (плохой)', -85, -75, -80], ['ниже −85 (на грани)', -200, -85, -90]]
+    .map(([label, lo, hi, mid]) => ({label, color: sigFill(mid), n: all.filter((b) => b.rssi >= lo && (hi === 0 || b.rssi < hi)).length}));
   const gens = countBy(all, (b) => b.gen === 'legacy' ? 'legacy (a/b/g)' : b.gen).sort((a, b) => b.label.localeCompare(a.label));
   const widths = countBy(all, (b) => b.width + ' МГц').sort((a, b) => parseInt(a.label, 10) - parseInt(b.label, 10));
   let vend = countBy(all, (b) => b.vendor || (b.random_mac ? 'локальный MAC' : 'неизвестен'));
@@ -491,8 +550,6 @@ function renderHeat(modeSeg) {
   const cw = clamp((W - L - R) / times.length, 4, 30);
   const H = T + rows.length * ch + 20;
   const tmax = times[times.length - 1];
-  // степень 1.7 растягивает рабочий диапазон: −80 и −60 должны различаться на глаз
-  const op = (r) => clamp(Math.pow(clamp((r + 92) / 50, 0, 1), 1.7), 0.06, 1).toFixed(2);
   let g = svgOpen(W, H);
   rows.forEach((b, i) => {
     const yy = T + i * ch, isSel = b.bssid === S.sel;
@@ -503,16 +560,16 @@ function renderHeat(modeSeg) {
     times.forEach((t, j) => {
       const r = m.get(t);
       if (r === undefined) return;
-      g += `<rect class="hc" x="${(L + j * cw).toFixed(1)}" y="${yy}" width="${Math.max(cw - 1, 2).toFixed(1)}" height="${ch - 2}" fill-opacity="${op(r)}">` +
+      g += `<rect class="hc" x="${(L + j * cw).toFixed(1)}" y="${yy}" width="${Math.max(cw - 1, 2).toFixed(1)}" height="${ch - 2}" style="fill:${sigFill(r)}">` +
         `<title>${esc(b.ssid)}: ${r} дБм, ${Math.round(tmax - t)} с назад</title></rect>`;
     });
     if (isSel) g += `<rect class="hsel" x="${L - 2}" y="${yy - 1}" width="${(times.length * cw + 3).toFixed(1)}" height="${ch}"/>`;
-    g += `<text x="${(L + times.length * cw + 6).toFixed(1)}" y="${yy + 13}"${isSel ? ' class="lbl"' : ''}>${b.rssi}</text>`;
+    g += `<text x="${(L + times.length * cw + 6).toFixed(1)}" y="${yy + 13}" style="fill:${sigText(b.rssi)};font-weight:${isSel ? 700 : 600}">${b.rssi}</text>`;
   });
   const yb = T + rows.length * ch + 13;
   g += `<text x="${L}" y="${yb}">−${Math.round(tmax - times[0])} с</text><text x="${(L + times.length * cw).toFixed(1)}" y="${yb}" text-anchor="end">сейчас</text></svg>`;
   const legend = '<div class="hleg"><span class="mut">слабее</span>' +
-    [-90, -80, -70, -60, -50, -40].map((r) => `<span><i style="opacity:${op(r)}"></i>${r}</span>`).join('') +
+    [-90, -85, -80, -75, -70, -67, -63, -60, -55, -50, -40].map((r) => `<span><i style="background:${sigFill(r)}"></i>${r}</span>`).join('') +
     '<span class="mut">сильнее, дБм. Пустая клетка: в этом скане BSS не слышна.</span></div>';
   return head + g + legend;
 }
@@ -619,8 +676,9 @@ function connChart(C, win) {
   const y = (r) => T + (-30 - clamp(r, -100, -30)) / 70 * (H - T - B);
   const order = [];
   for (const s of samples) if (s[2] && !order.includes(s[2])) order.push(s[2]);
-  const col = (b) => seriesColor(order.indexOf(b));
-  let g = svgOpen(W, H);
+  const col = (b) => laneColor(order.indexOf(b));
+  const laneY = H - B - 7;          // полоса снизу: к какой BSS был подключён ноутбук
+  let g = svgOpen(W, H) + sigBackdrop('sgC', y, L, W - R);
   for (let r = -30; r >= -100; r -= 10) {
     g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(r)}" y2="${y(r)}"/><text x="${L - 6}" y="${y(r) + 4}" text-anchor="end">${r}</text>`;
   }
@@ -637,16 +695,25 @@ function connChart(C, win) {
     g += `<rect class="down" x="${x(a).toFixed(1)}" y="${T}" width="${Math.max(2, x(b) - x(a)).toFixed(1)}" height="${H - T - B}">` +
       `<title>без связи ${fmtDur(b - a)} (${fmtClock(a)}–${fmtClock(b)})</title></rect>`;
   }
-  // линия RSSI: отдельный отрезок на каждую BSS
-  let d = '', cur = null, prev = null;
-  const flush = () => { if (d && cur) g += `<path d="${d}" fill="none" stroke="${col(cur)}" stroke-width="2.2"><title>${esc(cur)}</title></path>`; d = ''; };
+  // линия RSSI окрашена по уровню; отдельный отрезок на каждую BSS, BSS видна по полосе снизу
+  let d = '', cur = null, prev = null, segFrom = null;
+  const lanes = [];
+  const flush = (tEnd) => {
+    if (d && cur) g += `<path d="${d}" fill="none" stroke="url(#sgC)" stroke-width="2.4" stroke-linejoin="round"><title>${esc(cur)}</title></path>`;
+    if (cur && segFrom !== null) lanes.push([cur, segFrom, tEnd]);
+    d = ''; segFrom = null;
+  };
   for (const s of samples) {
-    if (s[1] === null) { flush(); cur = null; prev = null; continue; }
-    if (s[2] !== cur || (prev !== null && s[0] - prev > 5)) { flush(); cur = s[2]; d = 'M'; } else d += ' L';
+    if (s[1] === null) { flush(prev); cur = null; prev = null; continue; }
+    if (s[2] !== cur || (prev !== null && s[0] - prev > 5)) { flush(prev); cur = s[2]; d = 'M'; segFrom = s[0]; } else d += ' L';
     d += x(s[0]).toFixed(1) + ',' + y(s[1]).toFixed(1);
     prev = s[0];
   }
-  flush();
+  flush(prev);
+  for (const [b, a, z] of lanes) {
+    g += `<rect x="${x(a).toFixed(1)}" y="${laneY}" width="${Math.max(2, x(z) - x(a)).toFixed(1)}" height="5" rx="1" style="fill:${col(b)}">` +
+      `<title>${esc(b)} ${esc(bssLabel(b))}: ${fmtClock(a)}–${fmtClock(z)}</title></rect>`;
+  }
   // события: роуминг - пунктир, проблемы - метки сверху
   let lastLbl = -1e9;
   for (const e of (C.events || []).filter((ev) => ev.t >= t0)) {
@@ -663,10 +730,20 @@ function connChart(C, win) {
     g += `<text x="${x(t)}" y="${H - 6}" text-anchor="${k === 0 ? 'start' : k === 4 ? 'end' : 'middle'}">${k === 4 ? 'сейчас' : fmtClock(t)}</text>`;
   }
   g += '</svg>';
-  const legend = '<div class="legend">' + order.map((b) => `<span data-bssid="${esc(b)}"><span class="dot" style="background:${col(b)}"></span>` +
+  const legend = '<div class="legend"><span class="mut">полоса снизу - BSS:</span>' + order.map((b) => `<span data-bssid="${esc(b)}"><span class="lane" style="background:${col(b)}"></span>` +
     `<span class="mono">${esc(b)}</span>&nbsp;${esc(bssLabel(b))}</span>`).join('') +
-    '<span><span class="swatch down"></span>без связи</span><span><span class="swatch roam"></span>роуминг</span></div>';
+    '<span><span class="swatch down"></span>без связи</span><span><span class="swatch roam"></span>роуминг</span>' + sigScaleLegend() + '</div>';
   return g + legend;
+}
+
+// MCS подключения Windows не отдаёт; подбираем MCS/потоки/ширину/GI, которые дают ровно такую скорость
+function mcsGuess(dir, list) {
+  if (!list) return `<span class="mut">${dir}: нет данных</span>`;
+  if (!list.length) return `<span class="mut">${dir}: скорость не совпала ни с одним MCS</span>`;
+  const c = list[0];
+  const main = c.phy === 'legacy' ? `legacy ${c.rate} Мбит/с` : `${c.phy} MCS ${c.mcs} <span class="mut">(${esc(c.mod)})</span>, ${c.nss}×, ${c.width} МГц, GI ${c.gi}`;
+  const alt = list.length > 1 ? `<span class="mut" title="${esc(list.slice(1).map((x) => x.text).join('\n'))}"> или ещё ${list.length - 1} вар.</span>` : '';
+  return `<span class="mut">${dir}:</span> ${main}${alt}`;
 }
 
 function renderConn() {
@@ -675,7 +752,7 @@ function renderConn() {
   const st = C.stats || {};
   const win = P.connWin || 900;
   const up = cur && cur.state === 'connected' && cur.bssid;
-  const kv = (k, v) => `<div><span class="mut">${esc(k)}</span><b>${v}</b></div>`;
+  const kv = (k, v, cls) => `<div${cls ? ` class="${cls}"` : ''}><span class="mut">${esc(k)}</span><b>${v}</b></div>`;
   let card;
   if (!cur) card = `<p class="mut">Журнал ещё не получил ни одного замера. ${esc(C.status || '')}</p>`;
   else {
@@ -684,8 +761,9 @@ function renderConn() {
       (up ? kv('Сеть', esc(cur.ssid) + (cur.profile && cur.profile !== cur.ssid ? ` <span class="mut">(профиль ${esc(cur.profile)})</span>` : '')) +
         kv('BSSID', `<span class="mono">${esc(cur.bssid)}</span>${cur.vendor ? ' <span class="mut">' + esc(cur.vendor) + '</span>' : ''}`) +
         kv('Канал', cur.channel != null ? `${cur.channel}${bssLabel(cur.bssid) ? ' <span class="mut">(' + esc(bssLabel(cur.bssid)) + ')</span>' : ''}` : '—') +
-        kv('Сигнал', `<span class="${rssiClass(cur.rssi == null ? -100 : cur.rssi)}">${cur.rssi == null ? '—' : cur.rssi + ' дБм'}</span>, качество ${cur.quality}%`) +
+        kv('Сигнал', `${sigSpan(cur.rssi, ' дБм')}, качество ${cur.quality}%`) +
         kv('Скорость', `приём ${cur.rx_mbps} / передача ${cur.tx_mbps} Мбит/с`) +
+        kv('MCS по скорости (оценка)', mcsGuess('приём', cur.rx_mcs) + '<br>' + mcsGuess('передача', cur.tx_mcs), 'wide') +
         kv('Защита', `${esc(cur.auth)}, ${esc(cur.cipher)}${cur.onex ? ', 802.1X' : ''}`) : '') +
       '</div>';
   }
@@ -705,7 +783,7 @@ function renderConn() {
   let evs = (C.events || []).slice().reverse();
   if (S.cfilter === 'bad') evs = evs.filter((e) => e.severity !== 'info');
   const rows = evs.slice(0, 200).map((e) => {
-    const rs = [e.rssi_from, e.rssi_to].filter((v) => v != null).join(' → ');
+    const rs = [e.rssi_from, e.rssi_to].filter((v) => v != null).map((v) => sigSpan(v)).join(' → ');
     const mv = e.bssid_from || e.bssid_to ? `<span class="mono">${esc(e.bssid_from)}${e.bssid_from && e.bssid_to ? ' → ' : ''}${esc(e.bssid_to)}</span>` : '';
     return `<tr class="ev ${e.severity}"><td class="num">${fmtClock(e.t)}</td><td><span class="evk ${e.severity}">${esc(KIND_RU[e.kind] || e.kind)}</span></td>` +
       `<td>${esc(e.text)}${e.reason ? `<div class="mut">Причина: ${esc(e.reason)}${e.reason_code != null ? ' (0x' + e.reason_code.toString(16).toUpperCase() + ')' : ''}</div>` : ''}</td>` +
@@ -912,9 +990,9 @@ function svSide() {
   }
   const res = Object.entries(p.results || {}).sort((a, b) => b[1][3] - a[1][3]).slice(0, 12);
   side.innerHTML = `<div class="sub">Точка ${p.id}</div><dl class="kv small"><dt>Время</dt><dd>${fmtClock(p.t)}</dd>` +
-    `<dt>Подключение</dt><dd>${p.conn ? esc(p.conn.ssid) + ', ' + (p.conn.rssi != null ? p.conn.rssi + ' дБм' : '—') : 'нет'}</dd>` +
+    `<dt>Подключение</dt><dd>${p.conn ? esc(p.conn.ssid) + ', ' + sigSpan(p.conn.rssi, ' дБм') : 'нет'}</dd>` +
     `<dt>Слышно BSS</dt><dd>${Object.keys(p.results || {}).length}</dd></dl>` +
-    `<table class="mini"><tbody>${res.map(([b, v]) => `<tr><td>${esc(v[0])}</td><td class="mono">${esc(b.slice(-8))}</td><td>${esc(v[1])}/${v[2]}</td><td class="num ${rssiClass(v[3])}">${v[3]}</td></tr>`).join('')}</tbody></table>` +
+    `<table class="mini"><tbody>${res.map(([b, v]) => `<tr><td>${esc(v[0])}</td><td class="mono">${esc(b.slice(-8))}</td><td>${esc(v[1])}/${v[2]}</td><td class="num">${sigSpan(v[3])}</td></tr>`).join('')}</tbody></table>` +
     `<div class="toolbar"><button type="button" class="small" data-sv="del">Удалить точку</button></div>`;
 }
 
@@ -1029,8 +1107,11 @@ function renderBeacon() {
     ['SSID', b.ssid], ['BSSID', b.bssid + (b.random_mac ? ' (локально администрируемый)' : '')],
     ['Вендор', b.vendor || '—'],
     ['Диапазон и канал', `${b.band} ГГц, канал ${b.channel}, ширина ${b.width} МГц, центр ${b.center}`],
-    ['Сигнал', `${b.rssi} дБм, качество по драйверу ${b.quality}%`],
+    ['Сигнал', {h: `${sigSpan(b.rssi, ' дБм')}, качество по драйверу ${b.quality}%`}],
     ['Поколение', `${b.gen}${b.streams ? ', потоков: ' + b.streams : ''}`],
+    ['Макс. MCS', b.mcs == null ? (b.phy === 'legacy' ? 'legacy (без HT/VHT/HE)' : '—') : `${b.phy} MCS 0–${b.mcs}, потоков ${b.nss}`],
+    ['Макс. PHY-скорость', b.rate == null ? '—' : `${b.rate} Мбит/с на ${b.width} МГц (потолок по beacon, не текущая скорость)`],
+    ['BSS Color', b.bss_color == null ? '—' : String(b.bss_color)],
     ['Безопасность', b.security], ['AKM', b.akm.join(', ') || '—'], ['Шифры', b.ciphers.join(', ') || '—'],
     ['PMF (802.11w)', b.pmf || '—'], ['WPS', yn(b.wps)],
     ['802.11k', yn(b.k) + (b.k ? (b.nr ? ', neighbor report' : ', без neighbor report') : '')],
@@ -1039,7 +1120,7 @@ function renderBeacon() {
     ['Страна', b.country || '—'], ['Beacon interval', `${b.beacon} TU`], ['DTIM', b.dtim == null ? '—' : String(b.dtim)],
     ['Capability', b.cap], ['HT protection', String(b.ht_prot)], ['Размер IE', b.ie_len + ' байт'],
   ];
-  const left = '<dl class="kv">' + rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>';
+  const left = '<dl class="kv">' + rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v && v.h ? v.h : esc(v)}</dd>`).join('') + '</dl>';
   const ies = tree.map((ie, i) => {
     const fields = ie.fields.length
       ? `<dl class="kv small">${ie.fields.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '';
@@ -1057,7 +1138,8 @@ function renderBeacon() {
 }
 
 function beaconText(b) {
-  const lines = [`${b.ssid}  ${b.bssid}  ${b.band} GHz ch ${b.channel} ${b.width} MHz  ${b.rssi} dBm  ${b.security}`, ''];
+  const lines = [`${b.ssid}  ${b.bssid}  ${b.band} GHz ch ${b.channel} ${b.width} MHz  ${b.rssi} dBm  ${b.security}`,
+    b.rate == null ? '' : `max: ${b.phy} MCS ${b.mcs} x${b.nss}, ${b.rate} Mbit/s`, ''];
   for (const ie of b.ie_tree || []) {
     lines.push(`[${ie.id}] ${ie.name} (${ie.len})${ie.summary ? ': ' + ie.summary : ''}`);
     for (const [k, v] of ie.fields) lines.push(`    ${k}: ${v}`);
@@ -1080,13 +1162,13 @@ function renderCompare() {
     `${btns}<button type="button" class="small" data-base="clear">Убрать базу</button></div>`;
   if (!d) return head + '<p class="mut">База совпадает с текущим сканом. Сделай новый скан, и здесь появится разница.</p>';
   const brief = (x) => `<div class="drow"><span class="dot" style="background:${ssidColor(x.ssid)}"></span><b>${esc(x.ssid)}</b> ` +
-    `<span class="mono mut">${esc(x.bssid)}</span> ${esc(x.band)} ГГц, канал ${x.channel}, ${x.rssi} дБм, ${esc(x.security)}</div>`;
+    `<span class="mono mut">${esc(x.bssid)}</span> ${esc(x.band)} ГГц, канал ${x.channel}, ${sigSpan(x.rssi, ' дБм')}, ${esc(x.security)}</div>`;
   const sec = (title, n, body) => `<div><div class="sub">${title}: ${n}</div>${n ? body : '<div class="mut">нет</div>'}</div>`;
   const changed = d.changed.map((c) => `<div class="drow"><span class="dot" style="background:${ssidColor(c.ssid)}"></span><b>${esc(c.ssid)}</b> ` +
     `<span class="mono mut">${esc(c.bssid)}</span><dl class="chg">${c.changes.map((x) =>
       `<dt>${esc(x.field)}</dt><dd><span class="old">${esc(x.old)}</span> → <b>${esc(x.new)}</b></dd>`).join('')}</dl></div>`).join('');
   const rssi = d.rssi.map((r) => `<div class="drow"><b>${esc(r.ssid)}</b> <span class="mono mut">${esc(r.bssid)}</span> ` +
-    `${r.old} → ${r.new} дБм <b class="${r.delta < 0 ? 'bad' : 'good'}">${r.delta > 0 ? '+' : ''}${r.delta}</b></div>`).join('');
+    `${sigSpan(r.old)} → ${sigSpan(r.new)} дБм <b class="${r.delta < 0 ? 'bad' : 'good'}">${r.delta > 0 ? '+' : ''}${r.delta}</b></div>`).join('');
   return head + `<div class="dgrid">` +
     sec('Изменились настройки', d.changed.length, changed) +
     sec('Появились', d.added.length, d.added.map(brief).join('')) +
@@ -1386,6 +1468,8 @@ async function init() {
     const t = e.target;
     const cb = t.closest('[data-cb]');
     if (cb) { S.cb = cb.dataset.cb; renderPanel(); return; }
+    const sgc = t.closest('[data-sigcolor]');
+    if (sgc) { P.sigColor = sgc.dataset.sigcolor; savePrefs(); renderPanel(); return; }
     const sg = t.closest('[data-sig]');
     if (sg) { P.sigMode = sg.dataset.sig; savePrefs(); renderPanel(); return; }
     if (t.closest('[data-hist]')) { doExport('history'); return; }
@@ -1513,6 +1597,10 @@ async function init() {
     if (Date.now() - S.lastScan >= parseInt($('interval').value, 10) * 1000) startScan();
   }, 1000);
   setInterval(refresh, 1000);
+  // окно закрывают - сообщаем серверу, чтобы программа не осталась висеть в фоне (перезагрузка это отменит)
+  window.addEventListener('pagehide', () => {
+    try { fetch('/api/bye', {method: 'POST', keepalive: true, headers: {'X-Token': TOKEN || ''}}); } catch (e) { /* окно уже закрыто */ }
+  });
 
   refresh().then((ok) => {
     if (ok && S.data && !S.data.taken_at && !S.data.scanning) startScan();

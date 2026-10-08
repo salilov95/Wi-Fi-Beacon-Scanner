@@ -41,6 +41,7 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="демо-режим без сканирования; можно указать свой snap.json")
     g.add_argument("--port", type=int, default=0, help="порт (по умолчанию случайный свободный)")
     g.add_argument("--no-browser", action="store_true", help="не открывать окно, только напечатать адрес")
+    g.add_argument("--keep-running", action="store_true", help="не завершаться, когда окно закрыто")
     a = sub.add_parser("analyze", help="разобрать ранее сохранённый снапшот")
     a.add_argument("snapshot")
     common(a)
@@ -66,7 +67,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         if db is None:
             print("предупреждение: файл manuf не найден, вендоры не определяются (укажи --manuf)", file=sys.stderr)
         serve(AppState(backend, db, args.ssid, prefs_path=default_prefs_path()), port=args.port,
-              open_browser=not args.no_browser)
+              open_browser=not args.no_browser, exit_when_closed=False if args.keep_running else None)
         return 0
 
     if args.cmd == "interfaces":

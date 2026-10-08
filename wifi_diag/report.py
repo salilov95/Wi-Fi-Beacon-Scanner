@@ -8,6 +8,7 @@ from datetime import datetime
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
+from .mcs import capability
 from .model import Bss, Snapshot
 from .rules import CRITICAL, INFO, WARNING, Finding
 
@@ -15,16 +16,18 @@ SEV_RU = {CRITICAL: "Критично", WARNING: "Внимание", INFO: "Ин
 
 CSV_COLUMNS = [
     "ssid", "bssid", "vendor", "band_ghz", "channel", "width_mhz", "rssi_dbm", "link_quality",
-    "security", "ciphers", "generation", "streams", "dot11k", "dot11r", "dot11v",
+    "security", "ciphers", "generation", "streams", "phy", "max_mcs", "max_rate_mbps", "dot11k", "dot11r", "dot11v",
     "util_pct", "stations", "country", "beacon_interval", "dtim",
 ]
 
 
 def _row(b: Bss) -> List[object]:
     i = b.info
+    cap = capability(i)
     return [
         b.ssid_display, b.bssid, b.vendor or "", b.band, b.channel, i.width_mhz, b.rssi, b.link_quality,
         b.security, "/".join(b.ciphers), b.generation_label, i.max_streams or "",
+        cap["phy"], "" if cap["mcs"] is None else cap["mcs"], "" if cap["rate"] is None else round(cap["rate"], 1),
         "yes" if i.dot11k else "no", "yes" if i.dot11r else "no", "yes" if i.dot11v else "no",
         "" if i.qbss_util_pct is None else i.qbss_util_pct,
         "" if i.qbss_stations is None else i.qbss_stations,
@@ -101,6 +104,29 @@ def util_color(u: float) -> str:
     return "hsl(%d 70%% 40%%)" % hue
 
 
+# Сигнал: от красного (плохо) к зелёному (хорошо). Те же точки, что в интерфейсе и на карте обхода.
+RSSI_STOPS = [(-85, 0), (-75, 25), (-67, 55), (-60, 95), (-50, 130)]
+
+
+def rssi_hue(r: float) -> int:
+    if r <= RSSI_STOPS[0][0]:
+        return RSSI_STOPS[0][1]
+    for (a, ha), (b, hb) in zip(RSSI_STOPS, RSSI_STOPS[1:]):
+        if r <= b:
+            return round(ha + (hb - ha) * (r - a) / (b - a))
+    return RSSI_STOPS[-1][1]
+
+
+def rssi_color(r: float) -> str:
+    return "hsl(%d 72%% 36%%)" % rssi_hue(r)
+
+
+def _rssi_td(v: Any) -> str:
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        return "<td style='color:%s;font-weight:600'>%s</td>" % (rssi_color(v), v)
+    return "<td>%s</td>" % html.escape("" if v is None else str(v))
+
+
 def survey_rows(points: Sequence[Dict[str, Any]], focus: Sequence[str]) -> List[List[Any]]:
     """Таблица точек обхода: для каждого «моего» SSID лучший сигнал и сколько его BSS слышно от −75."""
     names = list(focus) or ["(все сети)"]
@@ -122,10 +148,21 @@ def survey_rows(points: Sequence[Dict[str, Any]], focus: Sequence[str]) -> List[
     return rows
 
 
+def _mcs_cell(b: Bss) -> str:
+    c = capability(b.info)
+    return "" if c["mcs"] is None else "%s %d x%d" % (c["phy"], c["mcs"], c["nss"])
+
+
+def _rate_cell(b: Bss) -> str:
+    c = capability(b.info)
+    return "" if c["rate"] is None else "%.0f" % c["rate"]
+
+
 _TABLE_COLS = [
     ("SSID", lambda b: b.ssid_display), ("BSSID", lambda b: b.bssid), ("Вендор", lambda b: b.vendor or ""),
     ("ГГц", lambda b: b.band), ("Канал", lambda b: b.channel), ("Ширина", lambda b: b.info.width_mhz),
     ("RSSI", lambda b: b.rssi), ("Безопасность", lambda b: b.security), ("Поколение", lambda b: b.generation_label),
+    ("Макс. MCS", lambda b: _mcs_cell(b)), ("Макс. PHY, Мбит/с", lambda b: _rate_cell(b)),
     ("k", lambda b: "+" if b.info.dot11k else "-"), ("r", lambda b: "+" if b.info.dot11r else "-"),
     ("v", lambda b: "+" if b.info.dot11v else "-"),
     ("Загрузка", lambda b: "" if b.info.qbss_util_pct is None else "%.0f%%" % b.info.qbss_util_pct),
@@ -193,24 +230,28 @@ def render_html(snap: Snapshot, findings: Sequence[Finding], focus: Sequence[str
         out.append("<div class='wrap'><table><thead><tr><th>Время</th><th>Событие</th><th>SSID</th><th>Откуда</th><th>Куда</th>"
                    "<th>RSSI</th><th>Длительность</th><th>Причина</th></tr></thead><tbody>")
         for ev in list(journal["events"])[-200:][::-1]:
-            rs = " → ".join(str(x) for x in (ev["rssi_from"], ev["rssi_to"]) if x is not None)
+            rs = " → ".join("<span style='color:%s;font-weight:600'>%s</span>" % (rssi_color(x), x)
+                            for x in (ev["rssi_from"], ev["rssi_to"]) if x is not None)
             out.append("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
                 datetime.fromtimestamp(ev["t"]).strftime("%H:%M:%S"), e(JOURNAL_KIND_RU.get(ev["kind"], ev["kind"])),
-                e(ev["ssid"]), e(ev["bssid_from"]), e(ev["bssid_to"]), e(rs),
+                e(ev["ssid"]), e(ev["bssid_from"]), e(ev["bssid_to"]), rs,
                 "" if ev["duration_s"] is None else "%.0f с" % ev["duration_s"], e(ev["reason"])))
         out.append("</tbody></table></div>")
     if survey:
         rows = survey_rows(survey, list(focus))
         out.append("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>")
         out.append("<div class='wrap'><table><thead><tr>%s</tr></thead><tbody>" % "".join("<th>%s</th>" % e(str(h)) for h in rows[0]))
+        rcols = {i for i, h in enumerate(rows[0]) if "RSSI" in str(h)}
         for r in rows[1:]:
-            out.append("<tr>%s</tr>" % "".join("<td>%s</td>" % e("" if v is None else str(v)) for v in r))
+            out.append("<tr>%s</tr>" % "".join(_rssi_td(v) if i in rcols else "<td>%s</td>" % e("" if v is None else str(v))
+                                               for i, v in enumerate(r)))
         out.append("</tbody></table></div>")
     out.append("<h2>Все BSS</h2><div class='wrap'><table><thead><tr>")
     out.extend("<th>%s</th>" % e(name) for name, _ in _TABLE_COLS)
     out.append("</tr></thead><tbody>")
     for b in sorted(snap.bss, key=lambda x: (x.ssid_display.lower(), x.band, x.channel, -x.rssi)):
-        out.append("<tr>%s</tr>" % "".join("<td>%s</td>" % e(str(fn(b))) for _, fn in _TABLE_COLS))
+        out.append("<tr>%s</tr>" % "".join(_rssi_td(fn(b)) if name == "RSSI" else "<td>%s</td>" % e(str(fn(b)))
+                                           for name, fn in _TABLE_COLS))
     out.append("</tbody></table></div></main></body></html>")
     return "".join(out)
 
