@@ -18,7 +18,9 @@
 
 ### Добавлено
 - Лицензия MIT, CHANGELOG, `pyproject.toml` (команда `wifi-beacon-scanner` после `pip install .`).
-- GitHub Actions: тесты на Windows и Linux при каждом push, сборка exe и установщика с публикацией в Releases по тегу.
+- GitHub Actions: тесты на Windows и Linux при каждом push (на Windows ещё печать PDF через настоящий Edge);
+  Release собирает exe и установщик, проверяет собранный exe (запуск, скан, выгрузка PDF и Excel)
+  и публикует их с контрольными суммами в Releases.
 
 ## 0.6.0 - 2026-10-08 (под именем WifiDiag, не публиковалась)
 
