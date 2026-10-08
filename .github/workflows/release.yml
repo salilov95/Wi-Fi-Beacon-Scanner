@@ -8,6 +8,9 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
+env:
+  PYTHONUTF8: "1"     # кириллица в выводе Python на Windows
+
 permissions:
   contents: write
 
@@ -15,8 +18,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -52,16 +55,8 @@ jobs:
           call build.bat || exit /b 1
           call build_installer.bat || exit /b 1
 
-      - name: Smoke test of the built exe
-        shell: pwsh
-        run: |
-          $p = Start-Process -FilePath dist\WiFiBeaconScanner\WiFiBeaconScanner.exe -ArgumentList "--demo","--no-browser" -PassThru
-          Start-Sleep -Seconds 8
-          if ($p.HasExited) { Get-Content "$env:LOCALAPPDATA\WiFiBeaconScanner\wifi-beacon-scanner.log" -ErrorAction SilentlyContinue; throw "exe exited with code $($p.ExitCode)" }
-          $log = Get-Content "$env:LOCALAPPDATA\WiFiBeaconScanner\wifi-beacon-scanner.log" -Raw
-          Write-Output $log
-          if ($log -notmatch "http://127\.0\.0\.1:\d+/") { throw "server did not start" }
-          Stop-Process -Id $p.Id -Force
+      - name: Smoke test of the built exe (start, scan, PDF and Excel export)
+        run: python tools/smoke_exe.py dist\WiFiBeaconScanner\WiFiBeaconScanner.exe
 
       - name: Checksums
         shell: pwsh

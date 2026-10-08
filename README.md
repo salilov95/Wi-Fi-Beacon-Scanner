@@ -228,6 +228,7 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     assets/                  иконка
     build.bat, build_installer.bat     сборка exe и установщика
     .github/workflows/                 CI (тесты) и Release (сборка exe, установщик, GitHub Release)
+    tools/smoke_exe.py                 проверка собранного exe в Release: запуск, скан, выгрузка PDF и Excel
     tests/                   unittest
 
 ## Известные ограничения
