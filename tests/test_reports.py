@@ -120,6 +120,46 @@ class ExportApiTests(unittest.TestCase):
         for needle in ("Wi-Fi: отчёт диагностики", "Загрузка каналов", "Подключение ноутбука", "Все BSS", "CORP"):
             self.assertIn(needle, text)
 
+    @unittest.skipUnless(sys.platform == "win32" and pdf.find_browser(), "только Windows с Edge")
+    def test_pdf_with_real_edge_on_windows(self):
+        t = time.monotonic()
+        st, hd, raw = self.c.req("POST", "/api/export/pdf", {"scope": "focus"})
+        self.assertEqual(st, 200, raw[:300])
+        self.assertTrue(raw.startswith(b"%PDF"))
+        self.assertLess(time.monotonic() - t, 60)
+
+    @unittest.skipIf(sys.platform == "win32", "фальшивый браузер - shell-скрипт")
+    def test_pdf_browser_that_does_not_exit(self):
+        """Edge на Windows бывает не завершается после печати: ждём файл, а не выход процесса."""
+        with tempfile.TemporaryDirectory() as d:
+            fake = os.path.join(d, "fake-browser")
+            with open(fake, "w", encoding="utf-8") as f:
+                f.write("#!%s\nimport sys, time\n"
+                        "out = [a.split('=', 1)[1] for a in sys.argv if a.startswith('--print-to-pdf=')][0]\n"
+                        "open(out, 'wb').write(b'%%PDF-1.4\\n' + b'x' * 200 + b'\\n%%%%EOF\\n')\n"
+                        "time.sleep(120)\n" % sys.executable)
+            os.chmod(fake, 0o755)
+            t = time.monotonic()
+            with mock.patch.object(pdf, "find_browser", return_value=fake):
+                data = pdf.html_to_pdf("<p>x</p>", timeout=30)
+            self.assertTrue(data.startswith(b"%PDF"))
+            self.assertLess(time.monotonic() - t, 10)
+
+    @unittest.skipIf(sys.platform == "win32", "фальшивый браузер - shell-скрипт")
+    def test_pdf_browser_fails_gives_fallback(self):
+        with tempfile.TemporaryDirectory() as d:
+            fake = os.path.join(d, "fake-browser")
+            with open(fake, "w", encoding="utf-8") as f:
+                f.write("#!/bin/sh\necho 'policy: headless disabled' >&2\nexit 3\n")
+            os.chmod(fake, 0o755)
+            before = set(glob.glob(os.path.join(tempfile.gettempdir(), "wbs_pdf_*")))
+            with mock.patch.object(pdf, "find_browser", return_value=fake):
+                st, body = self.c.j("POST", "/api/export/pdf", {"scope": "all"})
+            self.assertEqual(st, 500)
+            self.assertIn("код выхода 3", body["error"])
+            self.assertEqual(body["fallback"], "html")
+            self.assertEqual(set(glob.glob(os.path.join(tempfile.gettempdir(), "wbs_pdf_*"))) - before, set())
+
     def test_pdf_without_browser_gives_clear_error(self):
         with mock.patch.object(pdf, "find_browser", return_value=None):
             st, body = self.c.j("POST", "/api/export/pdf", {"scope": "all"})
