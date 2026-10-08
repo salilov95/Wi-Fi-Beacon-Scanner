@@ -227,6 +227,7 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     .github/workflows/                 CI (тесты) и Release (сборка exe, установщик, GitHub Release)
     tools/smoke_exe.py                 проверка собранного exe в Release: запуск, скан, выгрузка PDF и Excel
     tools/release_notes.py             текст релиза из CHANGELOG.md
+    tools/run_tests.py                 тесты в CI: упавшие видны аннотациями
     tests/                   unittest
 
 ## Известные ограничения
