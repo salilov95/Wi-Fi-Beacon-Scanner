@@ -57,6 +57,65 @@ class LifelineTests(unittest.TestCase):
         self.assertIn("не отвечает", self.l.should_exit())
 
 
+class FakeWindow:
+    def __init__(self):
+        self.code = None
+
+    def poll(self):
+        return self.code
+
+
+class OwnWindowTests(unittest.TestCase):
+    """Своё окно Edge: пока его процесс жив, тишина (свёрнуто, страница усыплена) - не повод выходить."""
+
+    def setUp(self):
+        self.c = Clock()
+        self.l = Lifeline(idle_s=900, first_s=300, bye_grace_s=5, clock=self.c)
+        self.w = FakeWindow()
+        self.l.attach_window(self.w)
+
+    def test_minimized_and_frozen_for_hours_keeps_running(self):
+        self.l.touch()
+        self.c.t += 6 * 3600
+        self.assertIsNone(self.l.should_exit())
+
+    def test_hidden_page_discarded_without_bye_keeps_running(self):
+        self.l.touch()
+        self.c.t += 4000
+        self.l.touch()                      # страницу перезагрузили после выгрузки - работает дальше
+        self.assertIsNone(self.l.should_exit())
+
+    def test_window_process_exit_means_closed(self):
+        self.l.touch()
+        self.c.t += 30
+        self.w.code = 0
+        self.assertEqual(self.l.should_exit(), "окно Edge закрыто")
+
+    def test_bye_while_edge_stays_in_background(self):
+        self.l.touch(); self.l.bye()
+        self.c.t += 6
+        self.assertEqual(self.l.should_exit(), "окно закрыто")
+
+    def test_edge_handed_window_to_running_instance(self):
+        self.w.code = 0                     # процесс-лаунчер сразу вышел, окно в чужом Edge
+        self.c.t += 1
+        self.assertIsNone(self.l.should_exit())
+        self.assertIsNone(self.l.window)    # дальше следим по запросам, как раньше
+        self.l.touch(); self.c.t += 899
+        self.assertIsNone(self.l.should_exit())
+
+
+class WindowCommandTests(unittest.TestCase):
+    def test_own_profile_and_no_background_throttling(self):
+        from wifi_beacon_scanner.web.server import window_command
+        cmd = window_command("msedge.exe", "http://127.0.0.1:1/?t=x", r"C:\p")
+        self.assertIn("--app=http://127.0.0.1:1/?t=x", cmd)
+        self.assertIn(r"--user-data-dir=C:\p", cmd)
+        for f in ("--disable-background-timer-throttling", "--disable-renderer-backgrounding",
+                  "--disable-backgrounding-occluded-windows"):
+            self.assertIn(f, cmd)
+
+
 class ByeEndpointTests(unittest.TestCase):
     def test_bye_needs_token_and_does_not_count_as_contact(self):
         state = AppState(DemoBackend(seed=1), None)

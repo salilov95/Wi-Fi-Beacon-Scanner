@@ -45,35 +45,58 @@ CSP = ("default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';
 
 
 class Lifeline:
-    """Понимает, что окно закрыто, и программе пора выйти. В установленной версии консоли нет,
+    """Понимает, что окно закрыто и программе пора выйти. В установленной версии консоли нет,
     поэтому без этого процесс оставался бы висеть в фоне после закрытия окна.
 
-    Окно опрашивает /api/state раз в секунду (свёрнутое окно Edge может замедлить опрос до раза в минуту).
-    При закрытии страница шлёт /api/bye; если за bye_grace_s не пришло новых запросов (перезагрузка
-    страницы их пришлёт), выходим. Запасные пути: окно молчит idle_s или так и не открылось за first_s.
+    Главный признак - процесс окна Edge: программа запускает своё окно с отдельным профилем, и пока этот
+    процесс жив, окно открыто, даже если оно свёрнуто и Edge усыпил страницу (тогда опроса нет совсем).
+    Тишину в таком случае не считаем закрытием: именно так программа раньше «падала» при сворачивании.
+
+    Если процесса нет (Edge не найден, открылся браузер по умолчанию, или окно ушло в уже запущенный Edge):
+    страница при закрытии шлёт /api/bye; если за bye_grace_s нет новых запросов (перезагрузка их пришлёт),
+    выходим. Запасные пути: окно молчит idle_s или так и не открылось за first_s.
     """
 
-    def __init__(self, idle_s: float = 900, first_s: float = 300, bye_grace_s: float = 5,
+    def __init__(self, idle_s: float = 3600, first_s: float = 300, bye_grace_s: float = 5,
                  clock=time.monotonic) -> None:
         self.idle_s, self.first_s, self.bye_grace_s, self.clock = idle_s, first_s, bye_grace_s, clock
         self._lock = threading.Lock()
         self.started = clock()
         self.last: Optional[float] = None
         self.bye_at: Optional[float] = None
+        self.window = None          # subprocess.Popen окна Edge, если оно наше
 
     def touch(self) -> None:
         with self._lock:
+            first = self.last is None
             self.last = self.clock()
+        if first:
+            print("окно подключилось")
 
     def bye(self) -> None:
         with self._lock:
             self.bye_at = self.clock()
 
+    def attach_window(self, proc) -> None:
+        self.window = proc
+
+    def _bye_expired(self, now: float, last: Optional[float], bye_at: Optional[float]) -> bool:
+        return bye_at is not None and (last is None or last <= bye_at) and now - bye_at >= self.bye_grace_s
+
     def should_exit(self) -> Optional[str]:
         now = self.clock()
         with self._lock:
             last, bye_at = self.last, self.bye_at
-        if bye_at is not None and (last is None or last <= bye_at) and now - bye_at >= self.bye_grace_s:
+        w = self.window
+        if w is not None:
+            if w.poll() is None:
+                # окно живо; выходим только если его явно закрыли (bye при видимой странице),
+                # а Edge остался работать в фоне
+                return "окно закрыто" if self._bye_expired(now, last, bye_at) else None
+            if last is not None or now - self.started > 10:
+                return "окно Edge закрыто"
+            self.window = None      # Edge сразу отдал окно уже запущенному экземпляру: следим по запросам
+        if self._bye_expired(now, last, bye_at):
             return "окно закрыто"
         if last is None:
             return "окно так и не открылось" if now - self.started >= self.first_s else None
@@ -338,14 +361,36 @@ def _find_edge() -> Optional[str]:
     return None
 
 
-def open_window(url: str) -> None:
-    """Edge в режиме --app даёт окно без адресной строки; иначе обычный браузер по умолчанию."""
+def app_profile_dir() -> str:
+    base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    return os.path.join(base, "WiFiBeaconScanner", "edge-profile")
+
+
+def window_command(edge: str, url: str, profile: str) -> List[str]:
+    """Отдельный профиль Edge: окно - собственный процесс (по нему видно, что окно закрыли), и Edge
+    не отдаёт его уже открытому браузеру пользователя с его настройками усыпления вкладок.
+    Флаги ниже - стандартные флаги Chromium против фонового замедления свёрнутых окон."""
+    return [edge, "--app=" + url, "--user-data-dir=" + profile, "--no-first-run", "--no-default-browser-check",
+            "--disable-background-timer-throttling", "--disable-renderer-backgrounding",
+            "--disable-backgrounding-occluded-windows", "--window-size=1440,900"]
+
+
+def open_window(url: str):
+    """Edge в режиме --app даёт окно без адресной строки; иначе обычный браузер по умолчанию.
+    Возвращает процесс окна Edge или None."""
     if sys.platform == "win32":
         edge = _find_edge()
         if edge:
-            subprocess.Popen([edge, "--app=" + url])
-            return
+            profile = app_profile_dir()
+            try:
+                os.makedirs(profile, exist_ok=True)
+                return subprocess.Popen(window_command(edge, url, profile))
+            except OSError as e:
+                print("не удалось открыть окно Edge со своим профилем: %s" % e)
+                subprocess.Popen([edge, "--app=" + url])
+                return None
     webbrowser.open(url)
+    return None
 
 
 def _watchdog(server: WifiServer, stop: threading.Event) -> None:
@@ -369,7 +414,7 @@ def serve(state: AppState, port: int = 0, open_browser: bool = True, exit_when_c
     if open_browser if exit_when_closed is None else exit_when_closed:
         threading.Thread(target=_watchdog, args=(server, stop), name="watchdog", daemon=True).start()
     if open_browser:
-        open_window(url)
+        server.lifeline.attach_window(open_window(url))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -378,3 +423,9 @@ def serve(state: AppState, port: int = 0, open_browser: bool = True, exit_when_c
         stop.set()
         state.stop_monitors()
         server.server_close()
+        w = server.lifeline.window
+        if w is not None and w.poll() is None:       # «Выход» в окне: закрываем и само окно
+            try:
+                w.terminate()
+            except OSError:
+                pass

@@ -303,7 +303,7 @@ function renderStrip() {
     it('2.4 ГГц', cnt('2.4')) + it('5 ГГц', cnt('5')) + (cnt('6') ? it('6 ГГц', cnt('6')) : '') +
     it('Лучший сигнал', `<span style="color:${sigText(best.rssi)}">${best.rssi}</span>`, 'дБм, ' + esc(best.ssid)) +
     (loaded ? it('Макс. загрузка', loaded.util.toFixed(0) + '%', `канал ${loaded.channel}, ${esc(loaded.ssid)}`) : '') +
-    `<button type="button" class="it" data-goto="findings" title="Открыть находки"><span class="mut">Находки</span>` +
+    `<button type="button" class="it" data-goto="findings" title="Открыть проблемы"><span class="mut">Проблемы</span>` +
     `<b class="bad">${c.critical}</b><b class="mid">${c.warning}</b><b>${c.info}</b></button>`;
 }
 
@@ -773,7 +773,7 @@ function renderConn() {
     stat('пинг-понгов', st.pingpong || 0, 'mid') + stat('залипаний', st.sticky || 0, 'mid') +
     stat('неудачных подключений', st.attempt_fail || 0, 'bad') +
     (st.since ? `<span class="it mut">журнал с ${fmtClock(st.since)}</span>` : '') + '</div>';
-  const tools = `<div class="toolbar"><span class="seg">${[[300, '5 мин'], [900, '15 мин'], [1800, '30 мин']].map(([v, l]) =>
+  const tools = `<div class="toolbar"><span class="seg">${[[60, '1 мин'], [300, '5 мин'], [900, '15 мин'], [1800, '30 мин']].map(([v, l]) =>
     `<button type="button" data-cwin="${v}" class="${win === v ? 'on' : ''}">${l}</button>`).join('')}</span>` +
     `<span class="seg">${[['all', 'все события'], ['bad', 'только проблемы']].map(([v, l]) =>
       `<button type="button" data-cfilter="${v}" class="${(S.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</span>` +
@@ -1082,7 +1082,7 @@ function renderFindings() {
   const fs = S.data.findings;
   if (!fs.length) return '<p class="mut">По заданным правилам проблем не найдено.</p>';
   const SEV = {critical: 'Критично', warning: 'Внимание', info: 'Информация'};
-  const hint = `<div class="toolbar"><span class="mut">${S.hl.size ? `Подсвечено в таблице: ${S.hl.size} BSS.` : 'Нажми на находку, чтобы подсветить затронутые BSS в таблице.'}</span>` +
+  const hint = `<div class="toolbar"><span class="mut">${S.hl.size ? `Подсвечено в таблице: ${S.hl.size} BSS.` : 'Нажми на проблему, чтобы подсветить затронутые BSS в таблице.'}</span>` +
     `${S.hl.size ? '<button type="button" class="small" id="clrHl">Сбросить</button>' : ''}</div>`;
   return hint + fs.map((f, i) => `
     <div class="f ${f.severity}${i === S.hlIdx ? ' on' : ''}" data-i="${i}" tabindex="0">
@@ -1279,7 +1279,7 @@ async function refresh() {
     handleState(r.data);
     return true;
   } catch (e) {
-    banner('Нет связи с программой: ' + e.message, true, null, 'link');
+    banner('Нет связи с программой (' + e.message + '). Если окно долго было свёрнуто, подожди пару секунд; если сообщение не уходит - программа закрыта, запусти её снова.', true, null, 'link');
     return false;
   }
 }
@@ -1631,9 +1631,13 @@ async function init() {
   }, 1000);
   setInterval(refresh, 1000);
   // окно закрывают - сообщаем серверу, чтобы программа не осталась висеть в фоне (перезагрузка это отменит)
+  // Только если страница видна: свёрнутое окно Edge может выгрузить страницу из памяти, и это не закрытие.
   window.addEventListener('pagehide', () => {
+    if (document.visibilityState !== 'visible') return;
     try { fetch('/api/bye', {method: 'POST', keepalive: true, headers: {'X-Token': TOKEN || ''}}); } catch (e) { /* окно уже закрыто */ }
   });
+  // окно развернули после сна - обновляем сразу, не дожидаясь таймера
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(); });
 
   refresh().then((ok) => {
     if (ok && S.data && !S.data.taken_at && !S.data.scanning) startScan();
