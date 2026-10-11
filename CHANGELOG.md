@@ -2,7 +2,7 @@
 
 Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
 
-## [Не выпущено]
+## [0.7.1] - 2026-10-11
 
 ### Изменено
 - README переписан: возможности, скриншоты, установка; подробности вынесены в `docs/`
@@ -48,5 +48,5 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
-[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v0.7.0...main
+[0.7.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.1
 [0.7.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.0
