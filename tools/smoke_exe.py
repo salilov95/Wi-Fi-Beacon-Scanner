@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 
 
@@ -45,7 +46,11 @@ def main(exe: str) -> int:
             print("::error title=exe::exe не запустил сервер (код %s)" % proc.poll())
             return 1
         base, token = m.group(1), m.group(2)
-        call(base, token, "/api/scan", {"interface": 0, "wait": 1})
+        try:
+            call(base, token, "/api/scan", {"interface": 0, "wait": 1})
+        except urllib.error.HTTPError as e:      # 409: первый скан программа уже запустила сама
+            if e.code != 409:
+                raise
         for _ in range(40):
             st = json.loads(call(base, token, "/api/state")[1])
             if st.get("scan_count"):
@@ -73,4 +78,8 @@ def main(exe: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1]))
+    try:
+        sys.exit(main(sys.argv[1]))
+    except Exception as e:  # noqa: BLE001 - причина должна попасть в аннотацию, логи CI недоступны
+        print("::error title=exe::%s: %s" % (type(e).__name__, e))
+        sys.exit(1)
