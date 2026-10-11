@@ -76,7 +76,8 @@ class DemoBackend(Backend):
         return ["Demo adapter"]
 
     def read_winlog(self, hours: float = 24) -> List[dict]:
-        return demo_winlog(time.time())
+        now = time.time()
+        return [e for e in demo_winlog(now) if e["t"] >= now - hours * 3600]
 
     def start_conn_monitor(self, tracker, lock, interface_index=0):
         m = DemoConnMonitor(tracker, lock, self.base)
@@ -147,27 +148,44 @@ def demo_roam(ses, t: float, frm: str, to: str, ms: float, full_auth: bool = Fal
 def demo_winlog(now: float) -> List[dict]:
     """Синтетические события WLAN-AutoConfig для демо-режима (текст - пересказ, помечен «демо»)."""
     from .winlog import group_of, LEVEL_RU
+    ok = {"ProfileName": "CORP", "SSID": "CORP", "BSSType": "Infrastructure", "PHYType": "802.11ax",
+          "AuthenticationAlgorithm": "WPA2-Enterprise", "CipherAlgorithm": "AES-CCMP", "OnexEnabled": "1"}
     rows = [
-        (-290, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
-        (-289.9, 11000, 4, "демо: начата ассоциация с беспроводной сетью"),
-        (-289.8, 11001, 4, "демо: ассоциация с беспроводной сетью выполнена"),
-        (-289.8, 11010, 4, "демо: начата проверка безопасности беспроводной сети"),
-        (-289.7, 12011, 4, "демо: начата проверка подлинности 802.1X"),
-        (-289.1, 12012, 4, "демо: проверка подлинности 802.1X выполнена (EAP-TLS, учётные данные компьютера)"),
-        (-289.0, 11005, 4, "демо: проверка безопасности беспроводной сети выполнена"),
-        (-288.9, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP"),
-        (-158, 8003, 4, "демо: отключено от сети CORP. Причина: точка доступа разорвала ассоциацию"),
-        (-157, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
-        (-156.5, 12013, 2, "демо: ошибка проверки подлинности 802.1X: не удалось проверить отзыв сертификата"),
-        (-156.4, 8002, 2, "демо: не удалось подключиться к сети CORP"),
-        (-154, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
-        (-152.6, 12012, 4, "демо: проверка подлинности 802.1X выполнена"),
-        (-152.5, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP"),
+        (-30500, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
+        (-21900, 8003, 4, "демо: отключено от сети CORP. Причина: пользователь отключил беспроводное подключение",
+         {"SSID": "CORP", "Reason": "Пользователь отключил подключение", "ReasonCode": "0x00028002"}),
+        (-21850, 8002, 2, "демо: не удалось подключиться к сети Hotel-WiFi. Причина: сеть недоступна",
+         {"SSID": "Hotel-WiFi", "FailureReason": "Сеть недоступна", "ReasonCode": "0x00028002"}),
+        (-9000, 11006, 3, "демо: проверка безопасности беспроводной сети не выполнена: истекло время ожидания 4-way handshake",
+         {"SSID": "CORP", "PeerMac": "00:e0:fc:10:04:02", "FailureReason": "Тайм-аут 4-way handshake", "ReasonCode": "0x00048001"}),
+        (-8990, 8002, 2, "демо: не удалось подключиться к сети CORP. Причина: тайм-аут 4-way handshake",
+         {"SSID": "CORP", "FailureReason": "Тайм-аут 4-way handshake", "ReasonCode": "0x00048001"}),
+        (-8950, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
+        (-290, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-289.9, 11000, 4, "демо: начата ассоциация с беспроводной сетью", {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
+        (-289.8, 11001, 4, "демо: ассоциация с беспроводной сетью выполнена", {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
+        (-289.8, 11010, 4, "демо: начата проверка безопасности беспроводной сети", {"SSID": "CORP"}),
+        (-289.7, 12011, 4, "демо: начата проверка подлинности 802.1X", {"SSID": "CORP", "EAPType": "13"}),
+        (-289.1, 12012, 4, "демо: проверка подлинности 802.1X выполнена (EAP-TLS, учётные данные компьютера)",
+         {"SSID": "CORP", "EAPType": "13", "Identity": "host/LAPTOP-01"}),
+        (-289.0, 11005, 4, "демо: проверка безопасности беспроводной сети выполнена", {"SSID": "CORP"}),
+        (-288.9, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
+        (-158, 8003, 4, "демо: отключено от сети CORP. Причина: точка доступа разорвала ассоциацию",
+         {"SSID": "CORP", "Reason": "Точка доступа разорвала ассоциацию", "ReasonCode": "0x00038004"}),
+        (-157, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-156.5, 12013, 2, "демо: ошибка проверки подлинности 802.1X: не удалось проверить отзыв сертификата",
+         {"SSID": "CORP", "EAPType": "13", "Reason": "Не удалось проверить отзыв сертификата", "ErrorCode": "0x80092013"}),
+        (-156.4, 8002, 2, "демо: не удалось подключиться к сети CORP. Причина: ошибка 802.1X",
+         {"SSID": "CORP", "FailureReason": "Ошибка проверки подлинности 802.1X", "ReasonCode": "0x00050005"}),
+        (-154, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-152.6, 12012, 4, "демо: проверка подлинности 802.1X выполнена", {"SSID": "CORP", "EAPType": "13"}),
+        (-152.5, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
     ]
     out = []
-    for dt, eid, level, msg in rows:
+    for dt, eid, level, msg, data in rows:
         out.append({"t": now + dt, "id": eid, "level": level, "level_ru": LEVEL_RU.get(level, ""), "group": group_of(eid),
-                    "message": msg, "ssid": "CORP", "bssid": "", "reason": "", "data": {}})
+                    "message": msg, "ssid": data.get("SSID", ""), "bssid": data.get("PeerMac", ""),
+                    "reason": data.get("FailureReason", data.get("Reason", "")), "data": dict(data)})
     return sorted(out, key=lambda e: -e["t"])
 
 

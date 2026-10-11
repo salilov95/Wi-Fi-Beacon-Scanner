@@ -35,7 +35,7 @@
 | MSM | associating → associated → authenticating → connected, roaming start/end, disassociating |
 | ONEX (802.1X) | результат аутентификации, причина отказа, код ошибки EAP, тип EAP, учётка компьютера или пользователя, перезапуски 802.1X |
 | `GetAdaptersInfo` | IPv4, DHCP-сервер, время получения аренды (`LeaseObtained`) |
-| журнал `Microsoft-Windows-WLAN-AutoConfig/Operational` (`wevtapi`) | история подключений с текстом Windows, по кнопке |
+| журнал `Microsoft-Windows-WLAN-AutoConfig/Operational` (`wevtapi`) | вкладка «Журнал Windows»: загружается за сутки при запуске, обновляется раз в минуту; события рядом с сессией - в её подробностях |
 
 Длительности:
 

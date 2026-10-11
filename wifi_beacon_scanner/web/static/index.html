@@ -69,8 +69,11 @@
           <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>строки таблицы</span>
           <span><kbd>Esc</kbd></span><span>сбросить поиск и подсветку</span>
         </div>
-        <div class="mtitle">Журнал программы</div>
-        <button type="button" id="openLogs" class="small">Открыть папку с журналом</button>
+        <div class="mtitle">О программе</div>
+        <div id="aboutBox" class="about"></div>
+        <div class="toolbar"><button type="button" id="openLogs" class="small">Папка с журналом</button>
+          <button type="button" id="checkUpd" class="small">Проверить обновления</button></div>
+        <div id="updResult" class="small"></div>
       </div>
     </span>
     <button id="quit" type="button" class="ghost">Выход</button>
@@ -139,6 +142,7 @@
       <button type="button" role="tab" data-tab="beacon">Beacon</button>
       <span class="grow"></span>
       <button type="button" role="tab" data-tab="sessions">Сессии</button>
+      <button type="button" role="tab" data-tab="winlog">Журнал Windows<span class="cnt bad" id="cntWl"></span></button>
       <button type="button" role="tab" data-tab="compare">Сравнение<span class="cnt" id="cntDiff"></span></button>
       <button type="button" id="maxBtn" class="ghost small">Развернуть</button>
     </nav>
