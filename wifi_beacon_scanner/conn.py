@@ -19,6 +19,8 @@ from collections import deque
 from dataclasses import asdict, dataclass, field
 from typing import Any, Deque, Dict, List, Optional, Sequence
 
+from .session import SessionTracker
+
 CONNECTED = "connected"
 
 STATE_RU = {
@@ -85,6 +87,7 @@ class ConnTracker:
         self._sticky_since: Optional[float] = None
         self._sticky_reported_for: str = ""
         self._dwell: Dict[str, float] = {}                      # bssid -> секунд на ней
+        self.sessions = SessionTracker()                        # машина состояний: стадии подключений
 
     # ---------- замеры ----------
     def add_sample(self, s: ConnSample) -> List[ConnEvent]:
