@@ -2,7 +2,7 @@
 
 Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
 
-## [Не выпущено] - черновик 0.9.0
+## [0.9.0] - 2026-10-11
 
 ### Добавлено
 - Вкладка «Сессии»: машина состояний клиента по уведомлениям Windows. Каждое подключение и роуминг
@@ -91,7 +91,7 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
-[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v0.8.0...release/0.9.0
+[0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0
 [0.8.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.8.0
 [0.7.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.1
 [0.7.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.0
