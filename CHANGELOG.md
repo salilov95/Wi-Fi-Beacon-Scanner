@@ -2,9 +2,11 @@
 
 Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
 
-## [Не выпущено] - черновик 1.0.0
+## [1.0.0] - 2026-10-11
 
 ### Добавлено
+- Ширину столбцов таблицы сетей можно менять: потянуть границу заголовка, двойной щелчок - ширина
+  по содержимому. Ширины запоминаются; «Вид» → «Сбросить ширину столбцов» возвращает автоматическую.
 - Вкладка «Журнал Windows» отдельно от «Сессий». Журнал WLAN-AutoConfig за сутки загружается сам при
   запуске и обновляется раз в минуту; период 24 ч / 3 дня / неделя, фильтр по стадии (подключение,
   ассоциация, безопасность / 4-way, 802.1X) и уровню, сводка (подключения 8001, неудачи 8002, отключения 8003,
@@ -108,7 +110,7 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
-[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v0.9.0...release/1.0.0
+[1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0
 [0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0
 [0.8.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.8.0
 [0.7.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.1

@@ -87,5 +87,13 @@ class ScanLogTests(unittest.TestCase):
         self.assertEqual(len(cm.output), 3)
 
 
+
+class ColumnWidthPrefsTests(unittest.TestCase):
+    def test_col_widths_are_sanitized(self):
+        out = sanitize_prefs({"colW": {"ssid": 150, "vendor": 99.6, "bad key": 100, "rssi": 5, "band": True, "x": "50"}})
+        self.assertEqual(out, {"colW": {"ssid": 150, "vendor": 99}})
+        self.assertNotIn("colW", sanitize_prefs({"colW": [1, 2]}))
+
+
 if __name__ == "__main__":
     unittest.main()

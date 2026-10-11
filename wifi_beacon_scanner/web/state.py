@@ -85,6 +85,11 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["panelH"] = int(d["panelH"])
     if isinstance(d.get("v"), int) and not isinstance(d.get("v"), bool) and 0 <= d["v"] <= 100:
         out["v"] = d["v"]
+    cw = d.get("colW")
+    if isinstance(cw, dict):
+        out["colW"] = {k: int(v) for k, v in list(cw.items())[:40]
+                       if isinstance(k, str) and _COL_RE.match(k) and isinstance(v, (int, float))
+                       and not isinstance(v, bool) and 20 <= v <= 2000}
     cols = d.get("cols")
     if isinstance(cols, list):
         out["cols"] = [c for c in cols if isinstance(c, str) and _COL_RE.match(c)][:40]

@@ -154,6 +154,7 @@ function normalizePrefs() {
   if (!Array.isArray(P.cols)) P.cols = COLS.filter((c) => c.on).map((c) => c.k);
   if (!(P.v >= 2)) { if (!P.cols.includes('trend')) P.cols.push('trend'); P.v = 2; }   // колонка появилась в этой версии
   if (P.v < 3) { for (const k of ['mcs', 'rate']) if (!P.cols.includes(k)) P.cols.push(k); P.v = 3; }
+  if (!P.colW || typeof P.colW !== 'object' || Array.isArray(P.colW)) P.colW = {};
   if (P.v < 4) { P.cols = P.cols.map((k) => k === 'krv' ? 'std' : k); if (!P.cols.includes('std')) P.cols.push('std'); P.v = 4; }
 
 }
@@ -214,7 +215,7 @@ function cell(b, k) {
     case 'ssid': {
       const cur = S.data.conn && S.data.conn.current;
       const me = cur && cur.state === 'connected' && cur.bssid === b.bssid ? '<span class="tag me" title="К этой BSS сейчас подключён ноутбук">подключён</span>' : '';
-      return `<td><span class="dot" style="background:${ssidColor(b.ssid)}"></span>${esc(b.ssid)}${b.hidden ? '<span class="tag">скрыт</span>' : ''}${me}</td>`;
+      return `<td title="${esc(b.ssid)}"><span class="dot" style="background:${ssidColor(b.ssid)}"></span>${esc(b.ssid)}${b.hidden ? '<span class="tag">скрыт</span>' : ''}${me}</td>`;
     }
     case 'bssid': return `<td class="mono">${esc(b.bssid)}${b.random_mac ? '<span class="tag" title="Локально администрируемый MAC">L</span>' : ''}</td>`;
     case 'rssi': {
@@ -240,7 +241,7 @@ function cell(b, k) {
     case 'streams': return `<td class="num">${b.streams || ''}</td>`;
     case 'band': case 'channel': case 'width': case 'seen_pct': case 'stations': case 'beacon': case 'dtim': case 'quality':
       return `<td class="num">${b[k] == null ? '' : esc(b[k])}</td>`;
-    default: return `<td>${esc(b[k])}</td>`;
+    default: return `<td title="${esc(b[k])}">${esc(b[k])}</td>`;
   }
 }
 
@@ -264,12 +265,47 @@ function spark(b) {
     `<circle cx="${x(vs.length - 1).toFixed(1)}" cy="${y(vs[vs.length - 1]).toFixed(1)}" r="2.4" style="fill:${sigFill(vs[vs.length - 1])}"/></svg></td>`;
 }
 
+// Ширина столбцов: пока пользователь ничего не тянул - автоматическая. Как только потянул границу,
+// ширины всех видимых столбцов фиксируются (table-layout: fixed) и запоминаются в настройках.
+const COLW_MIN = 36, COLW_MAX = 900, COLW_NEW = 110;
+function colWidths() { return P.colW && Object.keys(P.colW).length ? P.colW : null; }
+function applyColWidths() {
+  const W = colWidths(), cols = shownCols(), tbl = $('tbl');
+  if (!W) { $('cols').innerHTML = ''; tbl.classList.remove('fixed'); tbl.style.width = ''; return; }
+  const ws = cols.map((c) => W[c.k] || COLW_NEW);
+  $('cols').innerHTML = ws.map((w) => `<col style="width:${w}px">`).join('');
+  tbl.classList.add('fixed');
+  tbl.style.width = ws.reduce((a, b) => a + b, 0) + 'px';
+}
+function freezeColWidths() {
+  if (colWidths()) return;
+  P.colW = {};
+  // с запасом в 2 px: при дробной ширине текст обрезался бы многоточием
+  for (const th of $('thead').querySelectorAll('th')) P.colW[th.dataset.k] = Math.ceil(th.getBoundingClientRect().width) + 2;
+}
+function fitColumn(k) {
+  const idx = shownCols().findIndex((c) => c.k === k);
+  if (idx < 0) return;
+  freezeColWidths();
+  let w = COLW_MIN;
+  const th = $('thead').children[idx];
+  w = Math.max(w, th.scrollWidth + 14);
+  for (const tr of $('tbody').querySelectorAll('tr:not(.grp)')) {
+    const td = tr.children[idx];
+    if (td) w = Math.max(w, td.scrollWidth + 2);
+  }
+  P.colW[k] = Math.min(COLW_MAX, Math.ceil(w));
+  savePrefs(); applyColWidths();
+}
+
 function renderHead() {
   $('thead').innerHTML = shownCols().map((c) => {
     const on = S.sort.k === c.k;
     const arr = on ? `<span class="arr">${S.sort.dir > 0 ? '▲' : '▼'}</span>` : '';
-    return `<th data-k="${c.k}" tabindex="0" class="${on ? 'sorted' : ''}${c.num ? ' num' : ''}">${esc(c.t)}${arr}</th>`;
+    return `<th data-k="${c.k}" tabindex="0" class="${on ? 'sorted' : ''}${c.num ? ' num' : ''}">${esc(c.t)}${arr}` +
+      `<span class="colrz" data-rz="${c.k}" title="Потяни - ширина столбца, двойной щелчок - по содержимому"></span></th>`;
   }).join('');
+  applyColWidths();
 }
 
 function rowHtml(b, cols, fs) {
@@ -1717,9 +1753,35 @@ async function init() {
     cb.addEventListener('change', () => { S.bands[cb.value] = cb.checked; renderTable(); });
   }
 
+  // перетаскивание границы столбца
+  $('thead').addEventListener('pointerdown', (e) => {
+    const h = e.target.closest('.colrz');
+    if (!h) return;
+    e.preventDefault(); e.stopPropagation();
+    freezeColWidths();
+    const k = h.dataset.rz, x0 = e.clientX, w0 = P.colW[k] || COLW_NEW;
+    h.setPointerCapture(e.pointerId);
+    h.classList.add('on'); document.body.classList.add('colresize');
+    const move = (ev) => { P.colW[k] = clamp(Math.round(w0 + ev.clientX - x0), COLW_MIN, COLW_MAX); applyColWidths(); };
+    const up = () => {
+      h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up);
+      h.classList.remove('on'); document.body.classList.remove('colresize');
+      S.rzAt = Date.now(); savePrefs();
+    };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up);
+    h.addEventListener('pointercancel', up);
+  });
+  $('thead').addEventListener('dblclick', (e) => {
+    const h = e.target.closest('.colrz');
+    if (h) { e.preventDefault(); fitColumn(h.dataset.rz); }
+  });
+  $('colWReset').addEventListener('click', () => { P.colW = {}; savePrefs(); applyColWidths(); });
+
   $('thead').addEventListener('click', (e) => {
     const th = e.target.closest('th');
     if (!th) return;
+    if (e.target.closest('.colrz') || Date.now() - (S.rzAt || 0) < 300) return;     // это было изменение ширины, не сортировка
     const k = th.dataset.k;
     S.sort = S.sort.k === k ? {k, dir: -S.sort.dir} : {k, dir: ['rssi', 'rssi_avg', 'util', 'stations', 'seen_pct'].includes(k) ? -1 : 1};
     renderHead(); renderTable();

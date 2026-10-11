@@ -61,6 +61,7 @@
         <label class="chk"><input type="radio" name="density" value="compact"> Плотные</label>
         <div class="mtitle">Колонки</div>
         <div class="cols" id="colList"></div>
+        <button type="button" id="colWReset" class="small">Сбросить ширину столбцов</button>
         <div class="mtitle">Клавиши</div>
         <div class="keys">
           <span><kbd>F5</kbd></span><span>сканировать</span>
@@ -68,6 +69,7 @@
           <span><kbd>1</kbd> … <kbd>0</kbd></span><span>вкладки</span>
           <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>строки таблицы</span>
           <span><kbd>Esc</kbd></span><span>сбросить поиск и подсветку</span>
+          <span>граница заголовка</span><span>потянуть - ширина столбца, двойной щелчок - по содержимому</span>
         </div>
         <div class="mtitle">О программе</div>
         <div id="aboutBox" class="about"></div>
@@ -123,6 +125,7 @@
 
   <div class="tablewrap" id="tablewrap">
     <table id="tbl">
+      <colgroup id="cols"></colgroup>
       <thead><tr id="thead"></tr></thead>
       <tbody id="tbody"></tbody>
     </table>

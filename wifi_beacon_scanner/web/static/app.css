@@ -132,6 +132,12 @@ th,td{padding:var(--row) 9px;text-align:left;white-space:nowrap;border-bottom:1p
 th{position:sticky;top:0;background:var(--surface);z-index:1;cursor:pointer;user-select:none;font-weight:600;
   color:var(--mut);box-shadow:0 1px 0 var(--line)}
 th.sorted{color:var(--fg)}
+.colrz{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:2;touch-action:none}
+.colrz::after{content:"";position:absolute;right:0;top:22%;height:56%;border-left:1px solid var(--line)}
+th:hover .colrz::after,.colrz.on::after{border-left:2px solid var(--accent)}
+table.fixed{table-layout:fixed;width:auto}
+table.fixed th,table.fixed td{overflow:hidden;text-overflow:ellipsis}
+body.colresize,body.colresize *{cursor:col-resize!important;user-select:none}
 th .arr{font-size:10px;margin-left:3px}
 td.num,th.num{text-align:right}
 td.num{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13.5px}
