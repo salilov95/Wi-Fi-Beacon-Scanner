@@ -193,3 +193,17 @@ class Snapshot:
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+LOCATION_HINT = ("Windows не дала программе доступ к Wi-Fi-сканированию: с Windows 11 24H2 для этого нужно "
+                 "разрешение на расположение. Нажми «Да» в запросе Windows или включи «Параметры → "
+                 "Конфиденциальность и защита → Расположение → Разрешить классическим приложениям доступ к "
+                 "расположению». Скан повторится сам.")
+
+
+class ScanAccessDenied(OSError):
+    """Windows вернула ERROR_ACCESS_DENIED на сканирование: нет разрешения на расположение."""
+    kind = "location"
+
+    def __init__(self, msg: str = LOCATION_HINT) -> None:
+        super().__init__(msg)

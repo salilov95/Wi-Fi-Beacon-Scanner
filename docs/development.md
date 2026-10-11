@@ -88,6 +88,10 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     wifi_beacon_scanner/conn_win.py    опрос подключения и уведомления WLAN (только Windows)
     wifi_beacon_scanner/winstructs.py  структуры Native Wifi API для ctypes
     wifi_beacon_scanner/survey.py      обход по плану этажа (точки, проект)
+    wifi_beacon_scanner/session.py     машина состояний: сессии подключения и роуминга
+    wifi_beacon_scanner/onex.py        разбор уведомлений 802.1X (ONEX)
+    wifi_beacon_scanner/ip_win.py      IPv4 и аренда DHCP (GetAdaptersInfo)
+    wifi_beacon_scanner/winlog*.py     журнал WLAN-AutoConfig (wevtapi)
     wifi_beacon_scanner/mcs.py         MCS и PHY-скорости 802.11n/ac/ax, оценка MCS по скорости
     wifi_beacon_scanner/xlsx.py        запись .xlsx без библиотек
     wifi_beacon_scanner/pdf.py         PDF через Edge/Chromium headless

@@ -5,6 +5,7 @@
 """
 import os
 import queue
+import shutil
 import subprocess
 import sys
 import threading
@@ -22,6 +23,8 @@ def edge_window_pids():
 
 def main() -> int:
     env = dict(os.environ, PYTHONUTF8="1", PYTHONUNBUFFERED="1")
+    base = os.path.join(os.environ.get("LOCALAPPDATA", ""), "WiFiBeaconScanner")
+    shutil.rmtree(os.path.join(base, "edge-profile"), ignore_errors=True)     # как самый первый запуск
     app = subprocess.Popen([sys.executable, "-m", "wifi_beacon_scanner", "gui", "--demo"], stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT, text=True, encoding="utf-8", env=env)
     lines: "queue.Queue[str]" = queue.Queue()
@@ -47,10 +50,27 @@ def main() -> int:
             return 1
         pids = edge_window_pids()
         print("::notice title=window::окно подключилось, процессов Edge с профилем программы: %d" % len(pids))
-        time.sleep(5)
-        if app.poll() is not None:
-            print("::error title=window::программа завершилась при открытом окне")
+        # первые 30 с с новым профилем: Edge может перезапустить себя, программа при этом жить должна
+        seen = []
+        end = time.monotonic() + 30
+        while time.monotonic() < end:
+            try:
+                line = lines.get(timeout=0.5)
+                print(line)
+                seen.append(line)
+            except queue.Empty:
+                pass
+            if app.poll() is not None:
+                print("::error title=window::программа завершилась при открытом окне: %s" % " | ".join(seen[-5:]))
+                return 1
+        if any("процесс окна Edge завершился" in x for x in seen):
+            print("::notice title=window::Edge перезапустил окно при первом запуске, программа продолжила работу")
+        log = os.path.join(base, "logs", "app.log")
+        if not os.path.isfile(log):
+            print("::error title=window::нет файла журнала %s" % log)
             return 1
+        print("::notice title=window::журнал %s, %d байт" % (log, os.path.getsize(log)))
+        pids = edge_window_pids()
         for pid in pids:
             subprocess.run(["taskkill", "/F", "/PID", str(pid)], capture_output=True)
         if not wait_for("окно Edge закрыто", 30):

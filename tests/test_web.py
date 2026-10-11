@@ -20,8 +20,8 @@ class Client:
     def __init__(self, server, token=None):
         self.server, self.token = server, token
 
-    def req(self, method, path, body=None, headers=None):
-        c = http.client.HTTPConnection("127.0.0.1", self.server.port, timeout=10)
+    def req(self, method, path, body=None, headers=None, timeout=10):
+        c = http.client.HTTPConnection("127.0.0.1", self.server.port, timeout=timeout)
         h = dict(headers or {})
         if self.token is not None:
             h.setdefault("X-Token", self.token)

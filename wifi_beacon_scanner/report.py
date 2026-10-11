@@ -8,6 +8,7 @@ from datetime import datetime
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
+from . import amend
 from .mcs import capability
 from .model import Bss, Snapshot
 from .rules import CRITICAL, INFO, WARNING, Finding
@@ -17,6 +18,7 @@ SEV_RU = {CRITICAL: "Критично", WARNING: "Внимание", INFO: "Ин
 CSV_COLUMNS = [
     "ssid", "bssid", "vendor", "band_ghz", "channel", "width_mhz", "rssi_dbm", "link_quality",
     "security", "ciphers", "generation", "streams", "phy", "max_mcs", "max_rate_mbps", "dot11k", "dot11r", "dot11v",
+    "standards",
     "util_pct", "stations", "country", "beacon_interval", "dtim",
 ]
 
@@ -29,6 +31,7 @@ def _row(b: Bss) -> List[object]:
         b.security, "/".join(b.ciphers), b.generation_label, i.max_streams or "",
         cap["phy"], "" if cap["mcs"] is None else cap["mcs"], "" if cap["rate"] is None else round(cap["rate"], 1),
         "yes" if i.dot11k else "no", "yes" if i.dot11r else "no", "yes" if i.dot11v else "no",
+        amend.short(amend.standards(b)),
         "" if i.qbss_util_pct is None else i.qbss_util_pct,
         "" if i.qbss_stations is None else i.qbss_stations,
         i.country or "", b.beacon_interval, "" if i.dtim_period is None else i.dtim_period,
@@ -127,6 +130,33 @@ def _rssi_td(v: Any) -> str:
     return "<td>%s</td>" % html.escape("" if v is None else str(v))
 
 
+SESSION_KIND_RU = {"connect": "подключение", "roam": "роуминг"}
+SESSION_RESULT_RU = {"ok": "успешно", "fail": "ошибка", "aborted": "прервано", "in_progress": "идёт"}
+SESSION_HEAD = ["Время", "Тип", "Итог", "SSID", "Откуда", "Куда", "Ассоциация, мс", "Аутентификация, мс",
+                "Всего, мс", "IP через, мс", "IPv4", "DHCP-сервер", "IP/DHCP", "EAP", "Учётка 802.1X", "802.1X",
+                "Причина", "Код причины", "Ошибка EAP"]
+
+
+def session_rows(sessions: Sequence[Dict[str, Any]]) -> List[List[Any]]:
+    rows: List[List[Any]] = [list(SESSION_HEAD)]
+    for s in sessions:
+        rows.append([datetime.fromtimestamp(s["t_start"]).strftime("%Y-%m-%d %H:%M:%S"),
+                     SESSION_KIND_RU.get(s["kind"], s["kind"]), SESSION_RESULT_RU.get(s["result"], s["result"]),
+                     s["ssid"], s["bssid_from"], s["bssid"], s["assoc_ms"], s["auth_ms"], s["total_ms"], s["ip_ms"],
+                     s["ip"], s["dhcp_server"], s["ip_note"], s["eap_name"], s["onex_identity_ru"], s["onex_status_ru"],
+                     s["reason"], "0x%X" % s["reason_code"] if s["reason_code"] else None,
+                     ("0x%08X %s" % (s["onex_error_code"], s["onex_error"])).strip() if s["onex_error_code"] else None])
+    return rows
+
+
+def render_sessions_csv(sessions: Sequence[Dict[str, Any]]) -> str:
+    buf = io.StringIO(newline="")
+    w = csv.writer(buf, delimiter=";", lineterminator="\r\n")
+    for r in session_rows(sessions):
+        w.writerow(["" if v is None else v for v in r])
+    return buf.getvalue()
+
+
 def survey_rows(points: Sequence[Dict[str, Any]], focus: Sequence[str]) -> List[List[Any]]:
     """Таблица точек обхода: для каждого «моего» SSID лучший сигнал и сколько его BSS слышно от −75."""
     names = list(focus) or ["(все сети)"]
@@ -163,8 +193,7 @@ _TABLE_COLS = [
     ("ГГц", lambda b: b.band), ("Канал", lambda b: b.channel), ("Ширина", lambda b: b.info.width_mhz),
     ("RSSI", lambda b: b.rssi), ("Безопасность", lambda b: b.security), ("Поколение", lambda b: b.generation_label),
     ("Макс. MCS", lambda b: _mcs_cell(b)), ("Макс. PHY, Мбит/с", lambda b: _rate_cell(b)),
-    ("k", lambda b: "+" if b.info.dot11k else "-"), ("r", lambda b: "+" if b.info.dot11r else "-"),
-    ("v", lambda b: "+" if b.info.dot11v else "-"),
+    ("802.11", lambda b: amend.short(amend.standards(b))),
     ("Загрузка", lambda b: "" if b.info.qbss_util_pct is None else "%.0f%%" % b.info.qbss_util_pct),
     ("Станций", lambda b: "" if b.info.qbss_stations is None else b.info.qbss_stations),
     ("Страна", lambda b: b.info.country or ""),
@@ -237,6 +266,15 @@ def render_html(snap: Snapshot, findings: Sequence[Finding], focus: Sequence[str
                 e(ev["ssid"]), e(ev["bssid_from"]), e(ev["bssid_to"]), rs,
                 "" if ev["duration_s"] is None else "%.0f с" % ev["duration_s"], e(ev["reason"])))
         out.append("</tbody></table></div>")
+    if journal and journal.get("sessions"):
+        rows = session_rows(journal["sessions"][-200:][::-1])
+        keep = [0, 1, 2, 4, 5, 6, 7, 8, 9, 13, 15, 16]
+        out.append("<h2>Сессии подключения</h2><p class='mut'>Стадии по уведомлениям Windows: ассоциация, "
+                   "аутентификация (802.1X и 4-way handshake), получение IPv4.</p>")
+        out.append("<div class='wrap'><table><thead><tr>%s</tr></thead><tbody>" % "".join("<th>%s</th>" % e(rows[0][i]) for i in keep))
+        for r in rows[1:]:
+            out.append("<tr>%s</tr>" % "".join("<td>%s</td>" % e("" if r[i] is None else str(r[i])) for i in keep))
+        out.append("</tbody></table></div>")
     if survey:
         rows = survey_rows(survey, list(focus))
         out.append("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>")
@@ -300,6 +338,8 @@ def build_xlsx_report(snap: Snapshot, findings: Sequence[Finding], focus: Sequen
                        ev["ssid"], ev["bssid_from"], ev["bssid_to"], ev["rssi_from"], ev["rssi_to"], ev["duration_s"],
                        "0x%X" % ev["reason_code"] if ev["reason_code"] is not None else None, ev["reason"], ev["text"]])
         sheets.append(("Журнал подключения", jr))
+    if journal and journal.get("sessions"):
+        sheets.append(("Сессии", session_rows(journal["sessions"])))
     if survey:
         sheets.append(("Обход", survey_rows(survey, list(focus))))
     return build_xlsx(sheets)

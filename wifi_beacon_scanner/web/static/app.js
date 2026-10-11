@@ -26,7 +26,8 @@ const THEMES = [
   {id: 'paper', name: 'Тёплая бумага', c: ['#efe8da', '#faf6ec', '#2d6a52']},
   {id: 'contrast', name: 'Контрастная', dark: 1, c: ['#000000', '#161616', '#ffd60a']},
 ];
-const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', sigColor: 'level', heatAll: false, v: 0};
+const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', sigColor: 'level', heatAll: false,
+  auto: true, interval: 5, v: 0};
 try { Object.assign(P, JSON.parse(localStorage.getItem('wd_prefs') || '{}')); } catch (e) { /* без сохранения */ }
 // Порт у приложения каждый раз новый, а localStorage привязан к адресу, поэтому настройки ещё и
 // отправляются программе: она хранит их в файле и возвращает при следующем запуске.
@@ -108,13 +109,33 @@ async function api(path, body, raw) {
 
 // ---------- состояние ----------
 const OPEN_IE = [45, 48, 61, 191, 192, 255];   // какие IE раскрыты по умолчанию
-const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'compare'];
+const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'sessions', 'compare'];
 const S = {
-  data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '',
+  data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '', std: [], stdMode: 'all',
   bands: {'2.4': true, '5': true, '6': true}, collapsed: new Set(),
   sel: null, hl: new Set(), hlIdx: -1, tab: TABS.includes(P.tab) ? P.tab : 'channels', cb: '2.4',
   sig: '', lastScan: 0, ieOpen: null, ieFor: null,
 };
+
+// Дополнения 802.11 из beacon (amend.py): код, подпись, полное название. Первые девять - буквы стандарта.
+const STD = [
+  ['d', 'd', '802.11d - код страны'], ['e', 'e', '802.11e - QoS (WMM/EDCA)'], ['h', 'h', '802.11h - DFS/TPC'],
+  ['i', 'i', '802.11i - RSN (WPA2/WPA3)'], ['k', 'k', '802.11k - Radio Measurement'], ['r', 'r', '802.11r - Fast Transition'],
+  ['u', 'u', '802.11u - Interworking'], ['v', 'v', '802.11v - BSS Transition'], ['w', 'w', '802.11w - PMF'],
+  ['mc', 'mc', '802.11mc - FTM (RTT)'], ['ai', 'ai', '802.11ai - FILS'], ['s', 's', '802.11s - mesh'],
+  ['twt', 'TWT', 'TWT (802.11ax)'], ['mbssid', 'MBSSID', 'Multiple BSSID'], ['hs', 'HS2.0', 'Hotspot 2.0 / Passpoint'],
+];
+const STD_CODES = STD.map((x) => x[0]);
+const STD_MAIN = STD.slice(0, 9);
+function stdTitle(b) {
+  const st = b.std || {};
+  return STD.filter(([c]) => st[c]).map(([c, , t]) => `${t}: ${st[c]}`).join('\n') || 'дополнения не объявлены';
+}
+function stdMatch(b) {
+  if (!S.std.length) return true;
+  const st = b.std || {};
+  return S.stdMode === 'none' ? S.std.every((c) => !st[c]) : S.std.every((c) => st[c]);
+}
 
 const COLS = [
   {k: 'ssid', t: 'SSID', on: 1, fixed: 1}, {k: 'bssid', t: 'BSSID', on: 1}, {k: 'vendor', t: 'Вендор', on: 1},
@@ -124,7 +145,7 @@ const COLS = [
   {k: 'security', t: 'Безопасность', on: 1}, {k: 'akm', t: 'AKM'}, {k: 'ciphers', t: 'Шифры'}, {k: 'pmf', t: 'PMF'},
   {k: 'gen_n', t: 'Wi-Fi', on: 1}, {k: 'streams', t: 'Потоки', num: 1},
   {k: 'mcs', t: 'Макс. MCS', on: 1}, {k: 'rate', t: 'Макс. PHY, Мбит/с', num: 1, on: 1}, {k: 'bss_color', t: 'BSS Color', num: 1},
-  {k: 'krv', t: 'k·r·v', on: 1},
+  {k: 'std', t: '802.11', on: 1},
   {k: 'util', t: 'Загрузка', num: 1, on: 1}, {k: 'stations', t: 'Станций', num: 1, on: 1},
   {k: 'country', t: 'Страна', on: 1}, {k: 'beacon', t: 'Beacon, TU', num: 1}, {k: 'dtim', t: 'DTIM', num: 1},
   {k: 'quality', t: 'Качество, %', num: 1},
@@ -133,12 +154,14 @@ function normalizePrefs() {
   if (!Array.isArray(P.cols)) P.cols = COLS.filter((c) => c.on).map((c) => c.k);
   if (!(P.v >= 2)) { if (!P.cols.includes('trend')) P.cols.push('trend'); P.v = 2; }   // колонка появилась в этой версии
   if (P.v < 3) { for (const k of ['mcs', 'rate']) if (!P.cols.includes(k)) P.cols.push(k); P.v = 3; }
+  if (P.v < 4) { P.cols = P.cols.map((k) => k === 'krv' ? 'std' : k); if (!P.cols.includes('std')) P.cols.push('std'); P.v = 4; }
+
 }
 normalizePrefs();
 const shownCols = () => COLS.filter((c) => c.fixed || P.cols.includes(c.k));
 
 function sortVal(b, k) {
-  if (k === 'krv') return (b.k ? 1 : 0) + (b.r ? 1 : 0) + (b.v ? 1 : 0);
+  if (k === 'std') return Object.keys(b.std || {}).length;
   if (k === 'band') return parseFloat(b.band);
   if (k === 'trend') { const h = S.data.history[b.bssid] || []; return h.length > 1 ? h[h.length - 1][1] - h[0][1] : 0; }
   if (k === 'mcs') return b.mcs == null ? -1 : b.gen_n * 1000 + b.mcs * 10 + b.nss;
@@ -172,7 +195,7 @@ function visibleBss() {
   if (!S.data) return [];
   const fs = focusSet();
   const q = S.q.trim().toLowerCase();
-  let list = S.data.bss.filter((b) => S.bands[b.band] && b.rssi >= S.minRssi && secMatch(b, S.sec));
+  let list = S.data.bss.filter((b) => S.bands[b.band] && b.rssi >= S.minRssi && secMatch(b, S.sec) && stdMatch(b));
   if (S.onlyFocus && fs.size) list = list.filter((b) => fs.has(b.ssid));
   if (q) list = list.filter((b) => (b.ssid + ' ' + b.bssid + ' ' + b.vendor + ' ' + b.security).toLowerCase().includes(q));
   const {k, dir} = S.sort;
@@ -207,9 +230,11 @@ function cell(b, k) {
     case 'security': return `<td><span class="sec s-${secClass(b)}">${esc(b.security)}</span></td>`;
     case 'akm': case 'ciphers': return `<td>${esc(b[k].join(', '))}</td>`;
     case 'gen_n': return `<td>${esc(b.gen === 'legacy' ? 'legacy' : b.gen.replace('Wi-Fi ', ''))}</td>`;
-    case 'krv': {
-      const f = (on, l) => on ? `<b>${l}</b>` : `<span class="off">${l}</span>`;
-      return `<td class="krv">${f(b.k, 'k')} ${f(b.r, 'r')} ${f(b.v, 'v')}</td>`;
+    case 'std': {
+      const st = b.std || {};
+      const main = STD_MAIN.map(([c, l]) => st[c] ? `<b>${l}</b>` : `<span class="off">${l}</span>`).join('');
+      const extra = STD.slice(9).filter(([c]) => st[c]).map(([, l]) => l).join(' ');
+      return `<td class="krv" title="${esc(stdTitle(b))}">${main}${extra ? `<span class="x">${esc(extra)}</span>` : ''}</td>`;
     }
     case 'util': return `<td class="num">${b.util == null ? '' : b.util.toFixed(0) + '%'}</td>`;
     case 'streams': return `<td class="num">${b.streams || ''}</td>`;
@@ -277,10 +302,14 @@ function renderTable() {
   const empty = $('empty');
   if (!S.data || !total) {
     empty.hidden = false;
-    empty.textContent = S.data && S.data.scanning ? 'Идёт сканирование…' : 'Данных пока нет. Нажми «Сканировать».';
+    empty.textContent = !S.data ? 'Подключаюсь к программе…'
+      : S.data.scanning ? 'Идёт сканирование…'
+      : S.data.error ? 'Скан не удался, подробности - в плашке сверху.' + ($('auto').checked ? ' Автоскан повторит попытку.' : '')
+      : S.data.taken_at ? 'Windows вернула пустой список сетей.' + ($('auto').checked ? ' Автоскан повторит скан через несколько секунд.' : ' Нажми «Сканировать».')
+      : 'Данных пока нет. Нажми «Сканировать».';
   } else if (!list.length) {
     empty.hidden = false;
-    empty.textContent = 'Под фильтры ничего не попало. Ослабь фильтр по сигналу или защите.';
+    empty.textContent = 'Под фильтры ничего не попало. Ослабь фильтры: сигнал, защита, 802.11.';
   } else {
     empty.hidden = true;
   }
@@ -801,6 +830,122 @@ function renderConn() {
   return card + stats + tools + connChart(C, win) + `<div class="cgrid"><div>${table}</div><div>${dw}${raw}</div></div>`;
 }
 
+
+// ---------- сессии подключения: машина состояний клиента ----------
+const SES_KIND = {connect: 'подключение', roam: 'роуминг'};
+const SES_RES = {ok: 'успешно', fail: 'ошибка', aborted: 'прервано', in_progress: 'идёт'};
+const SES_STAGE = {start: 'начало подключения', associating: 'ассоциация', associated: 'ассоциирован',
+  authenticating: 'аутентификация (802.1X / 4-way)', connected: 'подключён', complete: 'подключение завершено',
+  roam_start: 'начало роуминга', roam_end: 'роуминг завершён', disassociating: 'разрыв ассоциации',
+  disconnected: 'отключён', fail: 'не удалось подключиться', ip: 'IPv4', dhcp: 'аренда DHCP (DORA завершён)',
+  onex: '802.1X', onex_restart: '802.1X перезапущен'};
+// пороги цвета, мс: [хорошо до, терпимо до]
+const SES_LIMITS = {roam: [100, 300], connect: [2000, 5000], auth_roam: [50, 200], auth_connect: [1000, 3000], ip: [1000, 3000], assoc: [50, 150]};
+function msCell(ms, lim) {
+  if (ms == null) return '<td class="num mut">—</td>';
+  const c = ms <= lim[0] ? 'good' : ms <= lim[1] ? 'mid' : 'bad';
+  return `<td class="num"><b class="${c}">${ms >= 10000 ? (ms / 1000).toFixed(1) + ' с' : ms + ' мс'}</b></td>`;
+}
+function fmtMs(ms) { return ms == null ? '—' : ms >= 10000 ? (ms / 1000).toFixed(1) + ' с' : ms + ' мс'; }
+
+function sesTimeline(s) {
+  const t0 = s.t_start, t1 = Math.max(s.t_end || 0, s.t_ip || 0, s.t_connected || 0, ...s.stages.map((x) => x.t)) || t0;
+  const span = Math.max(t1 - t0, 0.05);
+  const W = 900, H = 44, L = 8, R = 8;
+  const x = (t) => L + (t - t0) / span * (W - L - R);
+  const seg = (a, b, cls, label) => (a == null || b == null) ? '' :
+    `<rect class="tl ${cls}" x="${x(a).toFixed(1)}" y="16" width="${Math.max(2, x(b) - x(a)).toFixed(1)}" height="16" rx="3"><title>${label}: ${fmtMs(Math.round((b - a) * 1000))}</title></rect>`;
+  let g = `<svg class="chart tlsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="стадии сессии">`;
+  g += `<line class="grid" x1="${L}" x2="${W - R}" y1="24" y2="24"/>`;
+  g += seg(s.t_assoc_start, s.t_assoc_done, 'assoc', 'ассоциация');
+  g += seg(s.t_auth_start, s.t_connected, 'auth', 'аутентификация');
+  if (s.t_connected == null && s.t_auth_start != null && s.t_end != null) g += seg(s.t_auth_start, s.t_end, 'authfail', 'аутентификация не завершилась');
+  g += seg(s.t_connected, s.t_ip, 'ip', 'до IPv4');
+  for (const st of s.stages) {
+    const xx = x(st.t).toFixed(1);
+    g += `<line class="tlm${['fail', 'disconnected'].includes(st.stage) ? ' bad' : ''}" x1="${xx}" x2="${xx}" y1="10" y2="38"><title>${esc(SES_STAGE[st.stage] || st.stage)} +${Math.round((st.t - t0) * 1000)} мс${st.detail ? ': ' + esc(st.detail) : ''}</title></line>`;
+  }
+  g += '</svg>';
+  return g + `<div class="tlscale"><span>0</span><span>${fmtMs(Math.round(span * 1000))}</span></div>` + '<div class="legend"><span><span class="swatch tl assoc"></span>ассоциация</span><span><span class="swatch tl auth"></span>аутентификация (802.1X, 4-way handshake)</span><span><span class="swatch tl ip"></span>до получения IPv4</span></div>';
+}
+
+function sesDetails(s) {
+  const kv = (k, v) => v ? `<dt>${esc(k)}</dt><dd>${v}</dd>` : '';
+  const stages = s.stages.map((st) => `<tr><td class="num">+${Math.round((st.t - s.t_start) * 1000)} мс</td><td>${esc(SES_STAGE[st.stage] || st.stage)}</td><td>${esc(st.detail)}</td></tr>`).join('');
+  return '<div class="sesd">' + sesTimeline(s) + '<div class="cgrid"><div><table class="mini evt"><thead><tr><th>Время</th><th>Стадия</th><th>Подробности</th></tr></thead><tbody>' + stages + '</tbody></table></div>' +
+    '<div><dl class="kv small">' +
+    kv('Итог', esc(SES_RES[s.result] || s.result) + (s.reason ? ': ' + esc(s.reason) : '')) +
+    kv('Код причины', s.reason_code ? '0x' + s.reason_code.toString(16).toUpperCase() : '') +
+    kv('802.1X', esc(s.onex_status_ru) + (s.eap_name ? ', ' + esc(s.eap_name) : '') + (s.onex_identity_ru ? ', учётка: ' + esc(s.onex_identity_ru) : '') + (s.onex_restarts ? `, перезапусков: ${s.onex_restarts}` : '')) +
+    kv('Причина 802.1X', s.onex_reason ? esc(s.onex_reason) + (s.onex_reason_code ? ` (0x${s.onex_reason_code.toString(16).toUpperCase()})` : '') : '') +
+    kv('Ошибка EAP', s.onex_error_code ? `0x${s.onex_error_code.toString(16).toUpperCase().padStart(8, '0')} ${esc(s.onex_error)}` : '') +
+    kv('IPv4', s.ip ? esc(s.ip) + (s.dhcp_server ? `, DHCP-сервер ${esc(s.dhcp_server)}` : '') : '') +
+    kv('IP / DHCP', esc(s.ip_note)) +
+    kv('Аренда получена', s.lease_obtained ? new Date(s.lease_obtained * 1000).toLocaleTimeString('ru-RU') : '') +
+    '</dl></div></div></div>';
+}
+
+function renderSessions() {
+  const D = S.data.sessions || {sessions: [], summary: {}};
+  const sm = D.summary || {};
+  const st = (label, v, cls) => `<span class="it"><span class="mut">${label}</span><b class="${cls || ''}">${v}</b></span>`;
+  const stats = '<div class="cstats">' +
+    st('подключений', `${sm.connects_ok || 0}<span class="mut"> из ${sm.connects || 0}</span>`) +
+    st('неудачных', sm.connects_fail || 0, sm.connects_fail ? 'bad' : '') +
+    st('роумингов', sm.roams || 0) +
+    st('подключение, медиана', fmtMs(sm.connect_ms_med)) + st('роуминг, медиана', fmtMs(sm.roam_ms_med)) +
+    st('аутентификация, медиана', fmtMs(sm.auth_ms_med)) + st('до IPv4, медиана', fmtMs(sm.ip_ms_med)) +
+    st('802.1X успешно / отказ', `${sm.onex_ok || 0} / <span class="${sm.onex_fail ? 'bad' : ''}">${sm.onex_fail || 0}</span>`) + '</div>';
+  const f = S.sesFilter || 'all';
+  const tools = `<div class="toolbar"><span class="seg">${[['all', 'все'], ['connect', 'подключения'], ['roam', 'роуминги'], ['bad', 'ошибки']].map(([v, l]) =>
+    `<button type="button" data-sesf="${v}" class="${f === v ? 'on' : ''}">${l}</button>`).join('')}</span><span class="grow"></span>` +
+    '<button type="button" class="small" data-sesx="csv">Скачать сессии (CSV)</button></div>';
+  let list = D.sessions.slice().reverse();
+  if (f === 'connect' || f === 'roam') list = list.filter((s) => s.kind === f);
+  if (f === 'bad') list = list.filter((s) => s.result === 'fail' || s.result === 'aborted');
+  const rows = list.slice(0, 300).map((s) => {
+    const lim = SES_LIMITS[s.kind] || SES_LIMITS.connect;
+    const from = s.kind === 'roam' && s.bssid_from ? `<span class="mono">${esc(s.bssid_from.slice(-8))}</span> → ` : '';
+    const onex = s.onex_status_ru ? `<span class="${s.onex_status === 3 ? 'good' : s.onex_status === 4 || s.onex_status === 2 ? 'bad' : ''}">${esc(s.onex_status_ru.split(' (')[0])}</span>${s.eap_name ? ' <span class="mut">' + esc(s.eap_name) + '</span>' : ''}` : '<span class="mut">—</span>';
+    const res = `<span class="evk ${s.result === 'ok' ? '' : s.result === 'in_progress' ? 'warning' : 'critical'}">${esc(SES_RES[s.result] || s.result)}</span>`;
+    return `<tr class="sesr${S.sesSel === s.id ? ' sel' : ''}" data-ses="${s.id}" tabindex="0"><td class="num">${fmtClock(s.t_start)}</td><td>${esc(SES_KIND[s.kind] || s.kind)}</td><td>${res}</td>` +
+      `<td>${from}<span class="mono">${esc((s.bssid || '').slice(-8))}</span> <span class="mut">${esc(bssLabel(s.bssid))}</span></td>` +
+      msCell(s.assoc_ms, SES_LIMITS.assoc) + msCell(s.auth_ms, s.kind === 'roam' ? SES_LIMITS.auth_roam : SES_LIMITS.auth_connect) +
+      msCell(s.total_ms, lim) + msCell(s.ip_ms, SES_LIMITS.ip) + `<td>${onex}</td><td class="wrapcell">${esc(s.reason || s.ip_note || '')}</td></tr>`;
+  }).join('');
+  const table = rows ? '<table class="mini evt ses"><thead><tr><th>Время</th><th>Тип</th><th>Итог</th><th>Точка</th><th>Ассоц.</th><th>Аутент.</th><th>Всего</th><th>До IPv4</th><th>802.1X</th><th>Причина / IP</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    : '<p class="mut">Сессий пока нет: они появятся при следующем подключении или роуминге ноутбука.</p>';
+  const sel = D.sessions.find((s) => s.id === S.sesSel);
+  const note = '<p class="mut small">Стадии - по уведомлениям Windows (ACM, MSM, 802.1X). «Аутентификация» включает обмен EAP и 4-way handshake: ' +
+    'отдельно 4-way Windows не сообщает. «До IPv4» - от подключения до новой аренды DHCP (DORA) или появления адреса; если адрес остался с прошлого подключения, ожидания нет. ' +
+    'Время роуминга считается от начала ассоциации с новой точкой.</p>';
+  return stats + tools + table + (sel ? sesDetails(sel) : '') + note + renderWinlog();
+}
+
+function renderWinlog() {
+  const W = S.winlog;
+  const head = '<div class="sub">Журнал Windows: WLAN-AutoConfig</div><div class="toolbar">' +
+    [[24, 'за 24 ч'], [72, 'за 3 дня'], [168, 'за неделю']].map(([h, l]) => `<button type="button" class="small" data-winlog="${h}">Загрузить ${l}</button>`).join('') +
+    (W && W.events && W.events.length ? `<span class="seg">${[['all', 'все'], ['bad', 'ошибки']].map(([v, l]) => `<button type="button" data-wlf="${v}" class="${(S.wlFilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</span>` : '') +
+    '<span class="mut small">история подключений с причинами из журнала событий Windows</span></div>';
+  if (!W) return head;
+  if (W.loading) return head + '<p class="mut">Читаю журнал…</p>';
+  if (W.error) return head + `<p class="bad">${esc(W.error)}</p>`;
+  let ev = W.events;
+  if ((S.wlFilter || 'all') === 'bad') ev = ev.filter((e) => e.level && e.level <= 3);
+  if (!ev.length) return head + '<p class="mut">Событий нет.</p>';
+  return head + '<table class="mini evt"><thead><tr><th>Время</th><th>ID</th><th>Стадия</th><th>Уровень</th><th>Сообщение Windows</th></tr></thead><tbody>' +
+    ev.slice(0, 500).map((e) => `<tr class="ev ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : 'info'}"><td class="num">${e.t ? new Date(e.t * 1000).toLocaleString('ru-RU') : ''}</td><td class="num">${e.id}</td><td>${esc(e.group)}</td>` +
+      `<td><span class="evk ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : ''}">${esc(e.level_ru)}</span></td><td class="wrapcell">${esc(e.message || JSON.stringify(e.data))}</td></tr>`).join('') + '</tbody></table>';
+}
+
+async function loadWinlog(hours) {
+  S.winlog = {loading: true}; renderPanel();
+  const r = await api('/api/winlog?hours=' + hours);
+  S.winlog = r.ok ? r.data : {error: 'HTTP ' + r.status, events: []};
+  renderPanel();
+}
+
 // ---------- обход: план этажа и карта покрытия ----------
 const SV_BINS = [[-60, 130, 'от −60: отлично'], [-67, 95, '−60…−67: голос и видео'], [-72, 55, '−67…−72: данные'],
   [-80, 25, '−72…−80: слабо'], [-200, 0, 'ниже −80: нет покрытия']];
@@ -1114,8 +1259,7 @@ function renderBeacon() {
     ['BSS Color', b.bss_color == null ? '—' : String(b.bss_color)],
     ['Безопасность', b.security], ['AKM', b.akm.join(', ') || '—'], ['Шифры', b.ciphers.join(', ') || '—'],
     ['PMF (802.11w)', b.pmf || '—'], ['WPS', yn(b.wps)],
-    ['802.11k', yn(b.k) + (b.k ? (b.nr ? ', neighbor report' : ', без neighbor report') : '')],
-    ['802.11r', b.r ? 'да, MDID 0x' + b.mdid.toString(16).toUpperCase() : 'нет'], ['802.11v', yn(b.v)],
+    ...STD.map(([c, , t]) => [t, (b.std || {})[c] ? 'да: ' + b.std[c] : 'нет']),
     ['Загрузка и станции', b.util == null ? 'QBSS Load не вещается' : `${b.util.toFixed(0)}%, станций ${b.stations}`],
     ['Страна', b.country || '—'], ['Beacon interval', `${b.beacon} TU`], ['DTIM', b.dtim == null ? '—' : String(b.dtim)],
     ['Capability', b.cap], ['HT protection', String(b.ht_prot)], ['Размер IE', b.ie_len + ' байт'],
@@ -1193,11 +1337,11 @@ function renderPanel() {
   $('cntDiff').textContent = diffCount() || '';
   if (S.tab !== 'survey') body.dataset.svKey = '';
   if (S.data && S.tab === 'survey') { renderSurveyPanel(body); return; }
-  if (!S.data || (!S.data.bss.length && S.tab !== 'conn')) {
+  if (!S.data || (!S.data.bss.length && S.tab !== 'conn' && S.tab !== 'sessions')) {
     body.innerHTML = '<p class="mut">Данных пока нет. Нажми «Сканировать», и здесь появятся графики.</p>';
     return;
   }
-  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn,
+  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn, sessions: renderSessions,
     findings: renderFindings, beacon: renderBeacon, compare: renderCompare}[S.tab];
   const top = body.scrollTop;
   body.innerHTML = fn();
@@ -1210,6 +1354,19 @@ function renderAll() {
 }
 
 // ---------- меню «Вид» ----------
+// Фильтр по дополнениям 802.11: число рядом - сколько BSS в эфире объявляет дополнение
+function renderStdMenu() {
+  const all = S.data ? S.data.bss : [];
+  $('stdList').innerHTML = STD.map(([c, , t]) => {
+    const n = all.filter((b) => (b.std || {})[c]).length;
+    return `<label class="chk"><input type="checkbox" data-std="${c}"${S.std.includes(c) ? ' checked' : ''}> ${esc(t)}<span class="cnt">${n}</span></label>`;
+  }).join('');
+  for (const r of document.querySelectorAll('input[name=stdMode]')) r.checked = r.value === S.stdMode;
+  const btn = $('stdBtn');
+  btn.classList.toggle('on', S.std.length > 0);
+  btn.textContent = S.std.length ? `802.11: ${S.stdMode === 'none' ? 'без ' : ''}${S.std.map((c) => STD.find((x) => x[0] === c)[1]).join(' ')} ▾` : '802.11 ▾';
+}
+
 function renderViewMenu() {
   $('themes').innerHTML = THEMES.map((t) =>
     `<button type="button" data-theme-id="${t.id}" class="${P.theme === t.id ? 'on' : ''}" aria-pressed="${P.theme === t.id}">` +
@@ -1220,10 +1377,32 @@ function renderViewMenu() {
 }
 
 // ---------- сеть ----------
+// Ошибки страницы уходят в журнал программы (app.log), чтобы их можно было разобрать потом.
+let clientLogN = 0;
+function clientLog(level, msg) {
+  if (++clientLogN > 200) return;
+  try {
+    fetch('/api/clientlog', {method: 'POST', keepalive: true, headers: {'Content-Type': 'application/json', 'X-Token': TOKEN || ''},
+      body: JSON.stringify({level, msg: String(msg).slice(0, 4000)})}).catch(() => {});
+  } catch (e) { /* программа недоступна */ }
+}
+window.addEventListener('error', (e) => clientLog('error', `${e.message} (${e.filename}:${e.lineno}:${e.colno})` + (e.error && e.error.stack ? ' ' + e.error.stack : '')));
+window.addEventListener('unhandledrejection', (e) => clientLog('error', 'promise: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason)));
+
+async function openTarget(target) {
+  const r = await api('/api/open', {target});
+  if (!r.ok) banner('Не удалось открыть: ' + ((r.data && r.data.error) || r.status), true);
+  else if (r.data && r.data.ok === false) note('Путь: ' + r.data.path);
+}
+
 // src: откуда сообщение. Плашки «scan» и «link» снимает сама программа, когда проблема ушла;
 // остальные ошибки (экспорт, обход) висят, пока их не закроют или не появится новое сообщение.
 function banner(msg, isErr, action, src) {
   const b = $('banner');
+  const key = [msg || '', isErr ? 1 : 0, src || '', action ? action.label : ''].join('\u0001');
+  if (msg && b.dataset.key === key && !b.hidden) return;      // та же плашка: не пересоздаём кнопки каждую секунду
+  b.dataset.key = msg ? key : '';
+  if (msg && isErr) clientLog('warn', 'плашка: ' + msg);
   b.hidden = !msg;
   b.className = 'banner' + (isErr ? ' err' : '');
   b.dataset.src = src || '';
@@ -1260,7 +1439,8 @@ function handleState(d) {
   $('scan').disabled = d.scanning;
   $('scan').textContent = d.scanning ? 'Сканирую…' : 'Сканировать';
   $('status').textContent = d.taken_at ? `обновлено ${fmtTime(d.taken_at)}` : '';
-  if (d.error) banner('Ошибка скана: ' + d.error, true, null, 'scan');
+  if (d.error && d.error_kind === 'location') banner(d.error, true, {label: 'Открыть параметры расположения', run: () => openTarget('location-settings')}, 'scan');
+  else if (d.error) banner('Ошибка скана: ' + d.error, true, null, 'scan');
   else if (d.interfaces_error && !d.taken_at) banner('Адаптеры недоступны: ' + d.interfaces_error, true, null, 'scan');
   else if (['scan', 'link'].includes($('banner').dataset.src)) banner('');
   if (document.activeElement !== $('focus')) $('focus').value = d.focus.join(', ');
@@ -1269,6 +1449,10 @@ function handleState(d) {
     d.conn && d.conn.current && d.conn.current.bssid, sv.rev]);
   if (sig !== S.sig) { S.sig = sig; renderAll(); }
   else if (S.tab === 'conn' && cs && cs.length && cs[cs.length - 1][0] !== S.connT) renderPanel();   // журнал живёт раз в секунду
+  else if (S.tab === 'sessions') {
+    const ss = d.sessions && d.sessions.sessions, k = ss && ss.length ? ss.length + ':' + JSON.stringify(ss[ss.length - 1]).length : '0';
+    if (k !== S.sesKey) { S.sesKey = k; renderPanel(); }
+  }
   if (cs && cs.length) S.connT = cs[cs.length - 1][0];
 }
 
@@ -1329,6 +1513,7 @@ async function openPrintable(body) {
 
 async function doExport(fmt) {
   if (fmt === 'journal') return doDownload('/api/export/journal', 'wifi-journal.csv');
+  if (fmt === 'sessions') return doDownload('/api/export/sessions', 'wifi-sessions.csv');
   if (fmt === 'pdf') banner('Готовлю PDF через Edge, это займёт несколько секунд…', false);
   // «Как в таблице» передаёт ровно те строки, что видны сейчас: с фильтрами, поиском и «Только мои»
   const sc = P.expScope || 'table';
@@ -1402,6 +1587,11 @@ async function init() {
   renderViewMenu();
   if (P.panelH) $('panel').style.height = P.panelH + 'px', $('panel').style.flexBasis = P.panelH + 'px';
   $('group').checked = !!P.group;
+  $('auto').checked = P.auto !== false;
+  if ([5, 10, 30, 60].includes(+P.interval)) $('interval').value = String(P.interval);
+  $('auto').addEventListener('change', (e) => { P.auto = e.target.checked; savePrefs(); if (P.auto) startScan(); renderTable(); });
+  $('interval').addEventListener('change', (e) => { P.interval = +e.target.value; savePrefs(); });
+  $('openLogs').addEventListener('click', () => { closeMenus(); openTarget('logs'); });
 
   $('scan').addEventListener('click', startScan);
   $('focus').addEventListener('change', saveFocus);
@@ -1409,6 +1599,13 @@ async function init() {
   $('q').addEventListener('input', (e) => { S.q = e.target.value; renderTable(); });
   $('minRssi').addEventListener('change', (e) => { S.minRssi = parseInt(e.target.value, 10); renderTable(); });
   $('secFilter').addEventListener('change', (e) => { S.sec = e.target.value; renderTable(); });
+  renderStdMenu();      // фильтр, как и остальные фильтры таблицы, не запоминается между запусками
+  $('stdMenu').addEventListener('change', (e) => {
+    if (e.target.name === 'stdMode') S.stdMode = e.target.value;
+    else if (e.target.dataset.std) S.std = [...$('stdList').querySelectorAll('input[data-std]:checked')].map((x) => x.dataset.std);
+    renderStdMenu(); renderTable();
+  });
+  $('stdReset').addEventListener('click', () => { S.std = []; renderStdMenu(); renderTable(); });
   $('group').addEventListener('change', (e) => { P.group = e.target.checked; savePrefs(); renderTable(); });
   $('onlyFocus').addEventListener('change', (e) => { S.onlyFocus = e.target.checked; renderTable(); });
   for (const cb of document.querySelectorAll('.band')) {
@@ -1491,6 +1688,16 @@ async function init() {
     if (cw) { P.connWin = +cw.dataset.cwin; savePrefs(); renderPanel(); return; }
     const cf = e.target.closest('[data-cfilter]');
     if (cf) { S.cfilter = cf.dataset.cfilter; renderPanel(); return; }
+    const sf = e.target.closest('[data-sesf]');
+    if (sf) { S.sesFilter = sf.dataset.sesf; renderPanel(); return; }
+    const sx = e.target.closest('[data-sesx]');
+    if (sx) { doDownload('/api/export/sessions', 'wifi-sessions.csv'); return; }
+    const sr = e.target.closest('[data-ses]');
+    if (sr) { const id = +sr.dataset.ses; S.sesSel = S.sesSel === id ? null : id; renderPanel(); return; }
+    const wl = e.target.closest('[data-winlog]');
+    if (wl) { loadWinlog(+wl.dataset.winlog); return; }
+    const wf = e.target.closest('[data-wlf]');
+    if (wf) { S.wlFilter = wf.dataset.wlf; renderPanel(); return; }
     const jr = e.target.closest('[data-journal]');
     if (jr) {
       if (jr.dataset.journal === 'csv') doDownload('/api/export/journal', 'wifi-journal.csv');
@@ -1539,7 +1746,12 @@ async function init() {
   // меню
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-menu]');
-    if (btn) { const m = $(btn.dataset.menu); closeMenus(m); m.hidden = !m.hidden; if (!m.hidden && m.id === 'exportMenu') renderExportMenu(); return; }
+    if (btn) {
+      const m = $(btn.dataset.menu); closeMenus(m); m.hidden = !m.hidden;
+      if (!m.hidden && m.id === 'exportMenu') renderExportMenu();
+      if (!m.hidden && m.id === 'stdMenu') renderStdMenu();
+      return;
+    }
     // composedPath, а не closest: меню «Вид» перерисовывается при клике, и исходный элемент уже вне документа
     if (!e.composedPath().some((n) => n.classList && n.classList.contains('menu-list'))) closeMenus();
   });
@@ -1620,7 +1832,7 @@ async function init() {
     }
     if (typing || e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.key === '/') { e.preventDefault(); $('q').focus(); return; }
-    const n = parseInt(e.key, 10);
+    const n = e.key === '0' ? 10 : parseInt(e.key, 10);
     if (n >= 1 && n <= TABS.length) setTab(TABS[n - 1]);
   });
 

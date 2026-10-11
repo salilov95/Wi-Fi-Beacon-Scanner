@@ -60,6 +60,32 @@
 Проблемы ищутся по всему эфиру. Ошибки конфигурации и слабого сигнала - только для «Моих SSID»,
 чужие сети учитываются как помеха на канале. В отчёт попадают проблемы, которые касаются выбранных сетей.
 
+## Дополнения 802.11 (колонка «802.11» и фильтр)
+
+Что точка объявляет в beacon / probe response. Это заявленные возможности, а не проверка их работы.
+
+| Код | Откуда берётся |
+|---|---|
+| d | Country IE (7) |
+| e | WMM (vendor IE 00-50-F2 тип 2), EDCA Parameter Set (12) или бит QoS в Capability Information |
+| h | бит Spectrum Management в Capability Information, Power Constraint (32), TPC Report (35), Channel Switch Announcement (37) |
+| i | RSN IE (48) |
+| k | RM Enabled Capabilities (70), отдельно - есть ли neighbor report |
+| r | Mobility Domain (54), MDID и FT over DS |
+| u | Interworking (107) или бит 31 Extended Capabilities; тип сети, флаг «интернет», ANQP (108), Roaming Consortium (111) |
+| v | бит 19 Extended Capabilities (BSS Transition); дополнительно Proxy ARP, WNM Sleep, TFS, DMS, TIM Broadcast, WNM Notification |
+| w | PMF в RSN Capabilities: поддерживается (MFPC) или обязательна (MFPR) |
+| mc | FTM responder / initiator, биты 70/71 Extended Capabilities |
+| ai | FILS, бит 72 Extended Capabilities |
+| s | Mesh ID (114) |
+| TWT | HE MAC Capabilities (TWT Responder) или бит 78 Extended Capabilities |
+| MBSSID | Multiple BSSID (71) или бит 22 Extended Capabilities |
+| HS2.0 | Hotspot 2.0 Indication (vendor IE 50-6F-9A тип 0x10) |
+
+Фильтр «802.11» в строке фильтров: «есть все отмеченные» или «нет ни одного из отмеченных», рядом с
+каждым пунктом - сколько BSS в эфире его объявляет. Все включённые биты Extended Capabilities видны
+на вкладке «Beacon».
+
 ## Шкала сигнала
 
 Везде одна шкала от красного к зелёному: −85 дБм и ниже красный, −75 оранжевый, −67 жёлтый, −60 салатовый,

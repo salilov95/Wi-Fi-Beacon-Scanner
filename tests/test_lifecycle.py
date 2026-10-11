@@ -89,6 +89,34 @@ class OwnWindowTests(unittest.TestCase):
         self.l.touch()
         self.c.t += 30
         self.w.code = 0
+        self.assertIsNone(self.l.should_exit())     # пару секунд ждём: вдруг Edge перезапустился
+        self.c.t += 5
+        self.assertEqual(self.l.should_exit(), "окно Edge закрыто")
+
+    def test_edge_relaunched_itself_page_keeps_polling(self):
+        """Первый запуск с новым профилем: процесс Edge завершился, но окно живо и страница опрашивает программу."""
+        self.l.touch()
+        self.c.t += 3
+        self.w.code = 0
+        self.assertIsNone(self.l.should_exit())
+        for _ in range(3):
+            self.c.t += 1
+            self.l.touch()
+            self.assertIsNone(self.l.should_exit())
+        self.assertIsNone(self.l.window)            # дальше следим по запросам
+        self.c.t += 600
+        self.assertIsNone(self.l.should_exit())
+        self.l.bye()
+        self.c.t += 6
+        self.assertEqual(self.l.should_exit(), "окно закрыто")
+
+    def test_request_in_flight_at_close_is_not_a_relaunch(self):
+        self.l.touch()
+        self.w.code = 0
+        self.assertIsNone(self.l.should_exit())
+        self.c.t += 0.5
+        self.l.touch()                              # последний запрос страницы долетел после выхода Edge
+        self.c.t += 5
         self.assertEqual(self.l.should_exit(), "окно Edge закрыто")
 
     def test_bye_while_edge_stays_in_background(self):
@@ -99,6 +127,8 @@ class OwnWindowTests(unittest.TestCase):
     def test_edge_handed_window_to_running_instance(self):
         self.w.code = 0                     # процесс-лаунчер сразу вышел, окно в чужом Edge
         self.c.t += 1
+        self.assertIsNone(self.l.should_exit())
+        self.c.t += 5
         self.assertIsNone(self.l.should_exit())
         self.assertIsNone(self.l.window)    # дальше следим по запросам, как раньше
         self.l.touch(); self.c.t += 899

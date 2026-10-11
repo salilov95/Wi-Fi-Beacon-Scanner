@@ -123,7 +123,8 @@ class ExportApiTests(unittest.TestCase):
     @unittest.skipUnless(sys.platform == "win32" and pdf.find_browser(), "только Windows с Edge")
     def test_pdf_with_real_edge_on_windows(self):
         t = time.monotonic()
-        st, hd, raw = self.c.req("POST", "/api/export/pdf", {"scope": "focus"})
+        # первый запуск Edge на чистом раннере CI бывает дольше 10 с
+        st, hd, raw = self.c.req("POST", "/api/export/pdf", {"scope": "focus"}, timeout=90)
         self.assertEqual(st, 200, raw[:300])
         self.assertTrue(raw.startswith(b"%PDF"))
         self.assertLess(time.monotonic() - t, 60)
