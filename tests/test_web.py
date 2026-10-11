@@ -93,8 +93,14 @@ class WebTests(unittest.TestCase):
     def test_scan_flow_history_and_busy(self):
         st, d = self.c.j("GET", "/api/state")
         self.assertEqual((st, d["bss"], d["backend"], d["interfaces"]), (200, [], "demo", ["Demo adapter"]))
-        st1, _ = self.c.j("POST", "/api/scan", {"interface": 0, "wait": 1})
-        st2, _ = self.c.j("POST", "/api/scan", {"interface": 0, "wait": 1})
+        gate, orig = threading.Event(), self.state.backend.scan
+        self.state.backend.scan = lambda i, w: (gate.wait(10), orig(i, w))[1]    # скан ждёт, пока тест не отпустит
+        try:
+            st1, _ = self.c.j("POST", "/api/scan", {"interface": 0, "wait": 1})
+            st2, _ = self.c.j("POST", "/api/scan", {"interface": 0, "wait": 1})
+        finally:
+            gate.set()
+            self.state.backend.scan = orig
         self.assertEqual((st1, st2), (202, 409))      # второй запуск во время скана отклонён
         for _ in range(100):
             time.sleep(0.05)
