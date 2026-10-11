@@ -26,6 +26,11 @@ from ..survey import Survey
 log = logging.getLogger(__name__)
 
 HISTORY_POINTS = 240   # сколько последних замеров хранить на BSS
+# BSSID, которого давно не слышно, убирается из истории, иначе на долгом обходе она растёт без предела
+# (и целиком уходит в /api/state каждую секунду). Убираем, только если выполнены ОБА условия:
+#   * его нет ни в одном из последних HISTORY_POINTS сканов - глубже этого не смотрит ни один график;
+#   * его не слышно дольше HISTORY_TTL_S - запас для выгрузки истории в CSV/Excel.
+HISTORY_TTL_S = 1800
 ADVICE_BANDS = ("2.4", "5")
 
 
@@ -166,6 +171,7 @@ class AppState:
         self.snapshot: Optional[Snapshot] = None
         self.findings: List[Any] = []
         self.history: Dict[str, Deque[Tuple[float, int, Optional[float]]]] = {}
+        self._scan_times: Deque[float] = deque(maxlen=HISTORY_POINTS)   # время последних сканов (для очистки истории)
         self.focus: List[str] = list(focus or [])
         self.thresholds = Thresholds()
         self.scanning = False
@@ -241,10 +247,24 @@ class AppState:
                 self.history.setdefault(b.bssid, deque(maxlen=HISTORY_POINTS)).append(
                     (t, b.rssi, b.info.qbss_util_pct))
             self.scan_count += 1
+            self._scan_times.append(t)
+            self._prune_history(t)
+
+    def _prune_history(self, now: float) -> None:
+        """Убирает BSSID, которых нет в последних HISTORY_POINTS сканах и не слышно дольше HISTORY_TTL_S."""
+        if len(self._scan_times) < HISTORY_POINTS:
+            return                              # все сканы ещё в окне - убирать нечего
+        cutoff = min(self._scan_times[0], now - HISTORY_TTL_S)
+        stale = [k for k, h in self.history.items() if not h or h[-1][0] < cutoff]
+        for k in stale:
+            del self.history[k]
+        if stale:
+            log.debug("история: убрано BSSID %d (давно не слышно), осталось %d", len(stale), len(self.history))
 
     def load_snapshot(self, snap: Snapshot) -> None:
         with self.lock:
             self.history.clear()
+            self._scan_times.clear()
             self.scan_count = 0
             self._apply(snap, record_history=True)
             self.error = None

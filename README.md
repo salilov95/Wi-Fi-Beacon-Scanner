@@ -156,7 +156,7 @@ RSSI всех точек выбранной сети по сканам: лини
 Тихая установка (SCCM, Intune, GPO, PDQ):
 
 ```
-WiFiBeaconScanner-Setup-1.0.0.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+WiFiBeaconScanner-Setup-1.0.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 ```
 
 Файлы не подписаны сертификатом, поэтому при ручном запуске SmartScreen попросит подтверждение

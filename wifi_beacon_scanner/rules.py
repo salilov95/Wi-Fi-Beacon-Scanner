@@ -59,6 +59,26 @@ def _macs(items: Sequence[Bss]) -> List[str]:
     return [b.bssid for b in items]
 
 
+def radio_key(b: Bss) -> tuple:
+    """Ключ радиомодуля AP: по нему BSS разных SSID одного радио считаются одним передатчиком.
+
+    Условия: тот же диапазон, канал, ширина и центр полосы, а BSSID совпадают во всех битах, кроме
+    младших 4 бит последнего октета. Так раздают адреса Multiple BSSID (802.11) и большинство вендоров
+    (до 16 SSID на радио). Если вендор раздаёт BSSID иначе (например, меняет первый октет с битом
+    locally administered), такие BSS остаются разными радио - как было до 1.0.1.
+    """
+    mac = b.bssid.lower()
+    return (b.band, b.channel, b.info.width_mhz, b.center_channel, mac[:16])
+
+
+def group_radios(items: Sequence[Bss]) -> List[List[Bss]]:
+    """BSS, разложенные по радиомодулям (порядок - по первому появлению)."""
+    groups: Dict[tuple, List[Bss]] = {}
+    for b in items:
+        groups.setdefault(radio_key(b), []).append(b)
+    return list(groups.values())
+
+
 # ---------------------------------------------------------------- безопасность
 def rule_security(bss, th, focus):
     out: List[Finding] = []
@@ -177,21 +197,29 @@ def rule_signal(bss, th, focus):
 
 
 def rule_utilization(bss, th, focus):
+    """Одна находка на радиомодуль: загрузку эфира меряет радио, и у всех его SSID она одна и та же."""
     out: List[Finding] = []
-    for b in bss:
+    rep = [b for b in bss if b.info.qbss_util_pct is not None and _is_focus(b, focus)]
+    for radio in group_radios(rep):
+        b = max(radio, key=lambda x: x.info.qbss_util_pct)
         u = b.info.qbss_util_pct
-        if u is None or not _is_focus(b, focus):
-            continue
         if u >= th.util_crit:
             sev = CRITICAL
         elif u >= th.util_warn:
             sev = WARNING
         else:
             continue
-        out.append(Finding(sev, "RF_UTIL", "Высокая загрузка канала",
-                           "%s (%s, канал %d, %s ГГц): занято %.0f%% эфира, станций: %s."
-                           % (b.ssid_display, b.bssid, b.channel, b.band, u, b.info.qbss_stations),
-                           ssid=b.ssid_display, bssids=[b.bssid],
+        if len(radio) == 1:
+            detail = "%s (%s, канал %d, %s ГГц): занято %.0f%% эфира, станций: %s." % (
+                b.ssid_display, b.bssid, b.channel, b.band, u, b.info.qbss_stations)
+            ssid = b.ssid_display
+        else:
+            ssids = [x.ssid_display for x in radio]
+            ssid = ", ".join(ssids)
+            detail = "%s (одно радио, BSS: %d, канал %d, %s ГГц): занято %.0f%% эфира, станций по BSS: %s." % (
+                ssid, len(radio), b.channel, b.band, u, ", ".join(str(x.info.qbss_stations) for x in radio))
+        out.append(Finding(sev, "RF_UTIL", "Высокая загрузка канала", detail,
+                           ssid=ssid, bssids=_macs(radio),
                            recommendation="Цифра берётся из QBSS Load самой AP. Проверить число клиентов, смену канала/ширины, перенос клиентов на 5 ГГц."))
     return out
 
@@ -204,13 +232,16 @@ def rule_cochannel(bss, th, focus):
         if b.rssi >= th.cci_rssi:
             chans[(b.band, b.channel)].append(b)
     for (band, ch), items in sorted(chans.items()):
-        if len(items) < th.cci_warn_count:
+        # считаем радиомодули: несколько SSID одной AP - один передатчик, а не несколько соседей
+        radios = len(group_radios(items))
+        if radios < th.cci_warn_count:
             continue
         if focus and not any(b.ssid in focus for b in items):
             continue
+        heard = "%d BSS" % len(items) if radios == len(items) else "%d радио (BSS: %d)" % (radios, len(items))
         out.append(Finding(WARNING, "RF_COCHANNEL", "Много BSS на одном канале",
-                           "%s ГГц, канал %d: слышно %d BSS сильнее %d дБм (SSID: %s)."
-                           % (band, ch, len(items), th.cci_rssi,
+                           "%s ГГц, канал %d: слышно %s сильнее %d дБм (SSID: %s)."
+                           % (band, ch, heard, th.cci_rssi,
                               ", ".join(sorted({b.ssid_display for b in items})[:6])),
                            bssids=_macs(items),
                            recommendation="Все они делят эфир (CSMA/CA). Рассмотреть другой канал, меньшую ширину или меньшую мощность."))
@@ -331,16 +362,19 @@ def channel_advice(bss: Sequence[Bss], band: str, busy_util: float = 50.0) -> Li
     rows = []
     for c in cands:
         es = [b for b in bss if b.band == band and b.rssi >= -95 and near(b, c)]
-        energy = sum(10 ** (b.rssi / 10.0) for b in es)
+        radios = group_radios(es)
+        # мощность складываем по радиомодулям: SSID одного радио - один передатчик, его beacon-ы
+        # не добавляют энергии в эфир (иначе 4 SSID одной AP давали бы лишние +6 дБ)
+        energy = sum(10 ** (max(b.rssi for b in r) / 10.0) for r in radios)
         dbm = round(10 * math.log10(energy), 1) if energy > 0 else -120.0
         util = max([b.info.qbss_util_pct or 0.0 for b in es] or [0.0])
-        rows.append({"channel": c, "dbm": dbm, "count": len(es), "util": round(util, 1),
+        rows.append({"channel": c, "dbm": dbm, "count": len(es), "radios": len(radios), "util": round(util, 1),
                      "dfs": band == "5" and 52 <= c <= 144})
     # Сначала отсекаем каналы, где какая-то AP сама сообщает о высокой загрузке эфира:
     # тихий по уровню сигнала, но занятый на 80% канал свободным не является.
     for r in rows:
         r["busy"] = r["util"] >= busy_util
-    rows.sort(key=lambda r: (r["busy"], r["dbm"], r["count"]))
+    rows.sort(key=lambda r: (r["busy"], r["dbm"], r["radios"]))
     for i, r in enumerate(rows):
         r["best"] = i == 0
     return rows

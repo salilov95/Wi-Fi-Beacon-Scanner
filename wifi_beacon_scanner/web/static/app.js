@@ -383,11 +383,12 @@ function adviceHtml(band) {
   const rows = (S.data.advice || {})[band];
   if (!rows || !rows.length) return '';
   const items = rows.map((r) =>
-    `<span class="arow${r.best ? ' best' : ''}"><b>канал ${r.channel}</b>: ${r.count ? `${r.dbm} дБм, BSS ${r.count}, загрузка ${r.util.toFixed(0)}%` : 'соседей не слышно'}` +
+    `<span class="arow${r.best ? ' best' : ''}"><b>канал ${r.channel}</b>: ${r.count ? `${r.dbm} дБм, ${r.radios != null && r.radios !== r.count ? `радио ${r.radios} (BSS ${r.count})` : `BSS ${r.count}`}, загрузка ${r.util.toFixed(0)}%` : 'соседей не слышно'}` +
     `${r.best ? ' <span class="good">лучший</span>' : ''}${r.busy ? ' <span class="bad">занят</span>' : ''}${r.dfs ? ' <span class="tag">DFS</span>' : ''}</span>`).join('');
   return `<div class="advice"><div class="sub">Свободность каналов, ${band} ГГц</div>${items}` +
     `<div class="note">Ниже дБм, значит свободнее (сумма сигналов соседей на канале). Каналы с загрузкой от 50% идут последними. ` +
-    `Учитывается вся полоса соседа: точка 80 МГц занимает четыре канала. Оценка верна для места, где стоит ноутбук.</div></div>`;
+    `Учитывается вся полоса соседа: точка 80 МГц занимает четыре канала. Несколько SSID одного радио считаются одним передатчиком. ` +
+    `Оценка верна для места, где стоит ноутбук.</div></div>`;
 }
 
 function renderChannels() {
