@@ -1,9 +1,13 @@
 """CI (Windows): новые вызовы Windows API работают на настоящей системе - GetAdaptersInfo (IPv4 и аренда DHCP)
 и чтение журнала WLAN-AutoConfig через wevtapi. Результат - аннотациями; Wi-Fi на сервере CI нет, поэтому
 журнал может отсутствовать - это не ошибка, важно, что вызов не падает."""
+import os
 import sys
+import traceback
 
-from wifi_beacon_scanner import ip_win
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from wifi_beacon_scanner import ip_win  # noqa: E402
 
 
 def main() -> int:
@@ -35,4 +39,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:  # noqa: BLE001
+        tb = " | ".join(traceback.format_exc().strip().splitlines()[-4:])
+        print("::error title=smoke_winapi::%s: %s | %s" % (type(e).__name__, e, tb))
+        sys.exit(1)
