@@ -109,5 +109,8 @@ jobs:
             if ($old -eq "true") { gh release delete $tag --yes }
             gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --draft --prerelease --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag (черновик, ${{ github.ref_name }})" --notes-file release-notes.md
           } else {
+            # черновик этой же версии больше не нужен: публикуем настоящий релиз
+            $old = gh release view $tag --json isDraft -q .isDraft 2>$null
+            if ($old -eq "true") { gh release delete $tag --yes }
             gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md
           }
