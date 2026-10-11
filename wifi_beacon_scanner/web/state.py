@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sys
@@ -11,6 +12,7 @@ from collections import deque
 from dataclasses import asdict
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
+from ..amend import standards
 from ..backends import Backend
 from ..conn import ConnTracker
 from ..diff import diff_snapshots
@@ -20,6 +22,8 @@ from ..model import Bss, Snapshot
 from ..oui import OuiDb
 from ..rules import Thresholds, analyze, channel_advice, channel_utilization
 from ..survey import Survey
+
+log = logging.getLogger(__name__)
 
 HISTORY_POINTS = 240   # сколько последних замеров хранить на BSS
 ADVICE_BANDS = ("2.4", "5")
@@ -72,7 +76,9 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["sigMode"] = d["sigMode"]
     if d.get("sigColor") in ("level", "bss"):
         out["sigColor"] = d["sigColor"]
-    for k in ("group", "heatAll"):
+    if d.get("interval") in (5, 10, 30, 60):
+        out["interval"] = d["interval"]
+    for k in ("group", "heatAll", "auto"):
         if isinstance(d.get(k), bool):
             out[k] = d[k]
     if isinstance(d.get("panelH"), (int, float)) and not isinstance(d.get("panelH"), bool) and 100 <= d["panelH"] <= 4000:
@@ -127,6 +133,7 @@ def bss_to_dict(b: Bss) -> Dict[str, Any]:
         "nr": i.neighbor_report,
         "r": i.dot11r,
         "v": i.dot11v,
+        "std": standards(b),
         "mdid": i.mdid,
         "util": i.qbss_util_pct,
         "stations": i.qbss_stations,
@@ -158,6 +165,8 @@ class AppState:
         self.thresholds = Thresholds()
         self.scanning = False
         self.error: Optional[str] = None
+        self.error_kind: str = ""          # "location" - нет разрешения на расположение (Windows 11 24H2+)
+        self.last_scan_ms: Optional[int] = None
         self.scan_count = 0
         self.interfaces: List[str] = []
         self.interfaces_error: Optional[str] = None
@@ -294,7 +303,6 @@ class AppState:
             if self.scanning:
                 return False
             self.scanning = True
-            self.error = None
         threading.Thread(target=self._scan_worker, args=(interface_index, wait_s), daemon=True).start()
         return True
 
@@ -303,12 +311,19 @@ class AppState:
         try:
             snap = self.backend.scan(idx, wait_s)
             with self.lock:
+                self.error, self.error_kind = None, ""
+                self.last_scan_ms = int((time.time() - started) * 1000)
+                if not snap.bss:
+                    log.warning("скан #%d вернул пустой список сетей (%s)", self.scan_count + 1, snap.interface)
                 self._apply(snap, record_history=True)
                 self.conn.check_scan(time.time(), snap.bss)
                 self.survey.fill(started, snap.bss, self._conn_point())
         except Exception as e:  # noqa: BLE001
+            if getattr(e, "kind", "") != "location":
+                log.exception("скан не удался")
             with self.lock:
                 self.error = str(e)
+                self.error_kind = getattr(e, "kind", "") or ""
                 self.survey.fail_pending(started, str(e))
         finally:
             with self.lock:
@@ -408,6 +423,8 @@ class AppState:
             return {
                 "scanning": self.scanning,
                 "error": self.error,
+                "error_kind": self.error_kind,
+                "last_scan_ms": self.last_scan_ms,
                 "scan_count": self.scan_count,
                 "backend": self.backend.name,
                 "interfaces": self.interfaces,

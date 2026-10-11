@@ -15,18 +15,24 @@
 from __future__ import annotations
 
 import ctypes
+import logging
 import sys
 import time
 from ctypes import POINTER, Structure, byref, c_int32, c_ubyte, c_uint, c_uint16, c_uint32, c_uint64, c_void_p
 from typing import List, Optional, Tuple
 
-from .model import Bss, Snapshot, now_iso
+from .model import Bss, ScanAccessDenied, Snapshot, now_iso
 
 if sys.platform != "win32":  # pragma: no cover
     raise ImportError("scanner_win работает только на Windows")
 
+log = logging.getLogger(__name__)
+
 ERROR_SUCCESS = 0
+ERROR_ACCESS_DENIED = 5
 DOT11_BSS_TYPE_ANY = 3
+# сколько ещё ждать, если после WlanScan список пуст (адаптер только проснулся, скан не успел)
+EMPTY_EXTRA_WAIT_S = 6.0
 
 
 class GUID(Structure):
@@ -132,38 +138,55 @@ def scan(interface_index: int = 0, wait_s: float = 5.0) -> Snapshot:
             raise OSError("Нет адаптера с индексом %d (всего %d)" % (interface_index, len(ifaces)))
         desc, guid = ifaces[interface_index]
         # Запуск скана: код != 0 не фатален (служба может отклонить слишком частый запрос,
-        # тогда просто читаем то, что уже в кэше).
-        rc = _wlan.WlanScan(handle, byref(guid), None, None, None)
-        if rc != ERROR_SUCCESS:
-            print("предупреждение: WlanScan вернул %d (%s), читаю кэш" % (rc, ctypes.FormatError(rc).strip()),
-                  file=sys.stderr)
+        # тогда просто читаем то, что уже в кэше). Код 5 - Windows 11 24H2+ не дала доступ к расположению:
+        # при первом вызове она сама показывает запрос, и пользователь может успеть разрешить.
+        scan_rc = _wlan.WlanScan(handle, byref(guid), None, None, None)
+        if scan_rc != ERROR_SUCCESS:
+            log.warning("WlanScan вернул %d (%s), читаю кэш", scan_rc, ctypes.FormatError(scan_rc).strip())
         time.sleep(wait_s)
-        p = c_void_p()
-        _check(_wlan.WlanGetNetworkBssList(handle, byref(guid), None, DOT11_BSS_TYPE_ANY, 0, None, byref(p)),
-               "WlanGetNetworkBssList")
-        try:
-            n = c_uint32.from_address(p.value + 4).value        # dwNumberOfItems (после dwTotalSize)
-            first = p.value + 8
-            esz = ctypes.sizeof(WLAN_BSS_ENTRY)
-            result: List[Bss] = []
-            for i in range(n):
-                addr = first + i * esz
-                e = WLAN_BSS_ENTRY.from_address(addr)
-                ie = ctypes.string_at(addr + e.ulIeOffset, e.ulIeSize) if e.ulIeSize else b""
-                ssid = bytes(e.dot11Ssid.ucSSID[: e.dot11Ssid.uSSIDLength])
-                result.append(Bss(
-                    bssid=":".join("%02x" % x for x in e.dot11Bssid),
-                    ssid_bytes=ssid,
-                    rssi=e.lRssi,
-                    link_quality=e.uLinkQuality,
-                    freq_khz=e.ulChCenterFrequency,
-                    beacon_interval=e.usBeaconPeriod,
-                    capability=e.usCapabilityInformation,
-                    phy_type=e.dot11BssPhyType,
-                    ie_raw=ie,
-                ))
-        finally:
-            _wlan.WlanFreeMemory(p)
+        deadline = time.monotonic() + EMPTY_EXTRA_WAIT_S
+        tries = 0
+        while True:
+            tries += 1
+            p = c_void_p()
+            rc = _wlan.WlanGetNetworkBssList(handle, byref(guid), None, DOT11_BSS_TYPE_ANY, 0, None, byref(p))
+            if rc == ERROR_ACCESS_DENIED:
+                log.warning("WlanGetNetworkBssList: доступ запрещён (5) - нет разрешения на расположение")
+                raise ScanAccessDenied()
+            _check(rc, "WlanGetNetworkBssList")
+            result = _read_bss_list(p)
+            if result or time.monotonic() >= deadline:
+                break
+            time.sleep(1.0)
+        log.info("скан %s: BSS %d, WlanScan=%d, попыток чтения %d", desc, len(result), scan_rc, tries)
         return Snapshot(taken_at=now_iso(), interface=desc, bss=result)
     finally:
         _wlan.WlanCloseHandle(handle, None)
+
+
+def _read_bss_list(p: c_void_p) -> List[Bss]:
+    """Разбирает WLAN_BSS_LIST и освобождает его."""
+    try:
+        n = c_uint32.from_address(p.value + 4).value        # dwNumberOfItems (после dwTotalSize)
+        first = p.value + 8
+        esz = ctypes.sizeof(WLAN_BSS_ENTRY)
+        result: List[Bss] = []
+        for i in range(n):
+            addr = first + i * esz
+            e = WLAN_BSS_ENTRY.from_address(addr)
+            ie = ctypes.string_at(addr + e.ulIeOffset, e.ulIeSize) if e.ulIeSize else b""
+            ssid = bytes(e.dot11Ssid.ucSSID[: e.dot11Ssid.uSSIDLength])
+            result.append(Bss(
+                bssid=":".join("%02x" % x for x in e.dot11Bssid),
+                ssid_bytes=ssid,
+                rssi=e.lRssi,
+                link_quality=e.uLinkQuality,
+                freq_khz=e.ulChCenterFrequency,
+                beacon_interval=e.usBeaconPeriod,
+                capability=e.usCapabilityInformation,
+                phy_type=e.dot11BssPhyType,
+                ie_raw=ie,
+            ))
+        return result
+    finally:
+        _wlan.WlanFreeMemory(p)

@@ -26,7 +26,8 @@ const THEMES = [
   {id: 'paper', name: 'Тёплая бумага', c: ['#efe8da', '#faf6ec', '#2d6a52']},
   {id: 'contrast', name: 'Контрастная', dark: 1, c: ['#000000', '#161616', '#ffd60a']},
 ];
-const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', sigColor: 'level', heatAll: false, v: 0};
+const P = {theme: 'auto', density: 'normal', cols: null, panelH: null, tab: 'channels', group: false, sigMode: 'lines', sigColor: 'level', heatAll: false,
+  auto: true, interval: 5, v: 0};
 try { Object.assign(P, JSON.parse(localStorage.getItem('wd_prefs') || '{}')); } catch (e) { /* без сохранения */ }
 // Порт у приложения каждый раз новый, а localStorage привязан к адресу, поэтому настройки ещё и
 // отправляются программе: она хранит их в файле и возвращает при следующем запуске.
@@ -108,13 +109,33 @@ async function api(path, body, raw) {
 
 // ---------- состояние ----------
 const OPEN_IE = [45, 48, 61, 191, 192, 255];   // какие IE раскрыты по умолчанию
-const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'sessions', 'survey', 'findings', 'beacon', 'compare'];
+const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'sessions', 'compare'];
 const S = {
-  data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '',
+  data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '', std: [], stdMode: 'all',
   bands: {'2.4': true, '5': true, '6': true}, collapsed: new Set(),
   sel: null, hl: new Set(), hlIdx: -1, tab: TABS.includes(P.tab) ? P.tab : 'channels', cb: '2.4',
   sig: '', lastScan: 0, ieOpen: null, ieFor: null,
 };
+
+// Дополнения 802.11 из beacon (amend.py): код, подпись, полное название. Первые девять - буквы стандарта.
+const STD = [
+  ['d', 'd', '802.11d - код страны'], ['e', 'e', '802.11e - QoS (WMM/EDCA)'], ['h', 'h', '802.11h - DFS/TPC'],
+  ['i', 'i', '802.11i - RSN (WPA2/WPA3)'], ['k', 'k', '802.11k - Radio Measurement'], ['r', 'r', '802.11r - Fast Transition'],
+  ['u', 'u', '802.11u - Interworking'], ['v', 'v', '802.11v - BSS Transition'], ['w', 'w', '802.11w - PMF'],
+  ['mc', 'mc', '802.11mc - FTM (RTT)'], ['ai', 'ai', '802.11ai - FILS'], ['s', 's', '802.11s - mesh'],
+  ['twt', 'TWT', 'TWT (802.11ax)'], ['mbssid', 'MBSSID', 'Multiple BSSID'], ['hs', 'HS2.0', 'Hotspot 2.0 / Passpoint'],
+];
+const STD_CODES = STD.map((x) => x[0]);
+const STD_MAIN = STD.slice(0, 9);
+function stdTitle(b) {
+  const st = b.std || {};
+  return STD.filter(([c]) => st[c]).map(([c, , t]) => `${t}: ${st[c]}`).join('\n') || 'дополнения не объявлены';
+}
+function stdMatch(b) {
+  if (!S.std.length) return true;
+  const st = b.std || {};
+  return S.stdMode === 'none' ? S.std.every((c) => !st[c]) : S.std.every((c) => st[c]);
+}
 
 const COLS = [
   {k: 'ssid', t: 'SSID', on: 1, fixed: 1}, {k: 'bssid', t: 'BSSID', on: 1}, {k: 'vendor', t: 'Вендор', on: 1},
@@ -124,7 +145,7 @@ const COLS = [
   {k: 'security', t: 'Безопасность', on: 1}, {k: 'akm', t: 'AKM'}, {k: 'ciphers', t: 'Шифры'}, {k: 'pmf', t: 'PMF'},
   {k: 'gen_n', t: 'Wi-Fi', on: 1}, {k: 'streams', t: 'Потоки', num: 1},
   {k: 'mcs', t: 'Макс. MCS', on: 1}, {k: 'rate', t: 'Макс. PHY, Мбит/с', num: 1, on: 1}, {k: 'bss_color', t: 'BSS Color', num: 1},
-  {k: 'krv', t: 'k·r·v', on: 1},
+  {k: 'std', t: '802.11', on: 1},
   {k: 'util', t: 'Загрузка', num: 1, on: 1}, {k: 'stations', t: 'Станций', num: 1, on: 1},
   {k: 'country', t: 'Страна', on: 1}, {k: 'beacon', t: 'Beacon, TU', num: 1}, {k: 'dtim', t: 'DTIM', num: 1},
   {k: 'quality', t: 'Качество, %', num: 1},
@@ -133,12 +154,14 @@ function normalizePrefs() {
   if (!Array.isArray(P.cols)) P.cols = COLS.filter((c) => c.on).map((c) => c.k);
   if (!(P.v >= 2)) { if (!P.cols.includes('trend')) P.cols.push('trend'); P.v = 2; }   // колонка появилась в этой версии
   if (P.v < 3) { for (const k of ['mcs', 'rate']) if (!P.cols.includes(k)) P.cols.push(k); P.v = 3; }
+  if (P.v < 4) { P.cols = P.cols.map((k) => k === 'krv' ? 'std' : k); if (!P.cols.includes('std')) P.cols.push('std'); P.v = 4; }
+
 }
 normalizePrefs();
 const shownCols = () => COLS.filter((c) => c.fixed || P.cols.includes(c.k));
 
 function sortVal(b, k) {
-  if (k === 'krv') return (b.k ? 1 : 0) + (b.r ? 1 : 0) + (b.v ? 1 : 0);
+  if (k === 'std') return Object.keys(b.std || {}).length;
   if (k === 'band') return parseFloat(b.band);
   if (k === 'trend') { const h = S.data.history[b.bssid] || []; return h.length > 1 ? h[h.length - 1][1] - h[0][1] : 0; }
   if (k === 'mcs') return b.mcs == null ? -1 : b.gen_n * 1000 + b.mcs * 10 + b.nss;
@@ -172,7 +195,7 @@ function visibleBss() {
   if (!S.data) return [];
   const fs = focusSet();
   const q = S.q.trim().toLowerCase();
-  let list = S.data.bss.filter((b) => S.bands[b.band] && b.rssi >= S.minRssi && secMatch(b, S.sec));
+  let list = S.data.bss.filter((b) => S.bands[b.band] && b.rssi >= S.minRssi && secMatch(b, S.sec) && stdMatch(b));
   if (S.onlyFocus && fs.size) list = list.filter((b) => fs.has(b.ssid));
   if (q) list = list.filter((b) => (b.ssid + ' ' + b.bssid + ' ' + b.vendor + ' ' + b.security).toLowerCase().includes(q));
   const {k, dir} = S.sort;
@@ -207,9 +230,11 @@ function cell(b, k) {
     case 'security': return `<td><span class="sec s-${secClass(b)}">${esc(b.security)}</span></td>`;
     case 'akm': case 'ciphers': return `<td>${esc(b[k].join(', '))}</td>`;
     case 'gen_n': return `<td>${esc(b.gen === 'legacy' ? 'legacy' : b.gen.replace('Wi-Fi ', ''))}</td>`;
-    case 'krv': {
-      const f = (on, l) => on ? `<b>${l}</b>` : `<span class="off">${l}</span>`;
-      return `<td class="krv">${f(b.k, 'k')} ${f(b.r, 'r')} ${f(b.v, 'v')}</td>`;
+    case 'std': {
+      const st = b.std || {};
+      const main = STD_MAIN.map(([c, l]) => st[c] ? `<b>${l}</b>` : `<span class="off">${l}</span>`).join('');
+      const extra = STD.slice(9).filter(([c]) => st[c]).map(([, l]) => l).join(' ');
+      return `<td class="krv" title="${esc(stdTitle(b))}">${main}${extra ? `<span class="x">${esc(extra)}</span>` : ''}</td>`;
     }
     case 'util': return `<td class="num">${b.util == null ? '' : b.util.toFixed(0) + '%'}</td>`;
     case 'streams': return `<td class="num">${b.streams || ''}</td>`;
@@ -277,10 +302,14 @@ function renderTable() {
   const empty = $('empty');
   if (!S.data || !total) {
     empty.hidden = false;
-    empty.textContent = S.data && S.data.scanning ? 'Идёт сканирование…' : 'Данных пока нет. Нажми «Сканировать».';
+    empty.textContent = !S.data ? 'Подключаюсь к программе…'
+      : S.data.scanning ? 'Идёт сканирование…'
+      : S.data.error ? 'Скан не удался, подробности - в плашке сверху.' + ($('auto').checked ? ' Автоскан повторит попытку.' : '')
+      : S.data.taken_at ? 'Windows вернула пустой список сетей.' + ($('auto').checked ? ' Автоскан повторит скан через несколько секунд.' : ' Нажми «Сканировать».')
+      : 'Данных пока нет. Нажми «Сканировать».';
   } else if (!list.length) {
     empty.hidden = false;
-    empty.textContent = 'Под фильтры ничего не попало. Ослабь фильтр по сигналу или защите.';
+    empty.textContent = 'Под фильтры ничего не попало. Ослабь фильтры: сигнал, защита, 802.11.';
   } else {
     empty.hidden = true;
   }
@@ -1230,8 +1259,7 @@ function renderBeacon() {
     ['BSS Color', b.bss_color == null ? '—' : String(b.bss_color)],
     ['Безопасность', b.security], ['AKM', b.akm.join(', ') || '—'], ['Шифры', b.ciphers.join(', ') || '—'],
     ['PMF (802.11w)', b.pmf || '—'], ['WPS', yn(b.wps)],
-    ['802.11k', yn(b.k) + (b.k ? (b.nr ? ', neighbor report' : ', без neighbor report') : '')],
-    ['802.11r', b.r ? 'да, MDID 0x' + b.mdid.toString(16).toUpperCase() : 'нет'], ['802.11v', yn(b.v)],
+    ...STD.map(([c, , t]) => [t, (b.std || {})[c] ? 'да: ' + b.std[c] : 'нет']),
     ['Загрузка и станции', b.util == null ? 'QBSS Load не вещается' : `${b.util.toFixed(0)}%, станций ${b.stations}`],
     ['Страна', b.country || '—'], ['Beacon interval', `${b.beacon} TU`], ['DTIM', b.dtim == null ? '—' : String(b.dtim)],
     ['Capability', b.cap], ['HT protection', String(b.ht_prot)], ['Размер IE', b.ie_len + ' байт'],
@@ -1326,6 +1354,19 @@ function renderAll() {
 }
 
 // ---------- меню «Вид» ----------
+// Фильтр по дополнениям 802.11: число рядом - сколько BSS в эфире объявляет дополнение
+function renderStdMenu() {
+  const all = S.data ? S.data.bss : [];
+  $('stdList').innerHTML = STD.map(([c, , t]) => {
+    const n = all.filter((b) => (b.std || {})[c]).length;
+    return `<label class="chk"><input type="checkbox" data-std="${c}"${S.std.includes(c) ? ' checked' : ''}> ${esc(t)}<span class="cnt">${n}</span></label>`;
+  }).join('');
+  for (const r of document.querySelectorAll('input[name=stdMode]')) r.checked = r.value === S.stdMode;
+  const btn = $('stdBtn');
+  btn.classList.toggle('on', S.std.length > 0);
+  btn.textContent = S.std.length ? `802.11: ${S.stdMode === 'none' ? 'без ' : ''}${S.std.map((c) => STD.find((x) => x[0] === c)[1]).join(' ')} ▾` : '802.11 ▾';
+}
+
 function renderViewMenu() {
   $('themes').innerHTML = THEMES.map((t) =>
     `<button type="button" data-theme-id="${t.id}" class="${P.theme === t.id ? 'on' : ''}" aria-pressed="${P.theme === t.id}">` +
@@ -1336,10 +1377,32 @@ function renderViewMenu() {
 }
 
 // ---------- сеть ----------
+// Ошибки страницы уходят в журнал программы (app.log), чтобы их можно было разобрать потом.
+let clientLogN = 0;
+function clientLog(level, msg) {
+  if (++clientLogN > 200) return;
+  try {
+    fetch('/api/clientlog', {method: 'POST', keepalive: true, headers: {'Content-Type': 'application/json', 'X-Token': TOKEN || ''},
+      body: JSON.stringify({level, msg: String(msg).slice(0, 4000)})}).catch(() => {});
+  } catch (e) { /* программа недоступна */ }
+}
+window.addEventListener('error', (e) => clientLog('error', `${e.message} (${e.filename}:${e.lineno}:${e.colno})` + (e.error && e.error.stack ? ' ' + e.error.stack : '')));
+window.addEventListener('unhandledrejection', (e) => clientLog('error', 'promise: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason)));
+
+async function openTarget(target) {
+  const r = await api('/api/open', {target});
+  if (!r.ok) banner('Не удалось открыть: ' + ((r.data && r.data.error) || r.status), true);
+  else if (r.data && r.data.ok === false) note('Путь: ' + r.data.path);
+}
+
 // src: откуда сообщение. Плашки «scan» и «link» снимает сама программа, когда проблема ушла;
 // остальные ошибки (экспорт, обход) висят, пока их не закроют или не появится новое сообщение.
 function banner(msg, isErr, action, src) {
   const b = $('banner');
+  const key = [msg || '', isErr ? 1 : 0, src || '', action ? action.label : ''].join('\u0001');
+  if (msg && b.dataset.key === key && !b.hidden) return;      // та же плашка: не пересоздаём кнопки каждую секунду
+  b.dataset.key = msg ? key : '';
+  if (msg && isErr) clientLog('warn', 'плашка: ' + msg);
   b.hidden = !msg;
   b.className = 'banner' + (isErr ? ' err' : '');
   b.dataset.src = src || '';
@@ -1376,7 +1439,8 @@ function handleState(d) {
   $('scan').disabled = d.scanning;
   $('scan').textContent = d.scanning ? 'Сканирую…' : 'Сканировать';
   $('status').textContent = d.taken_at ? `обновлено ${fmtTime(d.taken_at)}` : '';
-  if (d.error) banner('Ошибка скана: ' + d.error, true, null, 'scan');
+  if (d.error && d.error_kind === 'location') banner(d.error, true, {label: 'Открыть параметры расположения', run: () => openTarget('location-settings')}, 'scan');
+  else if (d.error) banner('Ошибка скана: ' + d.error, true, null, 'scan');
   else if (d.interfaces_error && !d.taken_at) banner('Адаптеры недоступны: ' + d.interfaces_error, true, null, 'scan');
   else if (['scan', 'link'].includes($('banner').dataset.src)) banner('');
   if (document.activeElement !== $('focus')) $('focus').value = d.focus.join(', ');
@@ -1523,6 +1587,11 @@ async function init() {
   renderViewMenu();
   if (P.panelH) $('panel').style.height = P.panelH + 'px', $('panel').style.flexBasis = P.panelH + 'px';
   $('group').checked = !!P.group;
+  $('auto').checked = P.auto !== false;
+  if ([5, 10, 30, 60].includes(+P.interval)) $('interval').value = String(P.interval);
+  $('auto').addEventListener('change', (e) => { P.auto = e.target.checked; savePrefs(); if (P.auto) startScan(); renderTable(); });
+  $('interval').addEventListener('change', (e) => { P.interval = +e.target.value; savePrefs(); });
+  $('openLogs').addEventListener('click', () => { closeMenus(); openTarget('logs'); });
 
   $('scan').addEventListener('click', startScan);
   $('focus').addEventListener('change', saveFocus);
@@ -1530,6 +1599,13 @@ async function init() {
   $('q').addEventListener('input', (e) => { S.q = e.target.value; renderTable(); });
   $('minRssi').addEventListener('change', (e) => { S.minRssi = parseInt(e.target.value, 10); renderTable(); });
   $('secFilter').addEventListener('change', (e) => { S.sec = e.target.value; renderTable(); });
+  renderStdMenu();      // фильтр, как и остальные фильтры таблицы, не запоминается между запусками
+  $('stdMenu').addEventListener('change', (e) => {
+    if (e.target.name === 'stdMode') S.stdMode = e.target.value;
+    else if (e.target.dataset.std) S.std = [...$('stdList').querySelectorAll('input[data-std]:checked')].map((x) => x.dataset.std);
+    renderStdMenu(); renderTable();
+  });
+  $('stdReset').addEventListener('click', () => { S.std = []; renderStdMenu(); renderTable(); });
   $('group').addEventListener('change', (e) => { P.group = e.target.checked; savePrefs(); renderTable(); });
   $('onlyFocus').addEventListener('change', (e) => { S.onlyFocus = e.target.checked; renderTable(); });
   for (const cb of document.querySelectorAll('.band')) {
@@ -1670,7 +1746,12 @@ async function init() {
   // меню
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-menu]');
-    if (btn) { const m = $(btn.dataset.menu); closeMenus(m); m.hidden = !m.hidden; if (!m.hidden && m.id === 'exportMenu') renderExportMenu(); return; }
+    if (btn) {
+      const m = $(btn.dataset.menu); closeMenus(m); m.hidden = !m.hidden;
+      if (!m.hidden && m.id === 'exportMenu') renderExportMenu();
+      if (!m.hidden && m.id === 'stdMenu') renderStdMenu();
+      return;
+    }
     // composedPath, а не closest: меню «Вид» перерисовывается при клике, и исходный элемент уже вне документа
     if (!e.composedPath().some((n) => n.classList && n.classList.contains('menu-list'))) closeMenus();
   });

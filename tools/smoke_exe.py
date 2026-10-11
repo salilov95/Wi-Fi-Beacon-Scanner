@@ -14,7 +14,7 @@ import urllib.request
 
 def log_path() -> str:
     base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
-    return os.path.join(base, "WiFiBeaconScanner", "wifi-beacon-scanner.log")
+    return os.path.join(base, "WiFiBeaconScanner", "logs", "console.log")
 
 
 def call(base: str, token: str, path: str, body=None, timeout=90):

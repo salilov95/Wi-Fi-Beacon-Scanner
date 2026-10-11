@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Sequence, Tuple
 
+from . import amend
 from .model import Bss
 
 
@@ -32,6 +33,7 @@ FIELDS: List[Tuple[str, Callable[[Bss], Any]]] = [
     ("802.11k", lambda b: _yn(b.info.dot11k)),
     ("802.11r", lambda b: _yn(b.info.dot11r)),
     ("802.11v", lambda b: _yn(b.info.dot11v)),
+    ("Дополнения 802.11", lambda b: amend.short(amend.standards(b)) or "-"),
     ("Поколение", lambda b: b.generation_label),
     ("Страна", lambda b: b.info.country or "-"),
     ("Beacon interval", lambda b: b.beacon_interval),

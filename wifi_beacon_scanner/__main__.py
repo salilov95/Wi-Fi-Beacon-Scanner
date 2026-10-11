@@ -53,8 +53,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.cmd == "gui":
         from . import backends
-        import logging
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+        from . import applog
+        applog.setup()
         from .web.server import serve
         from .web.state import AppState, default_prefs_path, legacy_prefs_path
         if args.demo is not None:
@@ -68,9 +68,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         db = oui.load_default(args.manuf)
         if db is None:
             print("предупреждение: файл manuf не найден, вендоры не определяются (укажи --manuf)", file=sys.stderr)
-        serve(AppState(backend, db, args.ssid, prefs_path=default_prefs_path(),
-                       legacy_prefs_path=legacy_prefs_path()), port=args.port,
-              open_browser=not args.no_browser, exit_when_closed=False if args.keep_running else None)
+        state = AppState(backend, db, args.ssid, prefs_path=default_prefs_path(), legacy_prefs_path=legacy_prefs_path())
+        state.start_scan(0, 4.0)        # первый скан идёт, пока открывается окно
+        serve(state, port=args.port, open_browser=not args.no_browser,
+              exit_when_closed=False if args.keep_running else None)
         return 0
 
     if args.cmd == "interfaces":

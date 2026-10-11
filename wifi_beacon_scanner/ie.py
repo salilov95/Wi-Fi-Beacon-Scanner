@@ -14,6 +14,7 @@ from typing import Iterator, List, Optional, Tuple
 
 OUI_IEEE = b"\x00\x0f\xac"   # 00-0F-AC: наборы шифров/AKM из стандарта 802.11
 OUI_MS = b"\x00\x50\xf2"     # 00-50-F2: Microsoft/WFA (WPA1, WMM, WPS)
+OUI_WFA = b"\x50\x6f\x9a"    # 50-6F-9A: Wi-Fi Alliance (Hotspot 2.0 = тип 0x10)
 
 CIPHERS = {
     1: "WEP-40", 2: "TKIP", 4: "CCMP", 5: "WEP-104",
@@ -119,6 +120,18 @@ class BssInfo:
     ft_over_ds: bool = False
     rm_caps: Optional[bytes] = None     # RM Enabled Capabilities => 802.11k
     bss_transition: bool = False        # Extended Capabilities bit 19 => 802.11v
+    ext_caps: bytes = b""               # Extended Capabilities целиком (биты - см. EXT_CAP_BITS)
+    edca: bool = False                  # EDCA Parameter Set (IE 12) => 802.11e
+    power_constraint: Optional[int] = None   # Power Constraint (IE 32), дБ => 802.11h
+    tpc_tx_power: Optional[int] = None       # TPC Report (IE 35), дБм => 802.11h
+    csa: bool = False                   # Channel Switch Announcement (IE 37): точка прямо сейчас уходит с канала
+    multi_bssid: bool = False           # Multiple BSSID (IE 71)
+    interworking: Optional[int] = None  # Interworking (IE 107), первый байт: тип сети + флаги => 802.11u
+    anqp: bool = False                  # Advertisement Protocol (IE 108)
+    roaming_consortium: bool = False    # Roaming Consortium (IE 111)
+    mesh_id: Optional[bytes] = None     # Mesh ID (IE 114) => 802.11s
+    hs20: bool = False                  # Hotspot 2.0 / Passpoint (vendor IE Wi-Fi Alliance, тип 0x10)
+    he_mac: bytes = b""                 # HE MAC Capabilities Information (6 байт)
     ht: bool = False
     ht_primary: Optional[int] = None
     ht_sec_offset: int = 0              # 0 нет, 1 выше, 3 ниже
@@ -170,6 +183,15 @@ class BssInfo:
     @property
     def dot11v(self) -> bool:
         return self.bss_transition
+
+    def ext_bit(self, n: int) -> bool:
+        """Бит n поля Extended Capabilities (нумерация 802.11: бит 0 - младший бит первого байта)."""
+        return len(self.ext_caps) > n // 8 and bool(self.ext_caps[n // 8] >> (n % 8) & 1)
+
+    @property
+    def twt_responder(self) -> bool:
+        # HE MAC Capabilities, бит 2 - TWT Responder Support; дублируется битом 78 Extended Capabilities
+        return bool(self.he_mac and self.he_mac[0] & 0x04) or self.ext_bit(78)
 
     @property
     def generation(self) -> int:
@@ -293,8 +315,27 @@ def parse_ies(data: bytes) -> BssInfo:
             info.ft_over_ds = bool(b[2] & 0x01)
         elif eid == 70 and len(b) >= 1:
             info.rm_caps = bytes(b)
-        elif eid == 127 and len(b) >= 3:
-            info.bss_transition = bool((b[2] >> 3) & 1)   # бит 19
+        elif eid == 127 and b:
+            info.ext_caps = bytes(b)
+            info.bss_transition = len(b) >= 3 and bool((b[2] >> 3) & 1)   # бит 19
+        elif eid == 12 and b:
+            info.edca = True
+        elif eid == 32 and b:
+            info.power_constraint = b[0]
+        elif eid == 35 and b:
+            info.tpc_tx_power = b[0] - 256 if b[0] > 127 else b[0]
+        elif eid == 37:
+            info.csa = True
+        elif eid == 71:
+            info.multi_bssid = True
+        elif eid == 107 and b:
+            info.interworking = b[0]
+        elif eid == 108:
+            info.anqp = True
+        elif eid == 111:
+            info.roaming_consortium = True
+        elif eid == 114:
+            info.mesh_id = bytes(b)
         elif eid == 191 and len(b) >= 6:
             info.vht = True
             caps = int.from_bytes(b[0:4], "little")
@@ -320,11 +361,14 @@ def parse_ies(data: bytes) -> BssInfo:
             elif oui == OUI_MS and typ == 4:
                 info.wps = True
             else:
+                if oui == OUI_WFA and typ == 0x10:
+                    info.hs20 = True
                 info.vendor_ies.append((oui.hex("-"), typ, bytes(b[4:])))
         elif eid == 255 and len(b) >= 1:
             ext = b[0]
             if ext == EXT_HE_CAP:
                 info.he = True
+                info.he_mac = bytes(b[1:7])
                 _parse_he_cap(info, b)
             elif ext == EXT_HE_OP:
                 info.he = True
@@ -339,7 +383,10 @@ IE_NAMES = {
     0: "SSID", 1: "Supported Rates", 3: "DS Parameter Set", 5: "TIM", 7: "Country",
     11: "QBSS Load", 45: "HT Capabilities", 48: "RSN", 50: "Extended Supported Rates",
     54: "Mobility Domain (802.11r)", 61: "HT Operation", 70: "RM Enabled Capabilities (802.11k)",
-    127: "Extended Capabilities (802.11v)", 191: "VHT Capabilities", 192: "VHT Operation",
+    127: "Extended Capabilities", 191: "VHT Capabilities", 192: "VHT Operation",
+    12: "EDCA Parameter Set (802.11e)", 32: "Power Constraint (802.11h)", 35: "TPC Report (802.11h)",
+    37: "Channel Switch Announcement (802.11h)", 71: "Multiple BSSID", 107: "Interworking (802.11u)",
+    108: "Advertisement Protocol (802.11u)", 111: "Roaming Consortium (802.11u)", 114: "Mesh ID (802.11s)",
     221: "Vendor Specific", 255: "Extension",
 }
 EXT_NAMES = {
@@ -434,9 +481,30 @@ def _decode(eid: int, b: bytes):
         return "основной %d, %s" % (b[0], width), f
     if eid == 70 and b:
         return "neighbor report " + _yn(b[0] & 2), [("Neighbor report", _yn(b[0] & 2)), ("Сырой байт", "0x%02X" % b[0])]
-    if eid == 127 and len(b) >= 3:
-        bt = (b[2] >> 3) & 1
-        return "BSS Transition: " + _yn(bt), [("BSS Transition (бит 19)", _yn(bt))]
+    if eid == 127 and b:
+        on = [(n, name) for n, name in sorted(EXT_CAP_BITS.items()) if len(b) > n // 8 and b[n // 8] >> (n % 8) & 1]
+        f = [("Бит %d" % n, name) for n, name in on]
+        f.append(("Длина поля", "%d байт" % len(b)))
+        bt = len(b) >= 3 and (b[2] >> 3) & 1
+        return ("BSS Transition: " + _yn(bt) + ("; ещё %d" % (len(on) - bool(bt)) if len(on) > bool(bt) else "")), f
+    if eid == 32 and b:
+        return "%d дБ" % b[0], [("Снижение мощности относительно лимита страны", "%d дБ" % b[0])]
+    if eid == 35 and b:
+        tx = b[0] - 256 if b[0] > 127 else b[0]
+        return "TX %d дБм" % tx, [("Мощность передачи", "%d дБм" % tx)] + (
+            [("Link margin", "%d дБ" % b[1])] if len(b) >= 2 else [])
+    if eid == 37 and len(b) >= 3:
+        return "на канал %d через %d beacon" % (b[1], b[2]), [
+            ("Режим", "передача запрещена до переключения" if b[0] else "передача разрешена"),
+            ("Новый канал", b[1]), ("Через beacon", b[2])]
+    if eid == 107 and b:
+        ant = ACCESS_NETWORK_TYPE.get(b[0] & 0x0F, str(b[0] & 0x0F))
+        f = [("Тип сети", ant), ("Доступ в интернет", _yn(b[0] & 0x10)), ("ASRA (нужно доп. действие)", _yn(b[0] & 0x20)),
+             ("Экстренные службы (ESR)", _yn(b[0] & 0x40)), ("UESA", _yn(b[0] & 0x80))]
+        return ant + (", интернет" if b[0] & 0x10 else ""), f
+    if eid == 114:
+        t = b.decode("utf-8", "replace")
+        return t or "(пусто)", [("Mesh ID", t)]
     if eid == 191 and len(b) >= 6:
         from .mcs import VHT_MAP_MAX, map_text
         caps = int.from_bytes(b[0:4], "little")
@@ -487,6 +555,22 @@ def _decode(eid: int, b: bytes):
 
 
 VHT_WIDTHS = {0: "нет (до 80 МГц)", 1: "160 МГц", 2: "160 и 80+80 МГц", 3: "?"}
+
+# Interworking: Access Network Type (802.11u)
+ACCESS_NETWORK_TYPE = {0: "частная сеть", 1: "частная с гостевым доступом", 2: "платная публичная",
+                       3: "бесплатная публичная", 4: "личное устройство", 5: "только экстренные службы",
+                       14: "тестовая", 15: "любая (wildcard)"}
+
+# Биты Extended Capabilities (IEEE 802.11-2020, Table 9-153), которые показываем по имени
+EXT_CAP_BITS = {
+    0: "20/40 BSS Coexistence Management", 2: "Extended Channel Switching", 11: "FMS (802.11v)",
+    12: "Proxy ARP (802.11v)", 14: "Civic Location", 15: "Geospatial Location", 16: "TFS (802.11v)",
+    17: "WNM Sleep Mode (802.11v)", 18: "TIM Broadcast (802.11v)", 19: "BSS Transition (802.11v)",
+    22: "Multiple BSSID", 23: "Timing Measurement", 26: "DMS (802.11v)", 31: "Interworking (802.11u)",
+    32: "QoS Map (802.11u)", 46: "WNM Notification (802.11v)", 48: "UTF-8 SSID",
+    62: "Operating Mode Notification", 70: "FTM Responder (802.11mc)", 71: "FTM Initiator (802.11mc)",
+    72: "FILS (802.11ai)", 77: "TWT Requester", 78: "TWT Responder",
+}
 
 
 def _decode_he_cap(b: bytes):

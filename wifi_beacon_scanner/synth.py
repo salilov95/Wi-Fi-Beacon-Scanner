@@ -70,11 +70,37 @@ def rm_caps_ie(neighbor_report: bool = True) -> bytes:
     return ie(70, bytes([0x02 if neighbor_report else 0x00, 0, 0, 0, 0]))
 
 
-def ext_caps_ie(bss_transition: bool = True) -> bytes:
-    b = bytearray(8)
-    if bss_transition:
-        b[2] |= 1 << 3     # бит 19 = byte 2, bit 3
+def ext_caps_ie(bss_transition: bool = True, bits: Iterable[int] = ()) -> bytes:
+    bits = list(bits) + ([19] if bss_transition else [])      # бит 19 = byte 2, bit 3
+    b = bytearray(max(8, max(bits, default=0) // 8 + 1))
+    for n in bits:
+        b[n // 8] |= 1 << (n % 8)
     return ie(127, bytes(b))
+
+
+def power_constraint_ie(db: int = 3) -> bytes:
+    return ie(32, bytes([db]))
+
+
+def tpc_report_ie(tx_dbm: int = 17, margin: int = 0) -> bytes:
+    return ie(35, bytes([tx_dbm & 0xFF, margin]))
+
+
+def wmm_ie() -> bytes:
+    """WMM Parameter Element (OUI 00-50-F2, тип 2, подтип 1), упрощённо: только заголовок и QoS Info."""
+    return ie(221, b"\x00\x50\xf2\x02\x01\x01\x80\x00" + b"\x00" * 16)
+
+
+def interworking_ie(net_type: int = 0, internet: bool = True) -> bytes:
+    return ie(107, bytes([(net_type & 0x0F) | (0x10 if internet else 0)]))
+
+
+def anqp_ie() -> bytes:
+    return ie(108, b"\x7f\x00")      # Advertisement Protocol: ANQP
+
+
+def hs20_ie() -> bytes:
+    return ie(221, b"\x50\x6f\x9a\x10\x10")   # Wi-Fi Alliance, тип 0x10: Hotspot 2.0 Indication
 
 
 def ht_cap_ie(streams: int = 2) -> bytes:
@@ -105,14 +131,15 @@ def mcs_map(streams: int, val: int) -> int:
     return m
 
 
-def he_cap_ie(streams: int = 2, val: int = 2, w160: bool = False) -> bytes:
+def he_cap_ie(streams: int = 2, val: int = 2, w160: bool = False, twt: bool = False) -> bytes:
     """HE Capabilities: MAC caps (6), PHY caps (11), HE-MCS map <=80 (Rx, Tx), при w160 ещё карты для 160.
     val: 0 = MCS 0-7, 1 = 0-9, 2 = 0-11."""
     phy = bytearray(11)
     phy[0] = 0x02 | 0x04 | (0x08 if w160 else 0)      # Channel Width Set: 40 в 2.4, 40/80 в 5, 160 в 5
     m = mcs_map(streams, val)
     maps = struct.pack("<HH", m, m) + (struct.pack("<HH", m, m) if w160 else b"")
-    return ie(255, bytes([35]) + b"\x00" * 6 + bytes(phy) + maps)
+    mac = bytes([0x04 if twt else 0x00]) + b"\x00" * 5     # бит 2 - TWT Responder Support
+    return ie(255, bytes([35]) + mac + bytes(phy) + maps)
 
 
 def he_op_ie(color: int = 5, basic: int = 0xFFFC, six: Optional[tuple] = None) -> bytes:

@@ -19,10 +19,10 @@
       <select id="iface"></select>
     </label>
     <button id="scan" class="primary" type="button">Сканировать</button>
-    <label class="chk"><input type="checkbox" id="auto"> Авто
+    <label class="chk"><input type="checkbox" id="auto" checked> Авто
       <select id="interval" aria-label="Интервал автоскана">
-        <option value="5">5 с</option>
-        <option value="10" selected>10 с</option>
+        <option value="5" selected>5 с</option>
+        <option value="10">10 с</option>
         <option value="30">30 с</option>
         <option value="60">60 с</option>
       </select>
@@ -65,10 +65,12 @@
         <div class="keys">
           <span><kbd>F5</kbd></span><span>сканировать</span>
           <span><kbd>/</kbd></span><span>поиск по таблице</span>
-          <span><kbd>1</kbd> … <kbd>9</kbd></span><span>вкладки</span>
+          <span><kbd>1</kbd> … <kbd>0</kbd></span><span>вкладки</span>
           <span><kbd>↑</kbd> <kbd>↓</kbd></span><span>строки таблицы</span>
           <span><kbd>Esc</kbd></span><span>сбросить поиск и подсветку</span>
         </div>
+        <div class="mtitle">Журнал программы</div>
+        <button type="button" id="openLogs" class="small">Открыть папку с журналом</button>
       </div>
     </span>
     <button id="quit" type="button" class="ghost">Выход</button>
@@ -99,6 +101,16 @@
       <option value="ent">Enterprise</option>
       <option value="wpa3">WPA3 и OWE</option>
     </select>
+    <span class="menu">
+      <button type="button" data-menu="stdMenu" id="stdBtn" aria-haspopup="true">802.11 ▾</button>
+      <div class="menu-list std" id="stdMenu" hidden>
+        <div class="mtitle">Дополнения 802.11 из beacon</div>
+        <label class="chk"><input type="radio" name="stdMode" value="all" checked> есть все отмеченные</label>
+        <label class="chk"><input type="radio" name="stdMode" value="none"> нет ни одного из отмеченных</label>
+        <div class="stdlist" id="stdList"></div>
+        <button type="button" id="stdReset" class="small">Сбросить</button>
+      </div>
+    </span>
     <input id="q" type="search" placeholder="Поиск: SSID, BSSID, вендор" autocomplete="off" spellcheck="false">
     <label class="chk"><input type="checkbox" id="group"> По SSID</label>
     <label class="chk" id="onlyFocusWrap" hidden><input type="checkbox" id="onlyFocus"> Только мои</label>
@@ -122,12 +134,12 @@
       <button type="button" role="tab" data-tab="util">Утилизация</button>
       <button type="button" role="tab" data-tab="signal">Сигнал во времени</button>
       <button type="button" role="tab" data-tab="conn">Подключение</button>
-      <button type="button" role="tab" data-tab="sessions">Сессии</button>
       <button type="button" role="tab" data-tab="survey">Обход</button>
       <button type="button" role="tab" data-tab="findings">Проблемы<span class="cnt" id="cntFind"></span></button>
       <button type="button" role="tab" data-tab="beacon">Beacon</button>
-      <button type="button" role="tab" data-tab="compare">Сравнение<span class="cnt" id="cntDiff"></span></button>
       <span class="grow"></span>
+      <button type="button" role="tab" data-tab="sessions">Сессии</button>
+      <button type="button" role="tab" data-tab="compare">Сравнение<span class="cnt" id="cntDiff"></span></button>
       <button type="button" id="maxBtn" class="ghost small">Развернуть</button>
     </nav>
     <div class="panelbody" id="panelBody"></div>

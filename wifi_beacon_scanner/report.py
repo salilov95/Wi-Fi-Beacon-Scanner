@@ -8,6 +8,7 @@ from datetime import datetime
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
+from . import amend
 from .mcs import capability
 from .model import Bss, Snapshot
 from .rules import CRITICAL, INFO, WARNING, Finding
@@ -17,6 +18,7 @@ SEV_RU = {CRITICAL: "Критично", WARNING: "Внимание", INFO: "Ин
 CSV_COLUMNS = [
     "ssid", "bssid", "vendor", "band_ghz", "channel", "width_mhz", "rssi_dbm", "link_quality",
     "security", "ciphers", "generation", "streams", "phy", "max_mcs", "max_rate_mbps", "dot11k", "dot11r", "dot11v",
+    "standards",
     "util_pct", "stations", "country", "beacon_interval", "dtim",
 ]
 
@@ -29,6 +31,7 @@ def _row(b: Bss) -> List[object]:
         b.security, "/".join(b.ciphers), b.generation_label, i.max_streams or "",
         cap["phy"], "" if cap["mcs"] is None else cap["mcs"], "" if cap["rate"] is None else round(cap["rate"], 1),
         "yes" if i.dot11k else "no", "yes" if i.dot11r else "no", "yes" if i.dot11v else "no",
+        amend.short(amend.standards(b)),
         "" if i.qbss_util_pct is None else i.qbss_util_pct,
         "" if i.qbss_stations is None else i.qbss_stations,
         i.country or "", b.beacon_interval, "" if i.dtim_period is None else i.dtim_period,
@@ -190,8 +193,7 @@ _TABLE_COLS = [
     ("ГГц", lambda b: b.band), ("Канал", lambda b: b.channel), ("Ширина", lambda b: b.info.width_mhz),
     ("RSSI", lambda b: b.rssi), ("Безопасность", lambda b: b.security), ("Поколение", lambda b: b.generation_label),
     ("Макс. MCS", lambda b: _mcs_cell(b)), ("Макс. PHY, Мбит/с", lambda b: _rate_cell(b)),
-    ("k", lambda b: "+" if b.info.dot11k else "-"), ("r", lambda b: "+" if b.info.dot11r else "-"),
-    ("v", lambda b: "+" if b.info.dot11v else "-"),
+    ("802.11", lambda b: amend.short(amend.standards(b))),
     ("Загрузка", lambda b: "" if b.info.qbss_util_pct is None else "%.0f%%" % b.info.qbss_util_pct),
     ("Станций", lambda b: "" if b.info.qbss_stations is None else b.info.qbss_stations),
     ("Страна", lambda b: b.info.country or ""),

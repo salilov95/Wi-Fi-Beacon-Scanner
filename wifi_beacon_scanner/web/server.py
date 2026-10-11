@@ -25,7 +25,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, List, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from .. import report
+from .. import applog, report
 from ..pdf import PdfError, html_to_pdf
 from ..rules import channel_utilization
 from ..model import Snapshot
@@ -58,13 +58,15 @@ class Lifeline:
     """
 
     def __init__(self, idle_s: float = 3600, first_s: float = 300, bye_grace_s: float = 5,
-                 clock=time.monotonic) -> None:
+                 relaunch_grace_s: float = 4, clock=time.monotonic) -> None:
         self.idle_s, self.first_s, self.bye_grace_s, self.clock = idle_s, first_s, bye_grace_s, clock
         self._lock = threading.Lock()
         self.started = clock()
         self.last: Optional[float] = None
         self.bye_at: Optional[float] = None
         self.window = None          # subprocess.Popen окна Edge, если оно наше
+        self.window_gone_at: Optional[float] = None
+        self.relaunch_grace_s = relaunch_grace_s
 
     def touch(self) -> None:
         with self._lock:
@@ -79,6 +81,7 @@ class Lifeline:
 
     def attach_window(self, proc) -> None:
         self.window = proc
+        self.window_gone_at = None
 
     def _bye_expired(self, now: float, last: Optional[float], bye_at: Optional[float]) -> bool:
         return bye_at is not None and (last is None or last <= bye_at) and now - bye_at >= self.bye_grace_s
@@ -93,9 +96,20 @@ class Lifeline:
                 # окно живо; выходим только если его явно закрыли (bye при видимой странице),
                 # а Edge остался работать в фоне
                 return "окно закрыто" if self._bye_expired(now, last, bye_at) else None
-            if last is not None or now - self.started > 10:
+            if self.window_gone_at is None:
+                self.window_gone_at = now
+                log.info("процесс окна Edge завершился (код %s)", w.poll())
+            if last is not None and last - self.window_gone_at >= 1.5:
+                # страница продолжает опрашивать программу: Edge перезапустил себя (бывает при первом
+                # запуске с новым профилем) или отдал окно уже запущенному экземпляру - окно живо
+                log.info("окно живо после завершения процесса Edge: дальше следим по запросам страницы")
+                self.window = None
+            elif now - self.window_gone_at < self.relaunch_grace_s:
+                return None
+            elif last is not None or now - self.started > 10:
                 return "окно Edge закрыто"
-            self.window = None      # Edge сразу отдал окно уже запущенному экземпляру: следим по запросам
+            else:
+                self.window = None      # Edge сразу отдал окно уже запущенному экземпляру: следим по запросам
         if self._bye_expired(now, last, bye_at):
             return "окно закрыто"
         if last is None:
@@ -113,6 +127,7 @@ class WifiServer(ThreadingHTTPServer):
         self.state = state
         self.token = token
         self.lifeline = Lifeline()
+        self.clientlog_window, self.clientlog_count = 0.0, 0
 
     @property
     def port(self) -> int:
@@ -154,6 +169,39 @@ class Handler(BaseHTTPRequestHandler):
     def _token_ok(self, query_token: Optional[str] = None) -> bool:
         t = self.headers.get("X-Token") or query_token or ""
         return secrets.compare_digest(t, self.server.token)
+
+    def _clientlog(self) -> None:
+        """Ошибки и предупреждения страницы. Ограничения: 4 КБ на запрос, 60 записей в минуту."""
+        srv = self.server
+        now = time.monotonic()
+        if now - srv.clientlog_window >= 60:
+            srv.clientlog_window, srv.clientlog_count = now, 0
+        srv.clientlog_count += 1
+        try:
+            body = self._body_json()
+        except ValueError:
+            body = {}
+        if srv.clientlog_count <= 60 and isinstance(body, dict):
+            level = logging.ERROR if body.get("level") == "error" else logging.WARNING
+            msg = str(body.get("msg", ""))[:4000].replace("\r", " ").replace("\n", " | ")
+            logging.getLogger("wifi_beacon_scanner.page").log(level, "%s", msg)
+        self._json(200, {"ok": True})
+
+    def _open_target(self, target: str) -> None:
+        """Открывает на компьютере то, что нельзя открыть из страницы: параметры Windows или папку журнала."""
+        if target == "location-settings":
+            uri = "ms-settings:privacy-location"
+        elif target == "logs":
+            uri = applog.log_dir()
+        else:
+            return self._json(400, {"error": "неизвестная цель"})
+        if sys.platform != "win32":
+            return self._json(200, {"ok": False, "path": uri})
+        try:
+            os.startfile(uri)       # type: ignore[attr-defined]
+        except OSError as e:
+            return self._json(500, {"error": "не удалось открыть %s: %s" % (uri, e)})
+        return self._json(200, {"ok": True, "path": uri})
 
     def _body_json(self) -> Any:
         n = int(self.headers.get("Content-Length") or 0)
@@ -233,6 +281,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(403, {"error": "bad token"})
         st = self.server.state
         path = urlparse(self.path).path
+        if path == "/api/clientlog":           # ошибки страницы - в журнал программы
+            return self._clientlog()
         if path == "/api/bye":                 # окно закрывается (или перезагружается)
             self.server.lifeline.bye()
             return self._json(200, {"ok": True})
@@ -287,6 +337,8 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     st.set_baseline(Snapshot.from_json(json.dumps(body)))
                 return self._json(200, {"ok": True})
+            if path == "/api/open":
+                return self._open_target(str(body.get("target", "")))
             if path == "/api/quit":
                 self._json(200, {"ok": True})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
@@ -403,9 +455,11 @@ def open_window(url: str):
             profile = app_profile_dir()
             try:
                 os.makedirs(profile, exist_ok=True)
-                return subprocess.Popen(window_command(edge, url, profile))
+                proc = subprocess.Popen(window_command(edge, url, profile))
+                log.info("окно Edge запущено: pid %d, %s", proc.pid, edge)
+                return proc
             except OSError as e:
-                print("не удалось открыть окно Edge со своим профилем: %s" % e)
+                log.warning("не удалось открыть окно Edge со своим профилем: %s", e)
                 subprocess.Popen([edge, "--app=" + url])
                 return None
     webbrowser.open(url)
@@ -416,7 +470,7 @@ def _watchdog(server: WifiServer, stop: threading.Event) -> None:
     while not stop.wait(1.0):
         why = server.lifeline.should_exit()
         if why:
-            print("завершение: %s" % why)
+            log.info("завершение: %s", why)
             server.shutdown()
             return
 
@@ -428,6 +482,7 @@ def serve(state: AppState, port: int = 0, open_browser: bool = True, exit_when_c
     state.start_monitors()
     url = app_url(server)
     print("Интерфейс: %s" % url)
+    log.info("сервер слушает 127.0.0.1:%d, журнал: %s", server.port, applog.log_path() or "только консоль")
     print("Остановить: кнопка «Выход» в окне или Ctrl+C")
     stop = threading.Event()
     if open_browser if exit_when_closed is None else exit_when_closed:
