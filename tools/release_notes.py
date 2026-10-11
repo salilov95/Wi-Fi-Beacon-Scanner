@@ -14,6 +14,8 @@ def section(version: str) -> str:
     with open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8") as f:
         text = f.read()
     m = re.search(r"^## \[?%s\]?[^\n]*\n(.*?)(?=^## |^\[[^\]]+\]: |\Z)" % re.escape(version), text, re.S | re.M)
+    if not m:      # черновик: раздел «Не выпущено»
+        m = re.search(r"^## \[Не выпущено\][^\n]*\n(.*?)(?=^## |^\[[^\]]+\]: |\Z)", text, re.S | re.M)
     return m.group(1).strip() if m else ""
 
 

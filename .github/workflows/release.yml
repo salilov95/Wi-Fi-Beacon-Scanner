@@ -14,6 +14,10 @@ on:
         description: "Опубликовать GitHub Release v<версия из wifi_beacon_scanner/__init__.py>"
         type: boolean
         default: false
+      draft:
+        description: "Черновик: собрать и выложить черновой pre-release для проверки (не публикуется)"
+        type: boolean
+        default: false
 
 env:
   PYTHONUTF8: "1"     # кириллица в выводе Python на Windows
@@ -39,7 +43,7 @@ jobs:
           if ("${{ github.ref_type }}" -eq "tag") {
             if ("v$v" -ne "${{ github.ref_name }}") { throw "tag ${{ github.ref_name }} does not match version $v" }
             $tag = "${{ github.ref_name }}"
-          } elseif ("${{ inputs.publish }}" -eq "true") {
+          } elseif ("${{ inputs.publish }}" -eq "true" -or "${{ inputs.draft }}" -eq "true") {
             $tag = "v$v"
           }
           "version=$v" >> $env:GITHUB_OUTPUT
@@ -99,4 +103,14 @@ jobs:
           $tag = "${{ steps.ver.outputs.tag }}"
           $setup = (Get-ChildItem dist/installer/*.exe | Select-Object -First 1).FullName
           python tools/release_notes.py ${{ steps.ver.outputs.version }} --setup (Split-Path $setup -Leaf) --out release-notes.md
-          gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md
+          if ("${{ inputs.draft }}" -eq "true") {
+            # прошлый черновик этой версии заменяем новым
+            $old = gh release view $tag --json isDraft -q .isDraft 2>$null
+            if ($old -eq "true") { gh release delete $tag --yes }
+            gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --draft --prerelease --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag (черновик, ${{ github.ref_name }})" --notes-file release-notes.md
+          } else {
+            # черновик этой же версии больше не нужен: публикуем настоящий релиз
+            $old = gh release view $tag --json isDraft -q .isDraft 2>$null
+            if ($old -eq "true") { gh release delete $tag --yes }
+            gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md
+          }

@@ -59,7 +59,7 @@ class XlsxTests(unittest.TestCase):
         data = report.build_xlsx_report(snap, f, ["CORP"], "только мои", util=channel_utilization(bss),
                                         history={"02:00:00:00:20:01": [(1e9, -55, 70.6)]}, journal=journal, survey=survey)
         wb = openpyxl.load_workbook(io.BytesIO(data))
-        self.assertEqual(wb.sheetnames, ["Сводка", "BSS", "Находки", "Загрузка каналов", "История", "Журнал подключения", "Обход"])
+        self.assertEqual(wb.sheetnames, ["Сводка", "BSS", "Проблемы", "Загрузка каналов", "История", "Журнал подключения", "Обход"])
         self.assertEqual(wb["BSS"].max_row, 3)
         self.assertEqual(wb["Загрузка каналов"]["C2"].value, 70.6)
         obh = [c.value for c in wb["Обход"][2]]

@@ -37,3 +37,6 @@ jobs:
       - name: PDF through Microsoft Edge (Windows)
         if: runner.os == 'Windows'
         run: python -c "import time; from wifi_beacon_scanner import pdf; t=time.time(); d=pdf.html_to_pdf('<h1>Проверка печати</h1>'); assert d.startswith(b'%PDF'); print('::notice title=PDF::Edge напечатал %d байт за %.1f с (%s)' % (len(d), time.time()-t, pdf.find_browser()))"
+      - name: App window lifecycle (Windows)
+        if: runner.os == 'Windows'
+        run: python tools/smoke_window.py

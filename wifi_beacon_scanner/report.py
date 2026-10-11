@@ -191,7 +191,7 @@ def render_html(snap: Snapshot, findings: Sequence[Finding], focus: Sequence[str
     out.append("<div class='sum'><div><b>%d</b>BSS</div><div><b>%d</b>SSID</div>"
                "<div><b>%d</b>Критично</div><div><b>%d</b>Внимание</div><div><b>%d</b>Информация</div></div>"
                % (len(snap.bss), ssids, c[CRITICAL], c[WARNING], c[INFO]))
-    out.append("<h2>Находки</h2>")
+    out.append("<h2>Проблемы</h2>")
     if not findings:
         out.append("<p class='mut'>Проблем по заданным правилам не найдено.</p>")
     for f in findings:
@@ -266,7 +266,7 @@ def build_xlsx_report(snap: Snapshot, findings: Sequence[Finding], focus: Sequen
                                 ["Снято", snap.taken_at], ["Адаптер", snap.interface or "-"],
                                 ["В отчёт включены", scope_note or "все сети"], ["Мои SSID", ", ".join(focus) or "-"],
                                 ["BSS", len(snap.bss)], ["SSID", len({b.ssid_display for b in snap.bss if not b.hidden})],
-                                ["Находки: критично", c[CRITICAL]], ["Находки: внимание", c[WARNING]], ["Находки: информация", c[INFO]]]
+                                ["Проблемы: критично", c[CRITICAL]], ["Проблемы: внимание", c[WARNING]], ["Проблемы: информация", c[INFO]]]
     if journal and journal.get("events"):
         st = journal.get("stats", {})
         summary += [["Роумингов ноутбука", st.get("roams", 0)], ["Обрывов", st.get("disconnects", 0)],
@@ -276,7 +276,7 @@ def build_xlsx_report(snap: Snapshot, findings: Sequence[Finding], focus: Sequen
     sheets.append(("BSS", bss_rows))
     fr: List[List[Any]] = [["Важность", "Код", "Проблема", "Подробности", "Что проверить", "SSID", "BSSID"]]
     fr += [[SEV_RU[f.severity], f.code, f.title, f.detail, f.recommendation, f.ssid, ", ".join(f.bssids)] for f in findings]
-    sheets.append(("Находки", fr))
+    sheets.append(("Проблемы", fr))
     if util and util.get("channels"):
         ur: List[List[Any]] = [["ГГц", "Канал", "Загрузка макс, %", "Загрузка средн, %", "Уровень", "AP с данными", "BSS на канале",
                                 "Станций", "Самые загруженные"]]

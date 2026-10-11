@@ -12,7 +12,7 @@
 
 Тихая установка для раздачи на много ноутбуков (SCCM, Intune, GPO, PDQ):
 
-    WiFiBeaconScanner-Setup-0.7.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+    WiFiBeaconScanner-Setup-0.8.0.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 
 Тихое удаление:
 
