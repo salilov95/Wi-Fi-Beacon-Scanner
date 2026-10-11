@@ -2,7 +2,7 @@
 
 Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
 
-## [Не выпущено] - черновик 1.0.1
+## [1.0.1] - 2026-10-11
 
 ### Исправлено
 - Supported Rates / Extended Supported Rates: служебные коды BSS membership selector (HT PHY, VHT PHY,
@@ -134,6 +134,7 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
+[1.0.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.1
 [1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0
 [0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0
 [0.8.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.8.0
