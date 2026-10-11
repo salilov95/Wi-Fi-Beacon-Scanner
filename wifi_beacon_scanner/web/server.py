@@ -254,6 +254,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, {"events": events, "error": "", "hours": hours})
         if u.path == "/api/prefs":
             return self._json(200, st.prefs)
+        if u.path == "/api/about":
+            return self._json(200, about(st))
+        if u.path == "/api/update":
+            from .. import __version__, update
+            return self._json(200, update.check(__version__))
         if u.path == "/api/survey/plan":
             with st.lock:
                 mime, data = st.survey.plan_mime, st.survey.plan
@@ -418,6 +423,16 @@ def make_server(state: AppState, port: int = 0) -> WifiServer:
 
 def app_url(server: WifiServer) -> str:
     return "http://127.0.0.1:%d/?t=%s" % (server.port, server.token)
+
+
+def about(st: AppState) -> dict:
+    """Окно «О программе»: что запущено и где искать журнал."""
+    import platform
+    from .. import __version__
+    return {"version": __version__, "backend": st.backend.name, "python": platform.python_version(),
+            "os": "%s %s" % (platform.system(), platform.version()), "exe": sys.executable,
+            "frozen": bool(getattr(sys, "frozen", False)), "log": applog.log_path() or "", "log_dir": applog.log_dir(),
+            "prefs": st.prefs_path or "", "repo": "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"}
 
 
 def _find_edge() -> Optional[str]:

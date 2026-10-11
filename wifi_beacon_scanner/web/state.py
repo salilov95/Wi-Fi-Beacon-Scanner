@@ -30,7 +30,7 @@ ADVICE_BANDS = ("2.4", "5")
 
 
 PREF_THEMES = {"auto", "light", "dark", "nord", "solar", "paper", "contrast"}
-PREF_TABS = {"channels", "overview", "util", "signal", "conn", "sessions", "survey", "findings", "beacon", "compare"}
+PREF_TABS = {"channels", "overview", "util", "signal", "conn", "sessions", "winlog", "survey", "findings", "beacon", "compare"}
 _COL_RE = re.compile(r"^[a-z_]{1,24}$")
 
 
@@ -85,6 +85,11 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["panelH"] = int(d["panelH"])
     if isinstance(d.get("v"), int) and not isinstance(d.get("v"), bool) and 0 <= d["v"] <= 100:
         out["v"] = d["v"]
+    cw = d.get("colW")
+    if isinstance(cw, dict):
+        out["colW"] = {k: int(v) for k, v in list(cw.items())[:40]
+                       if isinstance(k, str) and _COL_RE.match(k) and isinstance(v, (int, float))
+                       and not isinstance(v, bool) and 20 <= v <= 2000}
     cols = d.get("cols")
     if isinstance(cols, list):
         out["cols"] = [c for c in cols if isinstance(c, str) and _COL_RE.match(c)][:40]
@@ -167,6 +172,9 @@ class AppState:
         self.error: Optional[str] = None
         self.error_kind: str = ""          # "location" - нет разрешения на расположение (Windows 11 24H2+)
         self.last_scan_ms: Optional[int] = None
+        self._scan_stats: List[int] = []    # число BSS по сканам с прошлой сводки в журнале
+        self._scan_stats_t = time.monotonic()
+        self._last_scan_ok = True
         self.scan_count = 0
         self.interfaces: List[str] = []
         self.interfaces_error: Optional[str] = None
@@ -313,14 +321,14 @@ class AppState:
             with self.lock:
                 self.error, self.error_kind = None, ""
                 self.last_scan_ms = int((time.time() - started) * 1000)
-                if not snap.bss:
-                    log.warning("скан #%d вернул пустой список сетей (%s)", self.scan_count + 1, snap.interface)
+                self._log_scan(snap)
                 self._apply(snap, record_history=True)
                 self.conn.check_scan(time.time(), snap.bss)
                 self.survey.fill(started, snap.bss, self._conn_point())
         except Exception as e:  # noqa: BLE001
-            if getattr(e, "kind", "") != "location":
-                log.exception("скан не удался")
+            if getattr(e, "kind", "") != "location" and (self._last_scan_ok or str(e) != self.error):
+                log.exception("скан не удался")      # одинаковая ошибка подряд - один раз
+            self._last_scan_ok = False
             with self.lock:
                 self.error = str(e)
                 self.error_kind = getattr(e, "kind", "") or ""
@@ -331,6 +339,24 @@ class AppState:
                 again = self.survey.pending_after(started)
         if again:                       # точку поставили во время скана: нужен скан уже из новой позиции
             self.start_scan(idx, wait_s)
+
+    def _log_scan(self, snap: Snapshot) -> None:
+        """Журнал без шума: первый скан, пустые сканы, восстановление после ошибки и сводка раз в 10 минут."""
+        n = len(snap.bss)
+        if self.scan_count == 0:
+            log.info("первый скан (%s): BSS %d за %d мс", snap.interface, n, self.last_scan_ms or 0)
+        elif not self._last_scan_ok and n:
+            log.info("скан снова работает: BSS %d", n)
+        if not n:
+            log.warning("скан #%d вернул пустой список сетей (%s)", self.scan_count + 1, snap.interface)
+        self._last_scan_ok = bool(n)
+        self._scan_stats.append(n)
+        now = time.monotonic()
+        if now - self._scan_stats_t >= 600:
+            st = self._scan_stats
+            log.info("за %d мин сканов %d, BSS мин/сред/макс %d/%d/%d", round((now - self._scan_stats_t) / 60), len(st),
+                     min(st), round(sum(st) / len(st)), max(st))
+            self._scan_stats, self._scan_stats_t = [], now
 
     # ---- экспорт: какие сети включать ----
     def export_view(self, scope: str, bssids: Optional[List[str]] = None):

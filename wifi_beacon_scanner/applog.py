@@ -42,6 +42,9 @@ def setup(level: int = logging.INFO, directory: Optional[str] = None) -> Optiona
     if sys.stderr is not None:          # в exe без консоли sys.stderr = None
         h = logging.StreamHandler(sys.stderr)
         h.setFormatter(fmt)
+        # в переносном exe консоль видит пользователь: туда только предупреждения и ошибки,
+        # подробности - в файле. Из исходников (и в CI) - всё.
+        h.setLevel(logging.WARNING if getattr(sys, "frozen", False) else level)
         root.addHandler(h)
     d = directory or log_dir()
     try:

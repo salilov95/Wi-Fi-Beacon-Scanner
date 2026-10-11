@@ -132,6 +132,12 @@ th,td{padding:var(--row) 9px;text-align:left;white-space:nowrap;border-bottom:1p
 th{position:sticky;top:0;background:var(--surface);z-index:1;cursor:pointer;user-select:none;font-weight:600;
   color:var(--mut);box-shadow:0 1px 0 var(--line)}
 th.sorted{color:var(--fg)}
+.colrz{position:absolute;top:0;right:0;width:8px;height:100%;cursor:col-resize;z-index:2;touch-action:none}
+.colrz::after{content:"";position:absolute;right:0;top:22%;height:56%;border-left:1px solid var(--line)}
+th:hover .colrz::after,.colrz.on::after{border-left:2px solid var(--accent)}
+table.fixed{table-layout:fixed;width:auto}
+table.fixed th,table.fixed td{overflow:hidden;text-overflow:ellipsis}
+body.colresize,body.colresize *{cursor:col-resize!important;user-select:none}
 th .arr{font-size:10px;margin-left:3px}
 td.num,th.num{text-align:right}
 td.num{font-family:var(--num);font-variant-numeric:tabular-nums;font-size:13.5px}
@@ -356,6 +362,13 @@ table.ses tr.sesr{cursor:pointer}
 table.ses tr.sesr.sel td{background:var(--hl)}
 td.wrapcell{white-space:normal;max-width:420px}
 .sesd{border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:10px 0}
+.tabs .cnt.bad{color:var(--bad)}
+.wlr{cursor:pointer}.wlr:hover td{background:var(--sel)}
+.wld td{background:var(--surface2,transparent);padding:4px 10px 10px}
+.wld dl{margin:0}
+.wltop{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 10px}
+.wltop .it b{font-family:var(--num)}
+.toolbar .lbl{color:var(--mut);margin-left:6px}
 svg.tlsvg{width:100%;height:44px;display:block}
 .tlscale{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin:0 6px 4px}
 svg.chart .tl{stroke:none}

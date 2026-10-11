@@ -109,7 +109,7 @@ async function api(path, body, raw) {
 
 // ---------- состояние ----------
 const OPEN_IE = [45, 48, 61, 191, 192, 255];   // какие IE раскрыты по умолчанию
-const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'sessions', 'compare'];
+const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'sessions', 'winlog', 'compare'];
 const S = {
   data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '', std: [], stdMode: 'all',
   bands: {'2.4': true, '5': true, '6': true}, collapsed: new Set(),
@@ -154,6 +154,7 @@ function normalizePrefs() {
   if (!Array.isArray(P.cols)) P.cols = COLS.filter((c) => c.on).map((c) => c.k);
   if (!(P.v >= 2)) { if (!P.cols.includes('trend')) P.cols.push('trend'); P.v = 2; }   // колонка появилась в этой версии
   if (P.v < 3) { for (const k of ['mcs', 'rate']) if (!P.cols.includes(k)) P.cols.push(k); P.v = 3; }
+  if (!P.colW || typeof P.colW !== 'object' || Array.isArray(P.colW)) P.colW = {};
   if (P.v < 4) { P.cols = P.cols.map((k) => k === 'krv' ? 'std' : k); if (!P.cols.includes('std')) P.cols.push('std'); P.v = 4; }
 
 }
@@ -214,7 +215,7 @@ function cell(b, k) {
     case 'ssid': {
       const cur = S.data.conn && S.data.conn.current;
       const me = cur && cur.state === 'connected' && cur.bssid === b.bssid ? '<span class="tag me" title="К этой BSS сейчас подключён ноутбук">подключён</span>' : '';
-      return `<td><span class="dot" style="background:${ssidColor(b.ssid)}"></span>${esc(b.ssid)}${b.hidden ? '<span class="tag">скрыт</span>' : ''}${me}</td>`;
+      return `<td title="${esc(b.ssid)}"><span class="dot" style="background:${ssidColor(b.ssid)}"></span>${esc(b.ssid)}${b.hidden ? '<span class="tag">скрыт</span>' : ''}${me}</td>`;
     }
     case 'bssid': return `<td class="mono">${esc(b.bssid)}${b.random_mac ? '<span class="tag" title="Локально администрируемый MAC">L</span>' : ''}</td>`;
     case 'rssi': {
@@ -240,7 +241,7 @@ function cell(b, k) {
     case 'streams': return `<td class="num">${b.streams || ''}</td>`;
     case 'band': case 'channel': case 'width': case 'seen_pct': case 'stations': case 'beacon': case 'dtim': case 'quality':
       return `<td class="num">${b[k] == null ? '' : esc(b[k])}</td>`;
-    default: return `<td>${esc(b[k])}</td>`;
+    default: return `<td title="${esc(b[k])}">${esc(b[k])}</td>`;
   }
 }
 
@@ -264,12 +265,47 @@ function spark(b) {
     `<circle cx="${x(vs.length - 1).toFixed(1)}" cy="${y(vs[vs.length - 1]).toFixed(1)}" r="2.4" style="fill:${sigFill(vs[vs.length - 1])}"/></svg></td>`;
 }
 
+// Ширина столбцов: пока пользователь ничего не тянул - автоматическая. Как только потянул границу,
+// ширины всех видимых столбцов фиксируются (table-layout: fixed) и запоминаются в настройках.
+const COLW_MIN = 36, COLW_MAX = 900, COLW_NEW = 110;
+function colWidths() { return P.colW && Object.keys(P.colW).length ? P.colW : null; }
+function applyColWidths() {
+  const W = colWidths(), cols = shownCols(), tbl = $('tbl');
+  if (!W) { $('cols').innerHTML = ''; tbl.classList.remove('fixed'); tbl.style.width = ''; return; }
+  const ws = cols.map((c) => W[c.k] || COLW_NEW);
+  $('cols').innerHTML = ws.map((w) => `<col style="width:${w}px">`).join('');
+  tbl.classList.add('fixed');
+  tbl.style.width = ws.reduce((a, b) => a + b, 0) + 'px';
+}
+function freezeColWidths() {
+  if (colWidths()) return;
+  P.colW = {};
+  // с запасом в 2 px: при дробной ширине текст обрезался бы многоточием
+  for (const th of $('thead').querySelectorAll('th')) P.colW[th.dataset.k] = Math.ceil(th.getBoundingClientRect().width) + 2;
+}
+function fitColumn(k) {
+  const idx = shownCols().findIndex((c) => c.k === k);
+  if (idx < 0) return;
+  freezeColWidths();
+  let w = COLW_MIN;
+  const th = $('thead').children[idx];
+  w = Math.max(w, th.scrollWidth + 14);
+  for (const tr of $('tbody').querySelectorAll('tr:not(.grp)')) {
+    const td = tr.children[idx];
+    if (td) w = Math.max(w, td.scrollWidth + 2);
+  }
+  P.colW[k] = Math.min(COLW_MAX, Math.ceil(w));
+  savePrefs(); applyColWidths();
+}
+
 function renderHead() {
   $('thead').innerHTML = shownCols().map((c) => {
     const on = S.sort.k === c.k;
     const arr = on ? `<span class="arr">${S.sort.dir > 0 ? '▲' : '▼'}</span>` : '';
-    return `<th data-k="${c.k}" tabindex="0" class="${on ? 'sorted' : ''}${c.num ? ' num' : ''}">${esc(c.t)}${arr}</th>`;
+    return `<th data-k="${c.k}" tabindex="0" class="${on ? 'sorted' : ''}${c.num ? ' num' : ''}">${esc(c.t)}${arr}` +
+      `<span class="colrz" data-rz="${c.k}" title="Потяни - ширина столбца, двойной щелчок - по содержимому"></span></th>`;
   }).join('');
+  applyColWidths();
 }
 
 function rowHtml(b, cols, fs) {
@@ -882,7 +918,7 @@ function sesDetails(s) {
     kv('IPv4', s.ip ? esc(s.ip) + (s.dhcp_server ? `, DHCP-сервер ${esc(s.dhcp_server)}` : '') : '') +
     kv('IP / DHCP', esc(s.ip_note)) +
     kv('Аренда получена', s.lease_obtained ? new Date(s.lease_obtained * 1000).toLocaleTimeString('ru-RU') : '') +
-    '</dl></div></div></div>';
+    '</dl></div></div>' + sesWinEvents(s) + '</div>';
 }
 
 function renderSessions() {
@@ -919,31 +955,113 @@ function renderSessions() {
   const note = '<p class="mut small">Стадии - по уведомлениям Windows (ACM, MSM, 802.1X). «Аутентификация» включает обмен EAP и 4-way handshake: ' +
     'отдельно 4-way Windows не сообщает. «До IPv4» - от подключения до новой аренды DHCP (DORA) или появления адреса; если адрес остался с прошлого подключения, ожидания нет. ' +
     'Время роуминга считается от начала ассоциации с новой точкой.</p>';
-  return stats + tools + table + (sel ? sesDetails(sel) : '') + note + renderWinlog();
+  return stats + tools + table + (sel ? sesDetails(sel) : '') + note;
+}
+
+// ---------- журнал Windows: WLAN-AutoConfig/Operational ----------
+// Загружается сам при запуске (за сутки) и обновляется раз в минуту, пока программа открыта.
+const WL_GROUPS = [['all', 'все'], ['подключение', 'подключение'], ['ассоциация', 'ассоциация'], ['безопасность / 4-way', 'безопасность / 4-way'], ['802.1X', '802.1X'], ['прочее', 'прочее']];
+const WL_PERIODS = [[24, '24 ч'], [72, '3 дня'], [168, 'неделя']];
+const wlKey = (e) => e.t + ':' + e.id;
+const wlBad = (e) => e.level === 1 || e.level === 2;
+const wlCls = (e) => wlBad(e) ? 'critical' : e.level === 3 ? 'warning' : '';
+function wlReason(e) {
+  const d = e.data || {};
+  return e.reason || d.FailureReason || d.ReasonCode || '';
+}
+function wlFiltered() {
+  const W = S.winlog;
+  let ev = W && W.events ? W.events : [];
+  if (S.wlGroup && S.wlGroup !== 'all') ev = ev.filter((e) => e.group === S.wlGroup);
+  if (S.wlLevel === 'bad') ev = ev.filter((e) => e.level && e.level <= 3);
+  return ev;
 }
 
 function renderWinlog() {
   const W = S.winlog;
-  const head = '<div class="sub">Журнал Windows: WLAN-AutoConfig</div><div class="toolbar">' +
-    [[24, 'за 24 ч'], [72, 'за 3 дня'], [168, 'за неделю']].map(([h, l]) => `<button type="button" class="small" data-winlog="${h}">Загрузить ${l}</button>`).join('') +
-    (W && W.events && W.events.length ? `<span class="seg">${[['all', 'все'], ['bad', 'ошибки']].map(([v, l]) => `<button type="button" data-wlf="${v}" class="${(S.wlFilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</span>` : '') +
-    '<span class="mut small">история подключений с причинами из журнала событий Windows</span></div>';
-  if (!W) return head;
-  if (W.loading) return head + '<p class="mut">Читаю журнал…</p>';
-  if (W.error) return head + `<p class="bad">${esc(W.error)}</p>`;
-  let ev = W.events;
-  if ((S.wlFilter || 'all') === 'bad') ev = ev.filter((e) => e.level && e.level <= 3);
-  if (!ev.length) return head + '<p class="mut">Событий нет.</p>';
-  return head + '<table class="mini evt"><thead><tr><th>Время</th><th>ID</th><th>Стадия</th><th>Уровень</th><th>Сообщение Windows</th></tr></thead><tbody>' +
-    ev.slice(0, 500).map((e) => `<tr class="ev ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : 'info'}"><td class="num">${e.t ? new Date(e.t * 1000).toLocaleString('ru-RU') : ''}</td><td class="num">${e.id}</td><td>${esc(e.group)}</td>` +
-      `<td><span class="evk ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : ''}">${esc(e.level_ru)}</span></td><td class="wrapcell">${esc(e.message || JSON.stringify(e.data))}</td></tr>`).join('') + '</tbody></table>';
+  const hours = S.wlHours || 24;
+  const seg = (items, cur, attr) => `<span class="seg">${items.map(([v, l]) => `<button type="button" ${attr}="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${esc(l)}</button>`).join('')}</span>`;
+  const tools = '<div class="toolbar">' + seg(WL_PERIODS, hours, 'data-wlh') +
+    '<span class="lbl">стадия</span>' + seg(WL_GROUPS, S.wlGroup || 'all', 'data-wlg') +
+    seg([['all', 'все уровни'], ['bad', 'ошибки и предупреждения']], S.wlLevel || 'all', 'data-wlf') +
+    '<span class="grow"></span><button type="button" class="small" data-wlx="reload">Обновить</button>' +
+    '<button type="button" class="small" data-wlx="csv">Скачать (CSV)</button></div>';
+  const upd = W && W.at ? `<span class="mut small">обновлено ${new Date(W.at).toLocaleTimeString('ru-RU')}, дальше - раз в минуту</span>` : '';
+  if (!W || (W.loading && !W.events)) return tools + '<p class="mut">Читаю журнал Windows…</p>';
+  if (W.error && !(W.events || []).length) return tools + `<p class="bad">${esc(W.error)}</p>`;
+  const all = W.events || [];
+  const cnt = (id) => all.filter((e) => e.id === id).length;
+  const st = (label, v, cls) => `<span class="it"><span class="mut">${label}</span><b class="${cls || ''}">${v}</b></span>`;
+  const stats = '<div class="cstats">' + st('событий', all.length) + st('подключений (8001)', cnt(8001)) +
+    st('не удалось подключиться (8002)', cnt(8002), cnt(8002) ? 'bad' : '') + st('отключений (8003)', cnt(8003), cnt(8003) ? 'mid' : '') +
+    st('ошибок 802.1X (12013)', cnt(12013), cnt(12013) ? 'bad' : '') + st('ошибок и предупреждений', all.filter((e) => e.level && e.level <= 3).length) + upd + '</div>';
+  // частые причины обрывов и отказов
+  const reasons = new Map();
+  for (const e of all) {
+    if (![8002, 8003, 12013, 11006].includes(e.id)) continue;
+    const r = wlReason(e) || (e.message || '').split('\n').find((x) => /причин|reason/i.test(x)) || '';
+    if (!r) continue;
+    const k = `${e.id}: ${r.trim()}`.slice(0, 160);
+    reasons.set(k, (reasons.get(k) || 0) + 1);
+  }
+  const top = [...reasons.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const topHtml = top.length ? '<div class="sub">Частые причины</div><div class="wltop">' + top.map(([k, n]) => `<span class="it"><b>${n}×</b> ${esc(k)}</span>`).join('') + '</div>' : '';
+  const ev = wlFiltered();
+  if (!ev.length) return tools + stats + topHtml + `<p class="mut">За ${esc(WL_PERIODS.find((p) => p[0] === hours)[1])} событий${S.wlGroup && S.wlGroup !== 'all' || S.wlLevel === 'bad' ? ' под фильтр' : ''} нет.</p>`;
+  const rows = ev.slice(0, 1000).map((e) => {
+    const k = wlKey(e), open = S.wlOpen && S.wlOpen.has(k);
+    const d = e.data || {};
+    const det = open ? `<tr class="wld"><td colspan="6"><dl class="kv small">${Object.entries(d).map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('') || '<dt>EventData</dt><dd>нет полей</dd>'}</dl></td></tr>` : '';
+    return `<tr class="ev wlr ${wlCls(e) || 'info'}" data-wl="${esc(k)}" tabindex="0"><td class="num">${e.t ? new Date(e.t * 1000).toLocaleString('ru-RU') : ''}</td><td class="num">${e.id}</td><td>${esc(e.group)}</td>` +
+      `<td><span class="${wlCls(e) ? 'evk ' + wlCls(e) : 'mut'}">${esc(e.level_ru)}</span></td><td>${esc(e.ssid || d.SSID || '')}</td><td class="wrapcell">${esc(e.message || JSON.stringify(d))}</td></tr>` + det;
+  }).join('');
+  return tools + stats + topHtml + '<table class="mini evt"><thead><tr><th>Время</th><th>ID</th><th>Стадия</th><th>Уровень</th><th>SSID</th><th>Сообщение Windows (нажми - поля события)</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+    (ev.length > 1000 ? `<p class="mut small">Показаны первые 1000 из ${ev.length}; полный список - в CSV.</p>` : '') +
+    '<p class="mut small">Журнал Microsoft-Windows-WLAN-AutoConfig/Operational: текст событий берётся из Windows на языке системы. Прав администратора не нужно.</p>';
 }
 
-async function loadWinlog(hours) {
-  S.winlog = {loading: true}; renderPanel();
-  const r = await api('/api/winlog?hours=' + hours);
-  S.winlog = r.ok ? r.data : {error: 'HTTP ' + r.status, events: []};
-  renderPanel();
+async function loadWinlog(hours, silent) {
+  hours = hours || S.wlHours || 24;
+  S.wlHours = hours;
+  const prev = S.winlog;
+  S.winlog = Object.assign({}, silent && prev ? prev : {}, {loading: true});
+  if (!silent && S.tab === 'winlog') renderPanel();
+  let r;
+  try { r = await api('/api/winlog?hours=' + hours); } catch (e) { r = {ok: false, status: e.message}; }
+  S.winlog = r.ok ? Object.assign(r.data, {at: Date.now()}) : Object.assign({}, prev || {}, {error: 'журнал не прочитан: ' + r.status, at: Date.now()});
+  S.winlog.loading = false;
+  const bad = (S.winlog.events || []).filter((e) => wlBad(e) && e.t > Date.now() / 1000 - 86400).length;
+  $('cntWl').textContent = bad || '';
+  $('cntWl').title = bad ? `ошибок за сутки: ${bad}` : '';
+  if (S.tab === 'winlog' || (S.tab === 'sessions' && S.sesSel != null)) renderPanel();
+}
+
+function winlogCsv() {
+  const ev = wlFiltered();
+  const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [['time', 'event_id', 'level', 'stage', 'ssid', 'bssid', 'reason', 'message', 'data'].join(';')];
+  for (const e of ev) {
+    const d = e.data || {};
+    lines.push([e.t ? new Date(e.t * 1000).toISOString() : '', e.id, e.level_ru, e.group, e.ssid || d.SSID || '', e.bssid || '',
+      wlReason(e), (e.message || '').replace(/\r?\n/g, ' '), JSON.stringify(d)].map(q).join(';'));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));
+  a.download = `wifi-winlog-${S.wlHours || 24}h.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// события Windows рядом с сессией: от 3 с до начала до 10 с после конца
+function sesWinEvents(s) {
+  const ev = S.winlog && S.winlog.events;
+  if (!ev || !ev.length) return '';
+  const t0 = s.t_start - 3, t1 = Math.max(s.t_end || 0, s.t_ip || 0, s.t_connected || 0, s.t_start) + 10;
+  const near = ev.filter((e) => e.t >= t0 && e.t <= t1).sort((a, b) => a.t - b.t);
+  if (!near.length) return '<p class="mut small">В журнале Windows рядом с этой сессией событий нет.</p>';
+  return '<div class="sub">События журнала Windows рядом с сессией</div><table class="mini evt"><thead><tr><th>Время</th><th>ID</th><th>Стадия</th><th>Сообщение Windows</th></tr></thead><tbody>' +
+    near.map((e) => `<tr class="ev ${wlCls(e) || 'info'}"><td class="num">${(e.t - s.t_start >= 0 ? '+' : '') + Math.round((e.t - s.t_start) * 1000)} мс</td><td class="num">${e.id}</td><td>${esc(e.group)}</td><td class="wrapcell">${esc(e.message)}</td></tr>`).join('') +
+    '</tbody></table>';
 }
 
 // ---------- обход: план этажа и карта покрытия ----------
@@ -1337,11 +1455,11 @@ function renderPanel() {
   $('cntDiff').textContent = diffCount() || '';
   if (S.tab !== 'survey') body.dataset.svKey = '';
   if (S.data && S.tab === 'survey') { renderSurveyPanel(body); return; }
-  if (!S.data || (!S.data.bss.length && S.tab !== 'conn' && S.tab !== 'sessions')) {
+  if (!S.data || (!S.data.bss.length && !['conn', 'sessions', 'winlog'].includes(S.tab))) {
     body.innerHTML = '<p class="mut">Данных пока нет. Нажми «Сканировать», и здесь появятся графики.</p>';
     return;
   }
-  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn, sessions: renderSessions,
+  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn, sessions: renderSessions, winlog: renderWinlog,
     findings: renderFindings, beacon: renderBeacon, compare: renderCompare}[S.tab];
   const top = body.scrollTop;
   body.innerHTML = fn();
@@ -1365,6 +1483,28 @@ function renderStdMenu() {
   const btn = $('stdBtn');
   btn.classList.toggle('on', S.std.length > 0);
   btn.textContent = S.std.length ? `802.11: ${S.stdMode === 'none' ? 'без ' : ''}${S.std.map((c) => STD.find((x) => x[0] === c)[1]).join(' ')} ▾` : '802.11 ▾';
+}
+
+// «О программе»: версия, источник данных, где журнал; проверка обновлений - только по кнопке
+async function renderAbout() {
+  if (S.about) return;
+  const r = await api('/api/about');
+  if (!r.ok) return;
+  S.about = r.data;
+  const a = r.data;
+  $('aboutBox').innerHTML = `<div><b>Wi-Fi Beacon Scanner ${esc(a.version)}</b></div>` +
+    `<div class="mut small">источник: ${esc(a.backend)}, Python ${esc(a.python)}, ${esc(a.os)}</div>` +
+    `<div class="mut small">журнал: <span class="mono">${esc(a.log || a.log_dir)}</span></div>`;
+}
+async function checkUpdate() {
+  const out = $('updResult');
+  out.textContent = 'Проверяю GitHub…';
+  const r = await api('/api/update');
+  const d = r.ok ? r.data : {error: 'HTTP ' + r.status};
+  if (d.error && !d.latest) { out.innerHTML = `<span class="bad">${esc(d.error)}</span>`; return; }
+  out.innerHTML = d.newer
+    ? `Есть новая версия <b>${esc(d.latest)}</b> (у тебя ${esc(d.current)}). <a href="${esc(d.url)}" target="_blank" rel="noopener">Открыть страницу релиза</a>`
+    : `Установлена последняя версия (${esc(d.current)}${d.latest && d.latest !== d.current ? ', на GitHub ' + esc(d.latest) : ''}).`;
 }
 
 function renderViewMenu() {
@@ -1592,6 +1732,7 @@ async function init() {
   $('auto').addEventListener('change', (e) => { P.auto = e.target.checked; savePrefs(); if (P.auto) startScan(); renderTable(); });
   $('interval').addEventListener('change', (e) => { P.interval = +e.target.value; savePrefs(); });
   $('openLogs').addEventListener('click', () => { closeMenus(); openTarget('logs'); });
+  $('checkUpd').addEventListener('click', checkUpdate);
 
   $('scan').addEventListener('click', startScan);
   $('focus').addEventListener('change', saveFocus);
@@ -1612,9 +1753,35 @@ async function init() {
     cb.addEventListener('change', () => { S.bands[cb.value] = cb.checked; renderTable(); });
   }
 
+  // перетаскивание границы столбца
+  $('thead').addEventListener('pointerdown', (e) => {
+    const h = e.target.closest('.colrz');
+    if (!h) return;
+    e.preventDefault(); e.stopPropagation();
+    freezeColWidths();
+    const k = h.dataset.rz, x0 = e.clientX, w0 = P.colW[k] || COLW_NEW;
+    h.setPointerCapture(e.pointerId);
+    h.classList.add('on'); document.body.classList.add('colresize');
+    const move = (ev) => { P.colW[k] = clamp(Math.round(w0 + ev.clientX - x0), COLW_MIN, COLW_MAX); applyColWidths(); };
+    const up = () => {
+      h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up);
+      h.classList.remove('on'); document.body.classList.remove('colresize');
+      S.rzAt = Date.now(); savePrefs();
+    };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up);
+    h.addEventListener('pointercancel', up);
+  });
+  $('thead').addEventListener('dblclick', (e) => {
+    const h = e.target.closest('.colrz');
+    if (h) { e.preventDefault(); fitColumn(h.dataset.rz); }
+  });
+  $('colWReset').addEventListener('click', () => { P.colW = {}; savePrefs(); applyColWidths(); });
+
   $('thead').addEventListener('click', (e) => {
     const th = e.target.closest('th');
     if (!th) return;
+    if (e.target.closest('.colrz') || Date.now() - (S.rzAt || 0) < 300) return;     // это было изменение ширины, не сортировка
     const k = th.dataset.k;
     S.sort = S.sort.k === k ? {k, dir: -S.sort.dir} : {k, dir: ['rssi', 'rssi_avg', 'util', 'stations', 'seen_pct'].includes(k) ? -1 : 1};
     renderHead(); renderTable();
@@ -1694,10 +1861,21 @@ async function init() {
     if (sx) { doDownload('/api/export/sessions', 'wifi-sessions.csv'); return; }
     const sr = e.target.closest('[data-ses]');
     if (sr) { const id = +sr.dataset.ses; S.sesSel = S.sesSel === id ? null : id; renderPanel(); return; }
-    const wl = e.target.closest('[data-winlog]');
-    if (wl) { loadWinlog(+wl.dataset.winlog); return; }
+    const wlh = e.target.closest('[data-wlh]');
+    if (wlh) { loadWinlog(+wlh.dataset.wlh); return; }
+    const wlg = e.target.closest('[data-wlg]');
+    if (wlg) { S.wlGroup = wlg.dataset.wlg; renderPanel(); return; }
     const wf = e.target.closest('[data-wlf]');
-    if (wf) { S.wlFilter = wf.dataset.wlf; renderPanel(); return; }
+    if (wf) { S.wlLevel = wf.dataset.wlf; renderPanel(); return; }
+    const wlx = e.target.closest('[data-wlx]');
+    if (wlx) { if (wlx.dataset.wlx === 'csv') winlogCsv(); else loadWinlog(S.wlHours); return; }
+    const wlr = e.target.closest('[data-wl]');
+    if (wlr) {
+      S.wlOpen = S.wlOpen || new Set();
+      const k = wlr.dataset.wl;
+      if (S.wlOpen.has(k)) S.wlOpen.delete(k); else S.wlOpen.add(k);
+      renderPanel(); return;
+    }
     const jr = e.target.closest('[data-journal]');
     if (jr) {
       if (jr.dataset.journal === 'csv') doDownload('/api/export/journal', 'wifi-journal.csv');
@@ -1750,6 +1928,7 @@ async function init() {
       const m = $(btn.dataset.menu); closeMenus(m); m.hidden = !m.hidden;
       if (!m.hidden && m.id === 'exportMenu') renderExportMenu();
       if (!m.hidden && m.id === 'stdMenu') renderStdMenu();
+      if (!m.hidden && m.id === 'viewMenu') renderAbout();
       return;
     }
     // composedPath, а не closest: меню «Вид» перерисовывается при клике, и исходный элемент уже вне документа
@@ -1853,7 +2032,12 @@ async function init() {
 
   refresh().then((ok) => {
     if (ok && S.data && !S.data.taken_at && !S.data.scanning) startScan();
+    loadWinlog(24, true);       // журнал Windows за сутки - сразу, без кнопки
   });
+  setInterval(() => {
+    const W = S.winlog;
+    if (W && !W.loading && W.at && Date.now() - W.at >= 60000 && document.visibilityState === 'visible') loadWinlog(S.wlHours, true);
+  }, 5000);
 }
 
 init();

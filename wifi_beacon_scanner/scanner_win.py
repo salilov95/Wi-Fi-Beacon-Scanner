@@ -33,6 +33,7 @@ ERROR_ACCESS_DENIED = 5
 DOT11_BSS_TYPE_ANY = 3
 # сколько ещё ждать, если после WlanScan список пуст (адаптер только проснулся, скан не успел)
 EMPTY_EXTRA_WAIT_S = 6.0
+_last_scan_rc = ERROR_SUCCESS       # предупреждение о коде WlanScan пишем только при его смене
 
 
 class GUID(Structure):
@@ -140,9 +141,14 @@ def scan(interface_index: int = 0, wait_s: float = 5.0) -> Snapshot:
         # Запуск скана: код != 0 не фатален (служба может отклонить слишком частый запрос,
         # тогда просто читаем то, что уже в кэше). Код 5 - Windows 11 24H2+ не дала доступ к расположению:
         # при первом вызове она сама показывает запрос, и пользователь может успеть разрешить.
+        global _last_scan_rc
         scan_rc = _wlan.WlanScan(handle, byref(guid), None, None, None)
-        if scan_rc != ERROR_SUCCESS:
-            log.warning("WlanScan вернул %d (%s), читаю кэш", scan_rc, ctypes.FormatError(scan_rc).strip())
+        if scan_rc != _last_scan_rc:
+            if scan_rc != ERROR_SUCCESS:
+                log.warning("WlanScan вернул %d (%s), читаю кэш", scan_rc, ctypes.FormatError(scan_rc).strip())
+            else:
+                log.info("WlanScan снова работает")
+            _last_scan_rc = scan_rc
         time.sleep(wait_s)
         deadline = time.monotonic() + EMPTY_EXTRA_WAIT_S
         tries = 0
@@ -158,7 +164,7 @@ def scan(interface_index: int = 0, wait_s: float = 5.0) -> Snapshot:
             if result or time.monotonic() >= deadline:
                 break
             time.sleep(1.0)
-        log.info("скан %s: BSS %d, WlanScan=%d, попыток чтения %d", desc, len(result), scan_rc, tries)
+        log.debug("скан %s: BSS %d, WlanScan=%d, попыток чтения %d", desc, len(result), scan_rc, tries)
         return Snapshot(taken_at=now_iso(), interface=desc, bss=result)
     finally:
         _wlan.WlanCloseHandle(handle, None)
