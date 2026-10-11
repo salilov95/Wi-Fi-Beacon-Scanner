@@ -108,7 +108,7 @@ async function api(path, body, raw) {
 
 // ---------- состояние ----------
 const OPEN_IE = [45, 48, 61, 191, 192, 255];   // какие IE раскрыты по умолчанию
-const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'survey', 'findings', 'beacon', 'compare'];
+const TABS = ['channels', 'overview', 'util', 'signal', 'conn', 'sessions', 'survey', 'findings', 'beacon', 'compare'];
 const S = {
   data: null, sort: {k: 'rssi', dir: -1}, q: '', onlyFocus: false, minRssi: -200, sec: '',
   bands: {'2.4': true, '5': true, '6': true}, collapsed: new Set(),
@@ -801,6 +801,122 @@ function renderConn() {
   return card + stats + tools + connChart(C, win) + `<div class="cgrid"><div>${table}</div><div>${dw}${raw}</div></div>`;
 }
 
+
+// ---------- сессии подключения: машина состояний клиента ----------
+const SES_KIND = {connect: 'подключение', roam: 'роуминг'};
+const SES_RES = {ok: 'успешно', fail: 'ошибка', aborted: 'прервано', in_progress: 'идёт'};
+const SES_STAGE = {start: 'начало подключения', associating: 'ассоциация', associated: 'ассоциирован',
+  authenticating: 'аутентификация (802.1X / 4-way)', connected: 'подключён', complete: 'подключение завершено',
+  roam_start: 'начало роуминга', roam_end: 'роуминг завершён', disassociating: 'разрыв ассоциации',
+  disconnected: 'отключён', fail: 'не удалось подключиться', ip: 'IPv4', dhcp: 'аренда DHCP (DORA завершён)',
+  onex: '802.1X', onex_restart: '802.1X перезапущен'};
+// пороги цвета, мс: [хорошо до, терпимо до]
+const SES_LIMITS = {roam: [100, 300], connect: [2000, 5000], auth_roam: [50, 200], auth_connect: [1000, 3000], ip: [1000, 3000], assoc: [50, 150]};
+function msCell(ms, lim) {
+  if (ms == null) return '<td class="num mut">—</td>';
+  const c = ms <= lim[0] ? 'good' : ms <= lim[1] ? 'mid' : 'bad';
+  return `<td class="num"><b class="${c}">${ms >= 10000 ? (ms / 1000).toFixed(1) + ' с' : ms + ' мс'}</b></td>`;
+}
+function fmtMs(ms) { return ms == null ? '—' : ms >= 10000 ? (ms / 1000).toFixed(1) + ' с' : ms + ' мс'; }
+
+function sesTimeline(s) {
+  const t0 = s.t_start, t1 = Math.max(s.t_end || 0, s.t_ip || 0, s.t_connected || 0, ...s.stages.map((x) => x.t)) || t0;
+  const span = Math.max(t1 - t0, 0.05);
+  const W = 900, H = 44, L = 8, R = 8;
+  const x = (t) => L + (t - t0) / span * (W - L - R);
+  const seg = (a, b, cls, label) => (a == null || b == null) ? '' :
+    `<rect class="tl ${cls}" x="${x(a).toFixed(1)}" y="16" width="${Math.max(2, x(b) - x(a)).toFixed(1)}" height="16" rx="3"><title>${label}: ${fmtMs(Math.round((b - a) * 1000))}</title></rect>`;
+  let g = `<svg class="chart tlsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="стадии сессии">`;
+  g += `<line class="grid" x1="${L}" x2="${W - R}" y1="24" y2="24"/>`;
+  g += seg(s.t_assoc_start, s.t_assoc_done, 'assoc', 'ассоциация');
+  g += seg(s.t_auth_start, s.t_connected, 'auth', 'аутентификация');
+  if (s.t_connected == null && s.t_auth_start != null && s.t_end != null) g += seg(s.t_auth_start, s.t_end, 'authfail', 'аутентификация не завершилась');
+  g += seg(s.t_connected, s.t_ip, 'ip', 'до IPv4');
+  for (const st of s.stages) {
+    const xx = x(st.t).toFixed(1);
+    g += `<line class="tlm${['fail', 'disconnected'].includes(st.stage) ? ' bad' : ''}" x1="${xx}" x2="${xx}" y1="10" y2="38"><title>${esc(SES_STAGE[st.stage] || st.stage)} +${Math.round((st.t - t0) * 1000)} мс${st.detail ? ': ' + esc(st.detail) : ''}</title></line>`;
+  }
+  g += '</svg>';
+  return g + `<div class="tlscale"><span>0</span><span>${fmtMs(Math.round(span * 1000))}</span></div>` + '<div class="legend"><span><span class="swatch tl assoc"></span>ассоциация</span><span><span class="swatch tl auth"></span>аутентификация (802.1X, 4-way handshake)</span><span><span class="swatch tl ip"></span>до получения IPv4</span></div>';
+}
+
+function sesDetails(s) {
+  const kv = (k, v) => v ? `<dt>${esc(k)}</dt><dd>${v}</dd>` : '';
+  const stages = s.stages.map((st) => `<tr><td class="num">+${Math.round((st.t - s.t_start) * 1000)} мс</td><td>${esc(SES_STAGE[st.stage] || st.stage)}</td><td>${esc(st.detail)}</td></tr>`).join('');
+  return '<div class="sesd">' + sesTimeline(s) + '<div class="cgrid"><div><table class="mini evt"><thead><tr><th>Время</th><th>Стадия</th><th>Подробности</th></tr></thead><tbody>' + stages + '</tbody></table></div>' +
+    '<div><dl class="kv small">' +
+    kv('Итог', esc(SES_RES[s.result] || s.result) + (s.reason ? ': ' + esc(s.reason) : '')) +
+    kv('Код причины', s.reason_code ? '0x' + s.reason_code.toString(16).toUpperCase() : '') +
+    kv('802.1X', esc(s.onex_status_ru) + (s.eap_name ? ', ' + esc(s.eap_name) : '') + (s.onex_identity_ru ? ', учётка: ' + esc(s.onex_identity_ru) : '') + (s.onex_restarts ? `, перезапусков: ${s.onex_restarts}` : '')) +
+    kv('Причина 802.1X', s.onex_reason ? esc(s.onex_reason) + (s.onex_reason_code ? ` (0x${s.onex_reason_code.toString(16).toUpperCase()})` : '') : '') +
+    kv('Ошибка EAP', s.onex_error_code ? `0x${s.onex_error_code.toString(16).toUpperCase().padStart(8, '0')} ${esc(s.onex_error)}` : '') +
+    kv('IPv4', s.ip ? esc(s.ip) + (s.dhcp_server ? `, DHCP-сервер ${esc(s.dhcp_server)}` : '') : '') +
+    kv('IP / DHCP', esc(s.ip_note)) +
+    kv('Аренда получена', s.lease_obtained ? new Date(s.lease_obtained * 1000).toLocaleTimeString('ru-RU') : '') +
+    '</dl></div></div></div>';
+}
+
+function renderSessions() {
+  const D = S.data.sessions || {sessions: [], summary: {}};
+  const sm = D.summary || {};
+  const st = (label, v, cls) => `<span class="it"><span class="mut">${label}</span><b class="${cls || ''}">${v}</b></span>`;
+  const stats = '<div class="cstats">' +
+    st('подключений', `${sm.connects_ok || 0}<span class="mut"> из ${sm.connects || 0}</span>`) +
+    st('неудачных', sm.connects_fail || 0, sm.connects_fail ? 'bad' : '') +
+    st('роумингов', sm.roams || 0) +
+    st('подключение, медиана', fmtMs(sm.connect_ms_med)) + st('роуминг, медиана', fmtMs(sm.roam_ms_med)) +
+    st('аутентификация, медиана', fmtMs(sm.auth_ms_med)) + st('до IPv4, медиана', fmtMs(sm.ip_ms_med)) +
+    st('802.1X успешно / отказ', `${sm.onex_ok || 0} / <span class="${sm.onex_fail ? 'bad' : ''}">${sm.onex_fail || 0}</span>`) + '</div>';
+  const f = S.sesFilter || 'all';
+  const tools = `<div class="toolbar"><span class="seg">${[['all', 'все'], ['connect', 'подключения'], ['roam', 'роуминги'], ['bad', 'ошибки']].map(([v, l]) =>
+    `<button type="button" data-sesf="${v}" class="${f === v ? 'on' : ''}">${l}</button>`).join('')}</span><span class="grow"></span>` +
+    '<button type="button" class="small" data-sesx="csv">Скачать сессии (CSV)</button></div>';
+  let list = D.sessions.slice().reverse();
+  if (f === 'connect' || f === 'roam') list = list.filter((s) => s.kind === f);
+  if (f === 'bad') list = list.filter((s) => s.result === 'fail' || s.result === 'aborted');
+  const rows = list.slice(0, 300).map((s) => {
+    const lim = SES_LIMITS[s.kind] || SES_LIMITS.connect;
+    const from = s.kind === 'roam' && s.bssid_from ? `<span class="mono">${esc(s.bssid_from.slice(-8))}</span> → ` : '';
+    const onex = s.onex_status_ru ? `<span class="${s.onex_status === 3 ? 'good' : s.onex_status === 4 || s.onex_status === 2 ? 'bad' : ''}">${esc(s.onex_status_ru.split(' (')[0])}</span>${s.eap_name ? ' <span class="mut">' + esc(s.eap_name) + '</span>' : ''}` : '<span class="mut">—</span>';
+    const res = `<span class="evk ${s.result === 'ok' ? '' : s.result === 'in_progress' ? 'warning' : 'critical'}">${esc(SES_RES[s.result] || s.result)}</span>`;
+    return `<tr class="sesr${S.sesSel === s.id ? ' sel' : ''}" data-ses="${s.id}" tabindex="0"><td class="num">${fmtClock(s.t_start)}</td><td>${esc(SES_KIND[s.kind] || s.kind)}</td><td>${res}</td>` +
+      `<td>${from}<span class="mono">${esc((s.bssid || '').slice(-8))}</span> <span class="mut">${esc(bssLabel(s.bssid))}</span></td>` +
+      msCell(s.assoc_ms, SES_LIMITS.assoc) + msCell(s.auth_ms, s.kind === 'roam' ? SES_LIMITS.auth_roam : SES_LIMITS.auth_connect) +
+      msCell(s.total_ms, lim) + msCell(s.ip_ms, SES_LIMITS.ip) + `<td>${onex}</td><td class="wrapcell">${esc(s.reason || s.ip_note || '')}</td></tr>`;
+  }).join('');
+  const table = rows ? '<table class="mini evt ses"><thead><tr><th>Время</th><th>Тип</th><th>Итог</th><th>Точка</th><th>Ассоц.</th><th>Аутент.</th><th>Всего</th><th>До IPv4</th><th>802.1X</th><th>Причина / IP</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    : '<p class="mut">Сессий пока нет: они появятся при следующем подключении или роуминге ноутбука.</p>';
+  const sel = D.sessions.find((s) => s.id === S.sesSel);
+  const note = '<p class="mut small">Стадии - по уведомлениям Windows (ACM, MSM, 802.1X). «Аутентификация» включает обмен EAP и 4-way handshake: ' +
+    'отдельно 4-way Windows не сообщает. «До IPv4» - от подключения до новой аренды DHCP (DORA) или появления адреса; если адрес остался с прошлого подключения, ожидания нет. ' +
+    'Время роуминга считается от начала ассоциации с новой точкой.</p>';
+  return stats + tools + table + (sel ? sesDetails(sel) : '') + note + renderWinlog();
+}
+
+function renderWinlog() {
+  const W = S.winlog;
+  const head = '<div class="sub">Журнал Windows: WLAN-AutoConfig</div><div class="toolbar">' +
+    [[24, 'за 24 ч'], [72, 'за 3 дня'], [168, 'за неделю']].map(([h, l]) => `<button type="button" class="small" data-winlog="${h}">Загрузить ${l}</button>`).join('') +
+    (W && W.events && W.events.length ? `<span class="seg">${[['all', 'все'], ['bad', 'ошибки']].map(([v, l]) => `<button type="button" data-wlf="${v}" class="${(S.wlFilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</span>` : '') +
+    '<span class="mut small">история подключений с причинами из журнала событий Windows</span></div>';
+  if (!W) return head;
+  if (W.loading) return head + '<p class="mut">Читаю журнал…</p>';
+  if (W.error) return head + `<p class="bad">${esc(W.error)}</p>`;
+  let ev = W.events;
+  if ((S.wlFilter || 'all') === 'bad') ev = ev.filter((e) => e.level && e.level <= 3);
+  if (!ev.length) return head + '<p class="mut">Событий нет.</p>';
+  return head + '<table class="mini evt"><thead><tr><th>Время</th><th>ID</th><th>Стадия</th><th>Уровень</th><th>Сообщение Windows</th></tr></thead><tbody>' +
+    ev.slice(0, 500).map((e) => `<tr class="ev ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : 'info'}"><td class="num">${e.t ? new Date(e.t * 1000).toLocaleString('ru-RU') : ''}</td><td class="num">${e.id}</td><td>${esc(e.group)}</td>` +
+      `<td><span class="evk ${e.level === 2 || e.level === 1 ? 'critical' : e.level === 3 ? 'warning' : ''}">${esc(e.level_ru)}</span></td><td class="wrapcell">${esc(e.message || JSON.stringify(e.data))}</td></tr>`).join('') + '</tbody></table>';
+}
+
+async function loadWinlog(hours) {
+  S.winlog = {loading: true}; renderPanel();
+  const r = await api('/api/winlog?hours=' + hours);
+  S.winlog = r.ok ? r.data : {error: 'HTTP ' + r.status, events: []};
+  renderPanel();
+}
+
 // ---------- обход: план этажа и карта покрытия ----------
 const SV_BINS = [[-60, 130, 'от −60: отлично'], [-67, 95, '−60…−67: голос и видео'], [-72, 55, '−67…−72: данные'],
   [-80, 25, '−72…−80: слабо'], [-200, 0, 'ниже −80: нет покрытия']];
@@ -1193,11 +1309,11 @@ function renderPanel() {
   $('cntDiff').textContent = diffCount() || '';
   if (S.tab !== 'survey') body.dataset.svKey = '';
   if (S.data && S.tab === 'survey') { renderSurveyPanel(body); return; }
-  if (!S.data || (!S.data.bss.length && S.tab !== 'conn')) {
+  if (!S.data || (!S.data.bss.length && S.tab !== 'conn' && S.tab !== 'sessions')) {
     body.innerHTML = '<p class="mut">Данных пока нет. Нажми «Сканировать», и здесь появятся графики.</p>';
     return;
   }
-  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn,
+  const fn = {channels: renderChannels, overview: renderOverview, util: renderUtil, signal: renderSignal, conn: renderConn, sessions: renderSessions,
     findings: renderFindings, beacon: renderBeacon, compare: renderCompare}[S.tab];
   const top = body.scrollTop;
   body.innerHTML = fn();
@@ -1269,6 +1385,10 @@ function handleState(d) {
     d.conn && d.conn.current && d.conn.current.bssid, sv.rev]);
   if (sig !== S.sig) { S.sig = sig; renderAll(); }
   else if (S.tab === 'conn' && cs && cs.length && cs[cs.length - 1][0] !== S.connT) renderPanel();   // журнал живёт раз в секунду
+  else if (S.tab === 'sessions') {
+    const ss = d.sessions && d.sessions.sessions, k = ss && ss.length ? ss.length + ':' + JSON.stringify(ss[ss.length - 1]).length : '0';
+    if (k !== S.sesKey) { S.sesKey = k; renderPanel(); }
+  }
   if (cs && cs.length) S.connT = cs[cs.length - 1][0];
 }
 
@@ -1329,6 +1449,7 @@ async function openPrintable(body) {
 
 async function doExport(fmt) {
   if (fmt === 'journal') return doDownload('/api/export/journal', 'wifi-journal.csv');
+  if (fmt === 'sessions') return doDownload('/api/export/sessions', 'wifi-sessions.csv');
   if (fmt === 'pdf') banner('Готовлю PDF через Edge, это займёт несколько секунд…', false);
   // «Как в таблице» передаёт ровно те строки, что видны сейчас: с фильтрами, поиском и «Только мои»
   const sc = P.expScope || 'table';
@@ -1491,6 +1612,16 @@ async function init() {
     if (cw) { P.connWin = +cw.dataset.cwin; savePrefs(); renderPanel(); return; }
     const cf = e.target.closest('[data-cfilter]');
     if (cf) { S.cfilter = cf.dataset.cfilter; renderPanel(); return; }
+    const sf = e.target.closest('[data-sesf]');
+    if (sf) { S.sesFilter = sf.dataset.sesf; renderPanel(); return; }
+    const sx = e.target.closest('[data-sesx]');
+    if (sx) { doDownload('/api/export/sessions', 'wifi-sessions.csv'); return; }
+    const sr = e.target.closest('[data-ses]');
+    if (sr) { const id = +sr.dataset.ses; S.sesSel = S.sesSel === id ? null : id; renderPanel(); return; }
+    const wl = e.target.closest('[data-winlog]');
+    if (wl) { loadWinlog(+wl.dataset.winlog); return; }
+    const wf = e.target.closest('[data-wlf]');
+    if (wf) { S.wlFilter = wf.dataset.wlf; renderPanel(); return; }
     const jr = e.target.closest('[data-journal]');
     if (jr) {
       if (jr.dataset.journal === 'csv') doDownload('/api/export/journal', 'wifi-journal.csv');
@@ -1620,7 +1751,7 @@ async function init() {
     }
     if (typing || e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.key === '/') { e.preventDefault(); $('q').focus(); return; }
-    const n = parseInt(e.key, 10);
+    const n = e.key === '0' ? 10 : parseInt(e.key, 10);
     if (n >= 1 && n <= TABS.length) setTab(TABS[n - 1]);
   });
 

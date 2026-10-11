@@ -341,3 +341,19 @@ svg.dash line{stroke:var(--fg)}
 }
 @media (max-width:1400px){#status{display:none}}
 @media (max-width:1300px){#iface{max-width:150px}#focus{width:100px}.brand{font-size:14px}}
+
+/* сессии подключения */
+table.ses tr.sesr{cursor:pointer}
+table.ses tr.sesr.sel td{background:var(--hl)}
+td.wrapcell{white-space:normal;max-width:420px}
+.sesd{border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:10px 0}
+svg.tlsvg{width:100%;height:44px;display:block}
+.tlscale{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin:0 6px 4px}
+svg.chart .tl{stroke:none}
+.tl.assoc,svg.chart .tl.assoc{fill:hsl(210 60% 55%);background:hsl(210 60% 55%)}
+.tl.auth,svg.chart .tl.auth{fill:hsl(275 50% 58%);background:hsl(275 50% 58%)}
+.tl.ip,svg.chart .tl.ip{fill:hsl(185 55% 45%);background:hsl(185 55% 45%)}
+svg.chart .tl.authfail{fill:var(--bad);opacity:.75}
+svg.chart .tlm{stroke:var(--fg);stroke-width:1;opacity:.55}
+svg.chart .tlm.bad{stroke:var(--bad);opacity:1;stroke-width:2}
+.small{font-size:12px}

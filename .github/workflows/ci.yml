@@ -40,3 +40,6 @@ jobs:
       - name: App window lifecycle (Windows)
         if: runner.os == 'Windows'
         run: python tools/smoke_window.py
+      - name: Windows API for sessions (Windows)
+        if: runner.os == 'Windows'
+        run: python tools/smoke_winapi.py

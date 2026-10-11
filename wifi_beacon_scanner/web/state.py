@@ -26,7 +26,7 @@ ADVICE_BANDS = ("2.4", "5")
 
 
 PREF_THEMES = {"auto", "light", "dark", "nord", "solar", "paper", "contrast"}
-PREF_TABS = {"channels", "overview", "util", "signal", "conn", "survey", "findings", "beacon", "compare"}
+PREF_TABS = {"channels", "overview", "util", "signal", "conn", "sessions", "survey", "findings", "beacon", "compare"}
 _COL_RE = re.compile(r"^[a-z_]{1,24}$")
 
 
@@ -423,6 +423,7 @@ class AppState:
                 "advice": advice,
                 "util": channel_utilization(snap.bss, self.history) if snap else {"channels": [], "no_data": []},
                 "conn": self._conn_dict(),
+                "sessions": self.conn.sessions.to_dict(),
                 "survey": self.survey.summary(),
                 "history": {k: [[round(t, 1), r, u] for t, r, u in v] for k, v in self.history.items()},
                 "now": round(time.time(), 1),

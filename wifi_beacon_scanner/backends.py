@@ -26,6 +26,10 @@ class Backend:
         """Запускает фоновый монитор подключения; None, если источник его не поддерживает."""
         return None
 
+    def read_winlog(self, hours: float = 24) -> List[dict]:
+        """События журнала WLAN-AutoConfig/Operational за последние hours часов (новые первыми)."""
+        raise OSError("журнал Windows недоступен для этого источника данных")
+
 
 class WindowsBackend(Backend):
     name = "windows"
@@ -37,6 +41,10 @@ class WindowsBackend(Backend):
     def scan(self, interface_index: int, wait_s: float) -> Snapshot:
         from . import scanner_win
         return scanner_win.scan(interface_index, wait_s)
+
+    def read_winlog(self, hours: float = 24) -> List[dict]:
+        from .winlog_win import read_events
+        return read_events(hours)
 
     def start_conn_monitor(self, tracker, lock, interface_index=0):
         from .conn_win import WinConnMonitor
@@ -66,6 +74,9 @@ class DemoBackend(Backend):
 
     def interfaces(self) -> List[str]:
         return ["Demo adapter"]
+
+    def read_winlog(self, hours: float = 24) -> List[dict]:
+        return demo_winlog(time.time())
 
     def start_conn_monitor(self, tracker, lock, interface_index=0):
         m = DemoConnMonitor(tracker, lock, self.base)
@@ -99,6 +110,67 @@ def _demo_rate(rssi: float, back: int) -> float:
     return round(phy_rate("HE", mcs, 2, 80), 1)
 
 
+def demo_connect(ses, t: float, bssid: str, ip_after: float, eap_s: float = 0.6, fail: str = "",
+                 lease: bool = True) -> None:
+    """Синтетическое подключение: ассоциация, 802.1X EAP-TLS (учётка компьютера), 4-way, DHCP."""
+    ses.stage(t, "start", "CORP")
+    ses.stage(t + 0.05, "associating", "CORP", bssid)
+    ses.stage(t + 0.08, "associated", "CORP", bssid)
+    ses.stage(t + 0.08, "authenticating", "CORP", bssid)
+    ses.onex(t + 0.10, 1, eap_type=13, identity=1)
+    if fail:
+        ses.onex(t + 0.10 + eap_s, 4, 0x50005, fail, 0x80092013,
+                 "демо: функции отзыва не смогли проверить отзыв сертификата", eap_type=13, identity=1)
+        ses.stage(t + 0.2 + eap_s, "fail", "CORP", bssid, 0x50005, "демо: " + fail)
+        return
+    ses.onex(t + 0.10 + eap_s, 3, eap_type=13, identity=1)
+    ses.stage(t + 0.14 + eap_s, "connected", "CORP", bssid)
+    ses.stage(t + 0.16 + eap_s, "complete", "CORP", bssid)
+    tc = t + 0.14 + eap_s
+    ses.ip_update(tc + ip_after + 0.3, "10.20.30.41", True, "10.20.0.10", (tc + ip_after) if lease else None)
+
+
+def demo_roam(ses, t: float, frm: str, to: str, ms: float, full_auth: bool = False) -> None:
+    """Синтетический роуминг: с FT (802.11r) или с полной 802.1X-аутентификацией."""
+    ses.stage(t, "roam_start", "CORP", frm)
+    ses.stage(t + 0.01, "associating", "CORP", to)
+    a = ms * (0.45 if not full_auth else 0.1) / 1000.0
+    ses.stage(t + 0.01 + a, "associated", "CORP", to)
+    ses.stage(t + 0.01 + a, "authenticating", "CORP", to)
+    if full_auth:
+        ses.onex(t + 0.02 + a, 1, eap_type=13, identity=1)
+        ses.onex(t + ms / 1000.0, 3, eap_type=13, identity=1)
+    ses.stage(t + 0.01 + ms / 1000.0, "connected", "CORP", to)
+    ses.stage(t + 0.02 + ms / 1000.0, "roam_end", "CORP", to)
+
+
+def demo_winlog(now: float) -> List[dict]:
+    """Синтетические события WLAN-AutoConfig для демо-режима (текст - пересказ, помечен «демо»)."""
+    from .winlog import group_of, LEVEL_RU
+    rows = [
+        (-290, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
+        (-289.9, 11000, 4, "демо: начата ассоциация с беспроводной сетью"),
+        (-289.8, 11001, 4, "демо: ассоциация с беспроводной сетью выполнена"),
+        (-289.8, 11010, 4, "демо: начата проверка безопасности беспроводной сети"),
+        (-289.7, 12011, 4, "демо: начата проверка подлинности 802.1X"),
+        (-289.1, 12012, 4, "демо: проверка подлинности 802.1X выполнена (EAP-TLS, учётные данные компьютера)"),
+        (-289.0, 11005, 4, "демо: проверка безопасности беспроводной сети выполнена"),
+        (-288.9, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP"),
+        (-158, 8003, 4, "демо: отключено от сети CORP. Причина: точка доступа разорвала ассоциацию"),
+        (-157, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
+        (-156.5, 12013, 2, "демо: ошибка проверки подлинности 802.1X: не удалось проверить отзыв сертификата"),
+        (-156.4, 8002, 2, "демо: не удалось подключиться к сети CORP"),
+        (-154, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP"),
+        (-152.6, 12012, 4, "демо: проверка подлинности 802.1X выполнена"),
+        (-152.5, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP"),
+    ]
+    out = []
+    for dt, eid, level, msg in rows:
+        out.append({"t": now + dt, "id": eid, "level": level, "level_ru": LEVEL_RU.get(level, ""), "group": group_of(eid),
+                    "message": msg, "ssid": "CORP", "bssid": "", "reason": "", "data": {}})
+    return sorted(out, key=lambda e: -e["t"])
+
+
 class DemoConnMonitor(threading.Thread):
     """Демо-журнал: сначала мгновенно «проигрывает» 5 минут истории с роумингами, обрывом,
     пинг-понгом и залипанием, потом раз в секунду добавляет живые замеры. Причины помечены «демо»."""
@@ -122,8 +194,22 @@ class DemoConnMonitor(threading.Thread):
                           rx_mbps=_demo_rate(rssi, 0), tx_mbps=_demo_rate(rssi, 1),
                           auth="WPA2 (RSNA)", cipher="CCMP", onex=True, profile="CORP")
 
+    def _prefill_sessions(self, t0: float) -> None:
+        ses, ap = self.tracker.sessions, [a[0] for a in self.aps] + [a[0] for a in self.aps]
+        ses.ip_update(t0 - 5, "0.0.0.0", True, "", t0 - 7200)
+        demo_connect(ses, t0 - 1.0, ap[0], ip_after=0.8)
+        demo_roam(ses, t0 + 70 - 0.06, ap[0], ap[1], 42)                       # FT: десятки мс
+        ses.stage(t0 + 141.5, "disconnected", "CORP", ap[1], 0x38003, "демо: точка доступа разорвала ассоциацию")
+        ses.ip_update(t0 + 142, "0.0.0.0", True, "", t0 - 1)
+        demo_connect(ses, t0 + 143.0, ap[1], ip_after=0, eap_s=0.5, fail="EAP-TLS: сервер отклонил аутентификацию")
+        demo_connect(ses, t0 + 144.4, ap[1], ip_after=1.9, eap_s=1.3)
+        demo_roam(ses, t0 + 175 - 0.05, ap[1], ap[2], 38)
+        demo_roam(ses, t0 + 190 - 0.2, ap[2], ap[1], 186)                     # медленный роуминг обратно
+        demo_roam(ses, t0 + 240 - 0.4, ap[1], ap[3], 410, full_auth=True)     # без FT: полный 802.1X
+
     def _prefill(self, now: float) -> None:
         t0, tr, j = now - 300, self.tracker, lambda: self.rng.uniform(-1.5, 1.5)
+        self._prefill_sessions(t0)
         for k in range(300):
             t = t0 + k
             if k < 70:
@@ -155,6 +241,9 @@ class DemoConnMonitor(threading.Thread):
             k += 1
             rssi = max(-85.0, min(-40.0, rssi + self.rng.uniform(-2, 2)))
             if k % 90 == 0:
+                with self.lock:
+                    demo_roam(self.tracker.sessions, time.time() - 0.05, self.aps[i % len(self.aps)][0],
+                              self.aps[(i + 1) % 2 % len(self.aps)][0], self.rng.choice([35, 48, 62, 140]))
                 i, rssi = (i + 1) % 2, -55.0
             with self.lock:
                 self.tracker.add_sample(self._s(time.time(), i, rssi))

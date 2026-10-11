@@ -23,7 +23,7 @@ import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, List, Optional, Tuple
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .. import report
 from ..pdf import PdfError, html_to_pdf
@@ -71,7 +71,7 @@ class Lifeline:
             first = self.last is None
             self.last = self.clock()
         if first:
-            print("окно подключилось")
+            log.info("окно подключилось")
 
     def bye(self) -> None:
         with self._lock:
@@ -191,6 +191,19 @@ class Handler(BaseHTTPRequestHandler):
         st = self.server.state
         if u.path == "/api/state":
             return self._json(200, st.to_dict())
+        if u.path == "/api/winlog":
+            try:
+                hours = max(1.0, min(24 * 14.0, float(parse_qs(u.query).get("hours", ["24"])[0])))
+            except ValueError:
+                hours = 24.0
+            try:
+                events = st.backend.read_winlog(hours)
+            except (OSError, NotImplementedError) as e:
+                return self._json(200, {"events": [], "error": str(e)})
+            except Exception as e:  # noqa: BLE001
+                log.exception("чтение журнала Windows")
+                return self._json(200, {"events": [], "error": "%s: %s" % (type(e).__name__, e)})
+            return self._json(200, {"events": events, "error": "", "hours": hours})
         if u.path == "/api/prefs":
             return self._json(200, st.prefs)
         if u.path == "/api/survey/plan":
@@ -289,6 +302,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def _export(self, fmt: str, scope: str = "all", bssids: Optional[List[str]] = None) -> None:
         st = self.server.state
+        if fmt == "sessions":
+            with st.lock:
+                ss = st.conn.sessions.to_dict(max_sessions=100000)["sessions"]
+            return self._send(200, report.render_sessions_csv(ss).encode("utf-8-sig"), "text/csv; charset=utf-8",
+                              {"Content-Disposition": 'attachment; filename="wifi-sessions.csv"'})
         if fmt == "journal":            # журнал подключения от выбора сетей не зависит
             with st.lock:
                 events = st.conn.to_dict(max_samples=0, max_events=100000)["events"]
@@ -309,7 +327,8 @@ class Handler(BaseHTTPRequestHandler):
             # загрузка каналов - по выбранным сетям; журнал и обход - целиком (они про ноутбук и маршрут)
             with st.lock:
                 extra = {"util": channel_utilization(snap.bss),
-                         "journal": st.conn.to_dict(max_samples=0, max_events=100000),
+                         "journal": dict(st.conn.to_dict(max_samples=0, max_events=100000),
+                                         sessions=st.conn.sessions.to_dict(max_sessions=100000)["sessions"]),
                          "survey": [dict(p) for p in st.survey.points]}
         if fmt == "html":
             data, ctype, fname = (report.render_html(snap, findings, focus, note, **extra).encode("utf-8"),
