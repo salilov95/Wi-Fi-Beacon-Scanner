@@ -2,6 +2,18 @@
 
 Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
 
+## [Не выпущено] - черновик 0.9.0
+
+### Добавлено
+- Вкладка «Сессии»: машина состояний клиента по уведомлениям Windows. Каждое подключение и роуминг
+  разложены на стадии (ассоциация, аутентификация 802.1X/4-way, получение IPv4) с длительностями и таймлайном.
+- 802.1X: подписка на уведомления ONEX - результат аутентификации, причина отказа, код ошибки EAP, тип EAP,
+  учётка компьютера или пользователя, перезапуски.
+- DHCP: время от подключения до новой аренды (DORA), адрес, DHCP-сервер, APIPA (GetAdaptersInfo).
+- Журнал Windows WLAN-AutoConfig/Operational за 24 часа, 3 дня или неделю, с текстом событий из Windows.
+- Сессии в CSV и в отчётах PDF/HTML/Excel.
+- CI на Windows проверяет GetAdaptersInfo и чтение журнала на настоящей системе.
+
 ## [0.8.0] - 2026-10-11
 
 ### Исправлено
@@ -60,6 +72,7 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
+[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v0.8.0...release/0.9.0
 [0.8.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.8.0
 [0.7.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.1
 [0.7.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.7.0
