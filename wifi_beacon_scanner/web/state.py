@@ -63,7 +63,7 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["tab"] = d["tab"]
     if d.get("expScope") in ("table", "focus", "all"):
         out["expScope"] = d["expScope"]
-    if d.get("connWin") in (300, 900, 1800):
+    if d.get("connWin") in (60, 300, 900, 1800):
         out["connWin"] = d["connWin"]
     so = d.get("svOpacity")
     if isinstance(so, (int, float)) and not isinstance(so, bool) and 0.1 <= so <= 0.9:
