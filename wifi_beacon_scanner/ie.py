@@ -23,8 +23,25 @@ CIPHERS = {
 AKMS = {
     1: "802.1X", 2: "PSK", 3: "FT-802.1X", 4: "FT-PSK",
     5: "802.1X-SHA256", 6: "PSK-SHA256", 8: "SAE", 9: "FT-SAE",
-    11: "Suite-B", 12: "Suite-B-192", 13: "FT-802.1X-SHA384", 18: "OWE",
+    11: "Suite-B", 12: "Suite-B-192", 13: "FT-802.1X-SHA384",
+    14: "FILS-SHA256", 15: "FILS-SHA384", 16: "FT-FILS-SHA256", 17: "FT-FILS-SHA384",   # 802.11ai
+    18: "OWE",
+    23: "802.1X-SHA384",                           # 802.1X с KDF на SHA-384
+    24: "SAE-EXT-KEY", 25: "FT-SAE-EXT-KEY",       # SAE с хешем по группе (Wi-Fi 7, MLO)
 }
+
+# BSS membership selectors: в Supported Rates / Extended Supported Rates они записаны как «скорость»
+# с битом basic, но скоростью не являются (IEEE 802.11, таблица BSS membership selector values;
+# те же значения - в include/linux/ieee80211.h). Например, 0xFF - не «63.5 Мбит/с», а «нужен HT PHY».
+MEMBERSHIP_SELECTORS = {
+    127: "HT PHY", 126: "VHT PHY", 125: "GLK", 124: "EPD", 123: "SAE H2E only",
+    122: "HE PHY", 121: "EHT PHY", 120: "UHR PHY",
+}
+
+
+def is_selector(x: int) -> bool:
+    """Байт из Supported Rates - это BSS membership selector, а не скорость."""
+    return bool(x & 0x80) and (x & 0x7F) in MEMBERSHIP_SELECTORS
 
 # Extension IDs внутри Element ID 255
 EXT_HE_CAP = 35
@@ -106,6 +123,7 @@ def parse_rsn_body(b: bytes) -> Optional[Rsn]:
 class BssInfo:
     ssid_ie: Optional[bytes] = None
     rates: List[Tuple[float, bool]] = field(default_factory=list)  # (Мбит/с, basic?)
+    selectors: List[int] = field(default_factory=list)  # BSS membership selectors из тех же IE (см. MEMBERSHIP_SELECTORS)
     ds_channel: Optional[int] = None
     dtim_period: Optional[int] = None
     country: Optional[str] = None
@@ -169,6 +187,11 @@ class BssInfo:
     vendor_ies: List[Tuple[str, int, bytes]] = field(default_factory=list)
 
     @property
+    def sae_h2e_only(self) -> bool:
+        """SAE только с hash-to-element (селектор 123)."""
+        return 123 in self.selectors
+
+    @property
     def dot11k(self) -> bool:
         return self.rm_caps is not None
 
@@ -220,6 +243,10 @@ class BssInfo:
                 w = 160
             else:
                 w = 160  # 80+80; для отчёта считаем как 160
+        elif self.vht and self.vht_width in (2, 3):
+            # устаревшая запись (802.11ac-2013): 2 = 160 МГц (seg0 - центр всей полосы), 3 = 80+80;
+            # её до сих пор шлют старые AP и прошивки
+            w = 160
         return w
 
     @property
@@ -282,7 +309,10 @@ def parse_ies(data: bytes) -> BssInfo:
             info.ssid_ie = b
         elif eid in (1, 50):
             for x in b:
-                info.rates.append(((x & 0x7F) / 2.0, bool(x & 0x80)))
+                if is_selector(x):
+                    info.selectors.append(x & 0x7F)
+                else:
+                    info.rates.append(((x & 0x7F) / 2.0, bool(x & 0x80)))
         elif eid == 3 and b:
             info.ds_channel = b[0]
         elif eid == 5 and len(b) >= 3:
@@ -414,8 +444,14 @@ def _decode(eid: int, b: bytes):
         t = b.decode("utf-8", "replace") or "<скрыт>"
         return t, [("SSID", t)]
     if eid in (1, 50):
-        s = " ".join("%g%s" % ((x & 0x7F) / 2.0, "*" if x & 0x80 else "") for x in b) + " Мбит/с"
-        return s, [("Скорости (* = basic)", s)]
+        rates = [x for x in b if not is_selector(x)]
+        sels = [MEMBERSHIP_SELECTORS[x & 0x7F] for x in b if is_selector(x)]
+        s = (" ".join("%g%s" % ((x & 0x7F) / 2.0, "*" if x & 0x80 else "") for x in rates) + " Мбит/с") if rates else "—"
+        f = [("Скорости (* = basic)", s)]
+        if sels:
+            f.append(("BSS membership selectors", ", ".join(sels)))
+            return (s + "; " if rates else "") + "требуется: " + ", ".join(sels), f
+        return s, f
     if eid == 3 and b:
         return "канал %d" % b[0], [("Канал", str(b[0]))]
     if eid == 5 and len(b) >= 2:

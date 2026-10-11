@@ -22,6 +22,8 @@ def freq_to_band(freq_khz: int) -> str:
 def freq_to_channel(freq_khz: int) -> int:
     if freq_khz == 2_484_000:
         return 14
+    if freq_khz == 5_935_000:       # 6 ГГц, канал 2: вне сетки 5950 + 5·n (802.11ax, Annex E)
+        return 2
     band = freq_to_band(freq_khz)
     if band == "2.4":
         return (freq_khz - 2_407_000) // 5000
@@ -98,13 +100,14 @@ class Bss:
         i = self.info
         if i.rsn is not None:
             akm = set(i.rsn.akm)
-            ent = {"802.1X", "FT-802.1X", "802.1X-SHA256", "Suite-B", "Suite-B-192", "FT-802.1X-SHA384"}
+            ent = {"802.1X", "FT-802.1X", "802.1X-SHA256", "Suite-B", "Suite-B-192", "FT-802.1X-SHA384",
+                   "802.1X-SHA384", "FILS-SHA256", "FILS-SHA384", "FT-FILS-SHA256", "FT-FILS-SHA384"}
             parts = []
             if akm & {"Suite-B-192", "FT-802.1X-SHA384"}:
                 parts.append("WPA3-Enterprise 192")
             elif akm & ent:
                 parts.append("WPA2/3-Enterprise" if i.rsn.mfp_required else "WPA2-Enterprise")
-            if "SAE" in akm or "FT-SAE" in akm:
+            if akm & {"SAE", "FT-SAE", "SAE-EXT-KEY", "FT-SAE-EXT-KEY"}:
                 if akm & {"PSK", "FT-PSK", "PSK-SHA256"}:
                     parts.append("WPA2/WPA3-Personal")
                 else:

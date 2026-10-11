@@ -103,15 +103,16 @@ class RfRules(unittest.TestCase):
         self.assertEqual([x.ssid for x in weak], ["CORP"])
 
     def test_utilization_thresholds(self):
+        # три разные AP (BSSID разных радио: отличаются не только младшим полубайтом)
         mk = lambda mac, u: make_bss(mac, "CORP", CH36, -50, ent_ies(extra=qbss_ie(10, u)))
-        f = analyze([mk("02:00:00:00:04:01", 100), mk("02:00:00:00:04:02", 150), mk("02:00:00:00:04:03", 200)])
+        f = analyze([mk("02:00:00:00:04:01", 100), mk("02:00:00:00:14:02", 150), mk("02:00:00:00:24:03", 200)])
         sev = {x.bssids[0]: x.severity for x in f if x.code == "RF_UTIL"}
         self.assertNotIn("02:00:00:00:04:01", sev)       # 39%
-        self.assertEqual(sev["02:00:00:00:04:02"], WARNING)  # 59%
-        self.assertEqual(sev["02:00:00:00:04:03"], CRITICAL)  # 78%
+        self.assertEqual(sev["02:00:00:00:14:02"], WARNING)  # 59%
+        self.assertEqual(sev["02:00:00:00:24:03"], CRITICAL)  # 78%
 
     def test_cochannel_count(self):
-        many = [make_bss("02:00:00:00:05:%02x" % i, "n%d" % i, CH6, -60, rsn_ie([2])) for i in range(4)]
+        many = [make_bss("02:00:00:%02x:05:00" % i, "n%d" % i, CH6, -60, rsn_ie([2])) for i in range(4)]   # 4 разные AP
         self.assertIn("RF_COCHANNEL", codes(analyze(many)))
         self.assertNotIn("RF_COCHANNEL", codes(analyze(many[:3])))
         weak = [make_bss("02:00:00:00:06:%02x" % i, "n%d" % i, CH6, -90, rsn_ie([2])) for i in range(6)]
