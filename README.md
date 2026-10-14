@@ -1,183 +1,226 @@
 <p align="center">
+  <b>English</b> · <a href="README.ru.md">Русский</a>
+</p>
+
+<p align="center">
   <img src="docs/images/logo.png" width="96" alt="">
 </p>
 
 <h1 align="center">Wi-Fi Beacon Scanner</h1>
 
 <p align="center">
-  Wi-Fi сканер и диагностика для Windows 10/11: что вещают точки доступа, где слабое покрытие
-  и почему ноутбук роумится или теряет связь.
+  Wi-Fi scanner and troubleshooting tool for Windows 10/11: what access points advertise, where coverage
+  is weak, and why a laptop roams or drops the connection.
 </p>
 
 <p align="center">
-  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Скачать" src="https://img.shields.io/badge/скачать-Windows_10%2F11-0a6c8f?style=flat-square&logo=windows"></a>
+  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Download" src="https://img.shields.io/badge/download-Windows_10%2F11-0a6c8f?style=flat-square&logo=windows"></a>
+  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/salilov95/Wi-Fi-Beacon-Scanner?style=flat-square"></a>
   <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.8%2B-3776ab?style=flat-square&logo=python&logoColor=white">
-  <img alt="Зависимости" src="https://img.shields.io/badge/зависимости-нет-2ea44f?style=flat-square">
-  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/лицензия-MIT-lightgrey?style=flat-square"></a>
+  <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-none-2ea44f?style=flat-square">
+  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square"></a>
 </p>
 
 <p align="center">
-  <a href="#возможности">Возможности</a> ·
-  <a href="#установка">Установка</a> ·
-  <a href="#документация">Документация</a>
+  <a href="#features">Features</a> ·
+  <a href="#where-the-data-comes-from">Data sources</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#documentation">Documentation</a>
 </p>
 
 <p align="center">
-  <img src="docs/images/main.png" alt="Главное окно: таблица сетей и спектр каналов 2.4 ГГц">
+  <img src="docs/images/main.png" alt="Main window: network table and 2.4 GHz channel spectrum">
 </p>
 
-## Возможности
+> The user interface is in Russian. Screenshots below show the Russian UI; the documentation is available
+> in both English and Russian.
 
-- **Таблица эфира** - все точки доступа 2.4, 5 и 6 ГГц: сигнал и тренд, канал и ширина, защита (WPA2/WPA3, PMF, AKM),
-  поколение Wi-Fi, максимальный MCS и PHY-скорость, загрузка канала, клиенты, вендор. Автоскан раз в 5 секунд,
-  столбцы можно скрывать и менять их ширину.
-- **Дополнения 802.11** - d, e, h, i, k, r, u, v, w, а также mc (FTM), TWT, Multiple BSSID, Hotspot 2.0
-  в колонке таблицы, в фильтре и в расшифровке beacon.
-- **Каналы** - спектр каждого диапазона с зоной DFS и подсказка, какой канал свободнее.
-- **Журнал подключения ноутбука** - роуминги, обрывы с причиной от Windows, пинг-понг, залипание на слабой точке.
-- **Сессии подключения** - машина состояний клиента: ассоциация, 802.1X/EAP и 4-way, получение IP по DHCP
-  с длительностью каждой стадии; результат 802.1X с причиной отказа и события Windows рядом с сессией.
-- **Журнал Windows** - WLAN-AutoConfig за сутки, 3 дня или неделю: подключения, отказы и обрывы с причинами,
-  загружается сам и обновляется раз в минуту.
-- **Обход по плану этажа** - карта покрытия по точкам замеров (site survey).
-- **Сигнал во времени** - графики и тепловая карта RSSI с автосканом.
-- **Загрузка каналов** - QBSS Load из beacon, от зелёного к красному.
-- **Проблемы** - 29 проверок безопасности, роуминга, радио и гигиены сети с подсказкой, что проверить.
-- **Расшифровка beacon** - все Information Elements выбранной точки.
-- **Отчёты** - PDF, Excel, HTML, CSV, JSON: по всем сетям, только по своим или как в таблице.
-- **Для раздачи на ноутбуки** - установщик с тихой установкой, семь тем, без внешних зависимостей.
+<details>
+<summary>UI glossary: tab and menu names</summary>
 
-### Дополнения 802.11
+| In the app | Meaning |
+|---|---|
+| Сканировать · Авто | Scan · Auto-scan |
+| Мои SSID | My SSIDs (your networks; problems are reported for them) |
+| Каналы · Обзор · Утилизация | Channels · Overview · Utilization |
+| Сигнал во времени · Подключение · Обход | Signal over time · Connection journal · Floor plan survey |
+| Проблемы · Beacon | Problems · Beacon decoder |
+| Сессии · Журнал Windows · Сравнение | Sessions · Windows event log · Compare |
+| Экспорт · Вид · О программе | Export · View · About |
+| Проверить обновления · Папка с журналом | Check for updates · Log folder |
 
-Какие дополнения объявляет каждая точка: d, e, h, i, k, r, u, v, w, а также FTM (802.11mc), FILS, mesh,
-TWT, Multiple BSSID и Hotspot 2.0. В таблице - строка букв, в фильтре - «есть все отмеченные» или
-«нет ни одного», с числом BSS у каждого пункта. Подробности по каждой точке (MDID, тип сети 802.11u,
-Power Constraint, биты Extended Capabilities) - на вкладке «Beacon». Откуда что берётся - в
-[документации](docs/diagnostics.md#дополнения-80211-колонка-80211-и-фильтр).
+</details>
 
-<img src="docs/images/standards.png" alt="Фильтр по дополнениям 802.11">
+## Features
 
-### Журнал подключения ноутбука
+- **Network table** - every access point on 2.4, 5 and 6 GHz: signal and trend, channel and width, security
+  (WPA2/WPA3, PMF, AKM), Wi-Fi generation, maximum MCS and PHY rate, channel load, clients, vendor.
+  Auto-scan every 5 seconds; columns can be hidden and resized.
+- **802.11 amendments** - d, e, h, i, k, r, u, v, w plus mc (FTM), TWT, Multiple BSSID and Hotspot 2.0
+  in a table column, a filter and the beacon decoder.
+- **Channels** - spectrum view per band with the DFS range and a hint on which channel is the least busy.
+- **Laptop connection journal** - roams, disconnects with the reason reported by Windows, ping-pong,
+  sticky client on a weak AP.
+- **Connection sessions** - client state machine: association, 802.1X/EAP and 4-way handshake, DHCP,
+  with the duration of each stage; 802.1X result with the failure reason and Windows events around the session.
+- **Windows event log** - WLAN-AutoConfig for the last day, 3 days or week: connections, failures and
+  disconnects with reasons; loads on start and refreshes every minute.
+- **Floor plan survey** - coverage map from measurement points (site survey).
+- **Signal over time** - RSSI charts and a heat map with auto-scan.
+- **Channel utilization** - QBSS Load from beacons, green to red.
+- **Problems** - 29 checks for security, roaming, RF and network hygiene, each with a hint on what to check.
+- **Beacon decoder** - every Information Element of the selected AP.
+- **Reports** - PDF, Excel, HTML, CSV, JSON: all networks, only yours, or exactly what the table shows.
+- **Ready for fleet deployment** - silent installer, seven themes, no external dependencies.
 
-Программа следит за собственным подключением раз в секунду: на какой точке ноутбук, с каким сигналом
-и скоростью. Видно каждый роуминг (откуда, куда, RSSI до и после, сколько продержался), обрывы с причиной
-от Windows, пинг-понг между двумя точками и залипание, когда ноутбук держится за слабую точку при наличии
-сильной. MCS текущего подключения оценивается по скорости приёма и передачи.
+### 802.11 amendments
 
-<img src="docs/images/connection.png" alt="Журнал подключения: график сигнала с роумингами и обрывом">
+Which amendments each AP advertises: d, e, h, i, k, r, u, v, w, plus FTM (802.11mc), FILS, mesh, TWT,
+Multiple BSSID and Hotspot 2.0. The table shows a row of letters; the filter offers "has all selected" or
+"has none of the selected", with the number of BSSs next to each item. Per-AP details (MDID, 802.11u network
+type, Power Constraint, Extended Capabilities bits) are on the Beacon tab. Where each letter comes from is
+described in the [documentation](docs/en/diagnostics.md#80211-amendments-column-and-filter).
 
-### Сессии подключения
+<img src="docs/images/standards.png" alt="802.11 amendments filter">
 
-Каждое подключение и каждый роуминг ноутбука разложены по стадиям по уведомлениям Windows: ассоциация,
-аутентификация (обмен 802.1X/EAP и 4-way handshake), получение IPv4 по DHCP. Видно, сколько длилась каждая
-стадия, чем закончилась аутентификация 802.1X (успех или отказ с причиной и кодом ошибки EAP, тип EAP,
-учётка компьютера или пользователя), когда пришла аренда DHCP и от какого сервера. Быстрый FT-роуминг
-(десятки мс) сразу отличается от роуминга с полной 802.1X-аутентификацией (сотни мс). В подробностях
-сессии - события журнала Windows вокруг неё. Прав администратора не нужно.
+### Laptop connection journal
 
-<img src="docs/images/sessions.png" alt="Сессии подключения: стадии, 802.1X, DHCP">
+The app polls its own connection once per second: which AP the laptop is on, with what signal and rate.
+You see every roam (from, to, RSSI before and after, time spent on the previous AP), disconnects with the
+reason from Windows, ping-pong between two APs, and the sticky client case when the laptop holds on to a weak
+AP while a stronger one is available. The MCS of the current connection is estimated from the Rx/Tx rates.
 
-### Журнал Windows
+<img src="docs/images/connection.png" alt="Connection journal: signal chart with roams and a disconnect">
 
-События `Microsoft-Windows-WLAN-AutoConfig/Operational` с текстом из самой Windows: начало и итог
-подключения, ассоциация, проверка безопасности и 4-way, 802.1X, отключения с причиной. Загружается
-за сутки сразу при запуске и обновляется раз в минуту; фильтры по стадии и уровню, сводка частых
-причин, все поля события по нажатию, выгрузка в CSV.
+### Connection sessions
 
-<img src="docs/images/winlog.png" alt="Журнал Windows WLAN-AutoConfig">
+Every connection and every roam is broken down into stages using Windows notifications: association,
+authentication (802.1X/EAP exchange and 4-way handshake), and IPv4 via DHCP. You see how long each stage took,
+how 802.1X ended (success, or failure with the reason and EAP error code, EAP type, machine or user
+credentials), when the DHCP lease arrived and from which server. A fast FT roam (tens of ms) is immediately
+distinguishable from a roam with full 802.1X authentication (hundreds of ms). Session details also list the
+Windows event log entries around it. No administrator rights required.
 
-### Обход по плану этажа
+<img src="docs/images/sessions.png" alt="Connection sessions: stages, 802.1X, DHCP">
 
-Загрузите план этажа, ходите с ноутбуком и отмечайте, где стоите. В каждой точке программа делает скан
-и строит карту покрытия: сигнал выбранной сети, сигнал подключения ноутбука или сколько точек доступа
-слышно для роуминга. Вдали от замеров карта ничего не дорисовывает. Проект сохраняется в файл, карта - в PNG.
+### Windows event log
 
-<img src="docs/images/survey.png" alt="Карта покрытия по плану этажа">
+Events from `Microsoft-Windows-WLAN-AutoConfig/Operational` with the text written by Windows itself:
+connection start and result, association, security checks and 4-way handshake, 802.1X, disconnects with
+the reason. The last day is loaded on start and refreshed every minute; filters by stage and level, a summary
+of the most frequent reasons, all event fields on click, CSV export.
 
-### Сигнал во времени
+<img src="docs/images/winlog.png" alt="Windows WLAN-AutoConfig event log">
 
-RSSI всех точек выбранной сети по сканам: линии окрашены по уровню, фон показывает зоны качества.
-Есть тепловая карта «точка × скан», где сразу видно, какая точка пропадает.
+### Floor plan survey
 
-<img src="docs/images/signal.png" alt="Сигнал во времени по точкам сети">
+Load a floor plan, walk around with the laptop and mark where you are. At each point the app runs a scan and
+builds a coverage map: signal of the selected network, the laptop's own connection signal, or how many APs are
+heard for roaming. Far from the measurement points the map shows nothing rather than guessing. The project is
+saved to a file, the map to PNG.
 
-<img src="docs/images/heatmap.png" alt="Тепловая карта сигнала">
+<img src="docs/images/survey.png" alt="Coverage map on a floor plan">
 
-### Загрузка каналов
+### Signal over time
 
-Сколько эфира занято на каждом канале по данным самих точек доступа (QBSS Load), число клиентов
-и история по сканам. Каналы, где точки не сообщают загрузку, перечислены отдельно.
+RSSI of every AP of the selected network across scans: lines are colored by level, the background shows quality
+zones. The "AP × scan" heat map shows at a glance which AP disappears.
 
-<img src="docs/images/utilization.png" alt="Загрузка каналов">
+<img src="docs/images/signal.png" alt="Signal over time per AP">
 
-### Проблемы
+<img src="docs/images/heatmap.png" alt="Signal heat map">
 
-Открытые и WEP-сети, TKIP, отсутствие PMF, 802.11k/r/v включены не на всех точках, разная защита
-у одного SSID, перекрытие каналов в 2.4 ГГц, перегруженные каналы, слабый сигнал. Нажатие на проблему
-подсвечивает затронутые точки в таблице. Полный список - в [документации](docs/diagnostics.md).
+### Channel utilization
 
-<img src="docs/images/findings.png" alt="Проблемы с подсказками">
+How much airtime is busy on each channel according to the APs themselves (QBSS Load), the number of clients
+and the history across scans. Channels where APs do not report load are listed separately.
 
-### Расшифровка beacon
+<img src="docs/images/utilization.png" alt="Channel utilization">
 
-Все Information Elements выбранной точки с расшифровкой и hex: RSN, HT/VHT/HE Capabilities и Operation,
-наборы MCS, BSS Color, параметры 6 ГГц, vendor IE.
+### Problems
 
-<img src="docs/images/beacon.png" alt="Расшифровка beacon">
+Open and WEP networks, TKIP, no PMF, 802.11k/r/v enabled on some APs only, different security settings within
+one SSID, overlapping 2.4 GHz channels, overloaded channels, weak signal. Clicking a problem highlights the
+affected APs in the table. Full list in the [documentation](docs/en/diagnostics.md).
 
-### Обзор эфира
+<img src="docs/images/findings.png" alt="Problems with hints">
 
-Число точек по каналам, распределение по уровню сигнала, защите, поколениям Wi-Fi, ширине канала и вендорам.
+### Beacon decoder
 
-<img src="docs/images/overview.png" alt="Обзор эфира">
+All Information Elements of the selected AP, decoded and in hex: RSN, HT/VHT/HE Capabilities and Operation,
+MCS sets, BSS Color, 6 GHz parameters, vendor IEs.
 
-### Отчёты и темы
+<img src="docs/images/beacon.png" alt="Beacon decoder">
 
-Отчёт в PDF и Excel (с цветовыми шкалами сигнала и загрузки), HTML, CSV, история замеров, журнал
-подключения, снапшот JSON. Семь тем оформления, включая тёмную.
+### Overview
+
+Number of APs per channel, distribution by signal level, security, Wi-Fi generation, channel width and vendor.
+
+<img src="docs/images/overview.png" alt="Air overview">
+
+### Reports and themes
+
+PDF and Excel reports (with color scales for signal and load), HTML, CSV, measurement history, connection
+journal, JSON snapshot. Seven color themes, including a dark one.
 
 <table>
   <tr>
-    <td width="50%" valign="top"><img src="docs/images/report.png" alt="PDF-отчёт"></td>
-    <td width="50%" valign="top"><img src="docs/images/dark.png" alt="Тёмная тема"></td>
+    <td width="50%" valign="top"><img src="docs/images/report.png" alt="PDF report"></td>
+    <td width="50%" valign="top"><img src="docs/images/dark.png" alt="Dark theme"></td>
   </tr>
 </table>
 
-## Установка
+## Where the data comes from
 
-Скачайте со страницы [Releases](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest):
+Windows only - no administrator rights, no access to the wireless controller:
 
-| Файл | Для чего |
+| Source | What it provides |
 |---|---|
-| `WiFiBeaconScanner-Setup-<версия>.exe` | установщик: Program Files, ярлык в «Пуске», штатное удаление |
-| `WiFiBeaconScanner.exe` | переносная версия одним файлом, без установки |
+| `WlanScan` + `WlanGetNetworkBssList` (Native Wifi) | beacons / probe responses cached by the WLAN AutoConfig service: raw IEs, RSSI, frequency, Capability |
+| `WlanQueryInterface`, once per second | the laptop's own connection: BSSID, RSSI, Rx/Tx rates, channel |
+| `WlanRegisterNotification` (ACM, MSM, ONEX) | connection and roaming stages, failure reasons, 802.1X result and EAP error |
+| `GetAdaptersInfo` | IPv4, DHCP server, lease time |
+| `Microsoft-Windows-WLAN-AutoConfig/Operational` event log | history of connections, failures and disconnects with Windows' own text |
+| Wireshark `manuf` file | vendor by OUI |
 
-Тихая установка (SCCM, Intune, GPO, PDQ):
+This is not monitor mode: retransmissions, EAPOL and roaming frames are not visible this way. The UI is a local
+page on `127.0.0.1` in a dedicated Edge window; the app only goes online when you click "Check for updates".
+
+## Installation
+
+Download from the [Releases](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest) page:
+
+| File | Purpose |
+|---|---|
+| `WiFiBeaconScanner-Setup-<version>.exe` | installer: Program Files, Start menu shortcut, regular uninstall |
+| `WiFiBeaconScanner.exe` | portable single-file version, no installation |
+
+Silent install (SCCM, Intune, GPO, PDQ):
 
 ```
 WiFiBeaconScanner-Setup-1.0.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
 ```
 
-Файлы не подписаны сертификатом, поэтому при ручном запуске SmartScreen попросит подтверждение
-(«Подробнее» → «Выполнить в любом случае»). Подробности - в [установке и раздаче](docs/deployment.md).
+The files are not code-signed, so SmartScreen asks for confirmation when you run them manually
+("More info" → "Run anyway"). Details in [Installation and deployment](docs/en/deployment.md).
 
-Из исходников (Python 3.8+, зависимостей нет):
+From source (Python 3.8+, no dependencies):
 
 ```
-python -m wifi_beacon_scanner gui            # сканировать
-python -m wifi_beacon_scanner gui --demo     # посмотреть на демо-данных
+python -m wifi_beacon_scanner gui            # scan
+python -m wifi_beacon_scanner gui --demo     # try it on demo data (works on any OS)
 ```
 
-## Документация
+## Documentation
 
-- [Установка и раздача на ноутбуки](docs/deployment.md) - тихая установка, где хранятся данные, ограничения
-- [Диагностика](docs/diagnostics.md) - все проверки, шкала сигнала, загрузка канала, MCS и PHY-скорость
-- [Журнал подключения и сессии](docs/connection-journal.md) - роуминги, обрывы, стадии подключения, 802.1X, DHCP
-- [Разработка, сборка и выпуск](docs/development.md) - запуск из исходников, CLI, тесты, сборка exe, релизы
-- [История изменений](CHANGELOG.md)
-- [Как вносить изменения](CONTRIBUTING.md)
+- [Installation and deployment](docs/en/deployment.md) - silent install, where data is stored, limitations
+- [Diagnostics](docs/en/diagnostics.md) - all checks, 802.11 amendments, signal scale, channel load, MCS and PHY rate
+- [Connection journal and sessions](docs/en/connection-journal.md) - roams, disconnects, connection stages, 802.1X, DHCP
+- [Development, build and release](docs/en/development.md) - running from source, CLI, tests, building the exe, releases
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md)
 
-## Лицензия
+## License
 
 [MIT](LICENSE)

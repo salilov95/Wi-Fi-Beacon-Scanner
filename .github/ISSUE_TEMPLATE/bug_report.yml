@@ -1,33 +1,34 @@
-name: Ошибка
-description: Программа работает не так, как ожидалось
+name: Bug report / Ошибка
+description: Something does not work as expected / Программа работает не так, как ожидалось
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
+        Make sure screenshots and files contain no SSIDs or BSSIDs you are not allowed to share.
         Перед отправкой проверьте, что в скриншотах и файлах нет SSID и BSSID, которые нельзя показывать.
   - type: input
     id: version
     attributes:
-      label: Версия программы
-      placeholder: "1.0.0 (Вид → О программе или свойства WiFiBeaconScanner.exe)"
+      label: App version / Версия программы
+      placeholder: "1.0.1 (View → About / Вид → О программе)"
     validations:
       required: true
   - type: input
     id: os
     attributes:
-      label: Windows и адаптер Wi-Fi
-      placeholder: "Windows 11 23H2, Intel Wi-Fi 6 AX201, драйвер 22.250"
+      label: Windows and Wi-Fi adapter / Windows и адаптер Wi-Fi
+      placeholder: "Windows 11 24H2, MediaTek Wi-Fi 6 MT7921"
   - type: textarea
     id: what
     attributes:
-      label: Что произошло и что ожидали
-      description: Шаги, чтобы повторить.
+      label: What happened and what you expected / Что произошло и что ожидали
+      description: Steps to reproduce / Шаги, чтобы повторить.
     validations:
       required: true
   - type: textarea
     id: log
     attributes:
-      label: Журнал программы
-      description: Последние строки `%LOCALAPPDATA%\WiFiBeaconScanner\wifi-beacon-scanner.log`.
+      label: App log / Журнал программы
+      description: Last lines of `%LOCALAPPDATA%\WiFiBeaconScanner\logs\app.log` (View → About → Log folder).
       render: text

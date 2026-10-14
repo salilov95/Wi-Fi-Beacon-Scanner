@@ -1,6 +1,6 @@
 # Разработка, сборка и выпуск
 
-[← README](../README.md)
+[← README](../../README.ru.md) · [English](../en/development.md)
 
 ## Запуск из исходников
 
@@ -47,14 +47,17 @@
 
 ## Сборка
 
-Версия задаётся в одном месте: `wifi_beacon_scanner/__init__.py`. Изменения описываются в [CHANGELOG.md](../CHANGELOG.md).
+Версия задаётся в одном месте: `wifi_beacon_scanner/__init__.py`. Изменения описываются на двух языках:
+[CHANGELOG.md](../../CHANGELOG.md) (английский) и [CHANGELOG.ru.md](../../CHANGELOG.ru.md); текст релиза собирается из обоих.
 
 **Выпуск версии (основной путь).** Поднять версию в `__init__.py`, дописать раздел в CHANGELOG, закоммитить
-в `main`, затем Actions → Release → Run workflow с галочкой «publish». Workflow [Release](../.github/workflows/release.yml)
+в `main`, затем Actions → Release → Run workflow с галочкой «publish». Workflow [Release](../../.github/workflows/release.yml)
 на чистом Windows прогонит тесты, скачает базу вендоров, соберёт переносной exe и установщик, проверит
 собранный exe (запуск, скан, выгрузка PDF и Excel) и опубликует релиз `v<версия>` с текстом из CHANGELOG.
 Тег создаётся на собранном коммите. Можно и тегом из консоли (`git tag v0.7.0 && git push origin v0.7.0`),
 тег должен совпадать с версией в `__init__.py`. Без галочки получится только сборка, файлы будут в артефакте запуска.
+С галочкой «draft» на ветке `release/<версия>` workflow выкладывает черновой pre-release для проверки на ноутбуке;
+при публикации той же версии черновик удаляется.
 
 **Локально на Windows.** Нужны Python 3 и Inno Setup 6.3+ (https://jrsoftware.org/isdl.php):
 
@@ -72,7 +75,9 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
 
     python -m unittest discover -s tests
 
-[CI](../.github/workflows/ci.yml) гоняет их на Windows и Linux при каждом push и pull request.
+[CI](../../.github/workflows/ci.yml) гоняет их на Windows и Linux при каждом push и pull request. На Windows ещё
+печатает PDF настоящим Edge, открывает окно программы с чистым профилем Edge и проверяет выход при закрытии,
+вызывает Windows API, на которых держатся сессии и журнал Windows.
 
 ## Структура
 
@@ -92,6 +97,9 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     wifi_beacon_scanner/onex.py        разбор уведомлений 802.1X (ONEX)
     wifi_beacon_scanner/ip_win.py      IPv4 и аренда DHCP (GetAdaptersInfo)
     wifi_beacon_scanner/winlog*.py     журнал WLAN-AutoConfig (wevtapi)
+    wifi_beacon_scanner/amend.py       дополнения 802.11 (d/e/h/i/k/r/u/v/w и др.) по Capability и IE
+    wifi_beacon_scanner/applog.py      журнал программы в файл (logs\app.log)
+    wifi_beacon_scanner/update.py      проверка новой версии на GitHub Releases (по кнопке)
     wifi_beacon_scanner/mcs.py         MCS и PHY-скорости 802.11n/ac/ax, оценка MCS по скорости
     wifi_beacon_scanner/xlsx.py        запись .xlsx без библиотек
     wifi_beacon_scanner/pdf.py         PDF через Edge/Chromium headless
@@ -103,6 +111,8 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     build.bat, build_installer.bat     сборка exe и установщика
     .github/workflows/                 CI (тесты) и Release (сборка exe, установщик, GitHub Release)
     tools/smoke_exe.py                 проверка собранного exe в Release: запуск, скан, выгрузка PDF и Excel
-    tools/release_notes.py             текст релиза из CHANGELOG.md
+    tools/smoke_window.py              CI: окно программы с чистым профилем Edge, выход при закрытии
+    tools/smoke_winapi.py              CI: GetAdaptersInfo и чтение журнала на настоящей Windows
+    tools/release_notes.py             текст релиза из CHANGELOG.md и CHANGELOG.ru.md
     tools/run_tests.py                 тесты в CI: упавшие видны аннотациями
     tests/                   unittest
