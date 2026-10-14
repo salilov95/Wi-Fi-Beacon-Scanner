@@ -7,11 +7,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-14
+
 ### Added
+- The app in English and Russian: interface, tabs, problems and hints, beacon decoding, sessions, PDF/Excel/HTML
+  and CSV reports. The language follows the Windows display language and can be switched in View → Language;
+  the choice is saved with the other settings. `--lang en|ru` sets it from the command line.
+- English screenshots in `README.md`; Russian screenshots in `README.ru.md` updated to the current version.
+- `tools/i18n_scan.py` and `tests/test_i18n.py`: no string is left without a translation.
 - Documentation in English: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md` and `docs/en/`; the Russian versions
   are `README.ru.md`, `CHANGELOG.ru.md`, `CONTRIBUTING.ru.md` and `docs/ru/`, with a language switch on every page.
 - `SECURITY.md` and `CODE_OF_CONDUCT.md`; bilingual issue and pull request templates.
 - Release notes are built from both changelogs (English first, then Russian).
+
+### Fixed
+- Survey layer summary: a point without signal is shown as "no signal" rather than "no dBm".
 
 ## [1.0.1] - 2026-10-11
 
@@ -143,7 +153,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   utilization, signal over time, connection journal, floor plan survey, findings, beacon, compare), PDF/Excel/
   HTML/CSV/JSON reports, color themes.
 
-[Unreleased]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.1.0
 [1.0.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.1
 [1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0
 [0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0

@@ -6,11 +6,21 @@
 
 ## [Не выпущено]
 
+## [1.1.0] - 2026-10-14
+
 ### Добавлено
+- Программа на русском и английском: интерфейс, вкладки, проблемы и подсказки, расшифровка beacon, сессии,
+  отчёты PDF/Excel/HTML и CSV. Язык берётся из языка интерфейса Windows и переключается в «Вид» → «Язык»;
+  выбор сохраняется вместе с остальными настройками. Ключ `--lang ru|en` задаёт его из командной строки.
+- Английские скриншоты в `README.md`; русские скриншоты в `README.ru.md` обновлены под текущую версию.
+- `tools/i18n_scan.py` и `tests/test_i18n.py`: ни одна строка не остаётся без перевода.
 - Документация на английском: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md` и `docs/en/`; русские версии -
   `README.ru.md`, `CHANGELOG.ru.md`, `CONTRIBUTING.ru.md` и `docs/ru/`, на каждой странице переключатель языка.
 - `SECURITY.md` и `CODE_OF_CONDUCT.md`; двуязычные шаблоны issue и pull request.
 - Текст релиза собирается из обоих CHANGELOG (сначала английский, потом русский).
+
+### Исправлено
+- Сводка слоя обхода: точка без сигнала показывается как «нет сигнала», а не «нет дБм».
 
 ## [1.0.1] - 2026-10-11
 
@@ -144,7 +154,8 @@
   (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
   beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
 
-[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.0.1...HEAD
+[Не выпущено]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.1.0
 [1.0.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.1
 [1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0
 [0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0

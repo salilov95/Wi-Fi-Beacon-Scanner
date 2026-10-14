@@ -19,14 +19,15 @@ from collections import deque
 from dataclasses import asdict, dataclass, field
 from typing import Any, Deque, Dict, List, Optional, Sequence
 
+from .i18n import N_, tr
 from .session import SessionTracker
 
 CONNECTED = "connected"
 
 STATE_RU = {
-    "connected": "подключён", "disconnected": "отключён", "disconnecting": "отключается",
-    "associating": "ассоциация", "authenticating": "аутентификация", "discovering": "поиск сети",
-    "not_ready": "адаптер не готов", "ad_hoc": "ad hoc", "unknown": "неизвестно",
+    "connected": N_("подключён"), "disconnected": N_("отключён"), "disconnecting": N_("отключается"),
+    "associating": N_("ассоциация"), "authenticating": N_("аутентификация"), "discovering": N_("поиск сети"),
+    "not_ready": N_("адаптер не готов"), "ad_hoc": "ad hoc", "unknown": N_("неизвестно"),
 }
 
 
@@ -79,7 +80,7 @@ class ConnTracker:
         self.samples: Deque[ConnSample] = deque(maxlen=max_samples)
         self.events: Deque[ConnEvent] = deque(maxlen=max_events)
         self.raw: Deque[Dict[str, Any]] = deque(maxlen=300)     # сырые уведомления для отладки
-        self.status: str = "не запущен"
+        self.status: str = tr("не запущен")
         self._last: Optional[ConnSample] = None
         self._bss_since: Optional[float] = None
         self._down_since: Optional[float] = None
@@ -98,33 +99,33 @@ class ConnTracker:
         if prev is None:
             if s.up:
                 self._bss_since = s.t
-                out.append(ConnEvent(s.t, "connected", "info", "Подключён к %s" % (s.ssid or "?"),
+                out.append(ConnEvent(s.t, "connected", "info", tr("Подключён к %s") % (s.ssid or "?"),
                                      ssid=s.ssid, bssid_to=s.bssid, rssi_to=s.rssi))
             else:
                 self._down_since = s.t
         elif prev.up and s.up:
             if s.ssid != prev.ssid:
-                out.append(ConnEvent(s.t, "ssid_change", "warning", "Переключился на другую сеть: %s → %s" % (prev.ssid, s.ssid),
+                out.append(ConnEvent(s.t, "ssid_change", "warning", tr("Переключился на другую сеть: %s → %s") % (prev.ssid, s.ssid),
                                      ssid=s.ssid, bssid_from=prev.bssid, bssid_to=s.bssid,
                                      rssi_from=prev.rssi, rssi_to=s.rssi, duration_s=self._since(self._bss_since, s.t)))
                 self._bss_since = s.t
                 self._last_roam = None
             elif s.bssid != prev.bssid:
-                ev = ConnEvent(s.t, "roam", "info", "Роуминг", ssid=s.ssid, bssid_from=prev.bssid, bssid_to=s.bssid,
+                ev = ConnEvent(s.t, "roam", "info", tr("Роуминг"), ssid=s.ssid, bssid_from=prev.bssid, bssid_to=s.bssid,
                                rssi_from=prev.rssi, rssi_to=s.rssi, duration_s=self._since(self._bss_since, s.t))
                 out.append(ev)
                 lr = self._last_roam
                 if (lr is not None and lr.bssid_from == s.bssid and lr.bssid_to == prev.bssid
                         and s.t - lr.t <= self.pingpong_window_s):
                     out.append(ConnEvent(s.t, "pingpong", "warning",
-                                         "Пинг-понг: вернулся на прежнюю BSS через %.0f с" % (s.t - lr.t),
+                                         tr("Пинг-понг: вернулся на прежнюю BSS через %.0f с") % (s.t - lr.t),
                                          ssid=s.ssid, bssid_from=prev.bssid, bssid_to=s.bssid,
                                          rssi_from=prev.rssi, rssi_to=s.rssi, duration_s=s.t - lr.t))
                 self._last_roam = ev
                 self._bss_since = s.t
                 self._sticky_since = None
         elif prev.up and not s.up:
-            out.append(ConnEvent(s.t, "disconnected", "critical", "Связь пропала (%s)" % STATE_RU.get(s.state, s.state),
+            out.append(ConnEvent(s.t, "disconnected", "critical", tr("Связь пропала (%s)") % tr(STATE_RU.get(s.state, s.state)),
                                  ssid=prev.ssid, bssid_from=prev.bssid, rssi_from=prev.rssi,
                                  duration_s=self._since(self._bss_since, s.t)))
             self._down_since = s.t
@@ -133,7 +134,7 @@ class ConnTracker:
         elif not prev.up and s.up:
             gap = self._since(self._down_since, s.t)
             out.append(ConnEvent(s.t, "connected", "info",
-                                 "Подключён к %s" % (s.ssid or "?") + (" после %.0f с без связи" % gap if gap else ""),
+                                 tr("Подключён к %s") % (s.ssid or "?") + (tr(" после %.0f с без связи") % gap if gap else ""),
                                  ssid=s.ssid, bssid_to=s.bssid, rssi_to=s.rssi, duration_s=gap))
             self._bss_since = s.t
             self._down_since = None
@@ -158,10 +159,10 @@ class ConnTracker:
                 if ev.kind == "disconnected" and not ev.reason and abs(ev.t - t) <= self.reason_attach_s:
                     ev.reason_code, ev.reason = reason_code, reason
                     return None
-            ev = ConnEvent(t, "disconnect_reason", "warning", "Windows сообщила об отключении", ssid=ssid,
+            ev = ConnEvent(t, "disconnect_reason", "warning", tr("Windows сообщила об отключении"), ssid=ssid,
                            bssid_from=bssid, reason_code=reason_code, reason=reason)
         else:
-            ev = ConnEvent(t, "attempt_fail", "critical", "Не удалось подключиться к %s" % (ssid or "сети"),
+            ev = ConnEvent(t, "attempt_fail", "critical", tr("Не удалось подключиться к %s") % (ssid or tr("сети")),
                            ssid=ssid, bssid_to=bssid, reason_code=reason_code, reason=reason)
         self.events.append(ev)
         return ev
@@ -204,7 +205,7 @@ class ConnTracker:
         best = max(better, key=lambda b: b.rssi)
         self._sticky_reported_for = cur.bssid
         ev = ConnEvent(t, "sticky", "warning",
-                       "Залипание: держится за слабую BSS, хотя рядом есть сильнее на %d дБ" % (best.rssi - my_rssi),
+                       tr("Залипание: держится за слабую BSS, хотя рядом есть сильнее на %d дБ") % (best.rssi - my_rssi),
                        ssid=cur.ssid, bssid_from=cur.bssid, bssid_to=best.bssid, rssi_from=my_rssi, rssi_to=best.rssi,
                        duration_s=round(t - self._sticky_since, 1))
         self.events.append(ev)

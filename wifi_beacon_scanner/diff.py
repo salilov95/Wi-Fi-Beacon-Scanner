@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Sequence, Tuple
 
+from .i18n import N_, tr
 from . import amend
 from .model import Bss
 
@@ -20,22 +21,22 @@ def _pmf(b: Bss) -> str:
 
 
 def _yn(v: bool) -> str:
-    return "да" if v else "нет"
+    return tr("да") if v else tr("нет")
 
 
 FIELDS: List[Tuple[str, Callable[[Bss], Any]]] = [
     ("SSID", lambda b: b.ssid_display),
-    ("Канал", lambda b: b.channel),
-    ("Ширина, МГц", lambda b: b.info.width_mhz),
-    ("Безопасность", lambda b: b.security),
-    ("Шифры", lambda b: "/".join(b.ciphers) or "-"),
+    (N_("Канал"), lambda b: b.channel),
+    (N_("Ширина, МГц"), lambda b: b.info.width_mhz),
+    (N_("Безопасность"), lambda b: b.security),
+    (N_("Шифры"), lambda b: "/".join(b.ciphers) or "-"),
     ("PMF", _pmf),
     ("802.11k", lambda b: _yn(b.info.dot11k)),
     ("802.11r", lambda b: _yn(b.info.dot11r)),
     ("802.11v", lambda b: _yn(b.info.dot11v)),
-    ("Дополнения 802.11", lambda b: amend.short(amend.standards(b)) or "-"),
-    ("Поколение", lambda b: b.generation_label),
-    ("Страна", lambda b: b.info.country or "-"),
+    (N_("Дополнения 802.11"), lambda b: amend.short(amend.standards(b)) or "-"),
+    (N_("Поколение"), lambda b: b.generation_label),
+    (N_("Страна"), lambda b: b.info.country or "-"),
     ("Beacon interval", lambda b: b.beacon_interval),
 ]
 
@@ -55,6 +56,7 @@ def diff_snapshots(old: Sequence[Bss], new: Sequence[Bss], rssi_delta: int = 8) 
         a, b = o[k], n[k]
         ch = []
         for name, fn in FIELDS:
+            name = tr(name)
             x, y = fn(a), fn(b)
             if x != y:
                 ch.append({"field": name, "old": str(x), "new": str(y)})

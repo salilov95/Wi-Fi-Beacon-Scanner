@@ -25,14 +25,15 @@ from __future__ import annotations
 
 import struct
 from typing import Any, Dict, Optional
+from .i18n import N_, tr
 
 ONEX_RESULT_UPDATE = 1
 ONEX_AUTH_RESTARTED = 2
 # ONEX_AUTH_RESTART_REASON
-RESTART_REASON_RU = {0: "инициировала сеть (аутентификатор)", 1: "по запросу Windows (MSM)",
-                     2: "тайм-аут состояния held", 3: "тайм-аут аутентификации", 4: "изменились настройки 802.1X",
-                     5: "сменился пользователь", 6: "изменилось состояние карантина",
-                     7: "попытка с другими учётными данными"}
+RESTART_REASON_RU = {0: N_("инициировала сеть (аутентификатор)"), 1: N_("по запросу Windows (MSM)"),
+                     2: N_("тайм-аут состояния held"), 3: N_("тайм-аут аутентификации"), 4: N_("изменились настройки 802.1X"),
+                     5: N_("сменился пользователь"), 6: N_("изменилось состояние карантина"),
+                     7: N_("попытка с другими учётными данными")}
 
 
 def _u32(b: bytes, off: int) -> Optional[int]:
@@ -68,4 +69,4 @@ def parse_result_update(b: bytes) -> Dict[str, Any]:
 
 def parse_restart(b: bytes) -> Dict[str, Any]:
     r = _u32(b, 0)
-    return {"reason": r, "reason_ru": RESTART_REASON_RU.get(r, str(r)) if r is not None else ""}
+    return {"reason": r, "reason_ru": tr(RESTART_REASON_RU.get(r, str(r))) if r is not None else ""}

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Iterator, List, Optional, Tuple
+from .i18n import N_, tr
 
 OUI_IEEE = b"\x00\x0f\xac"   # 00-0F-AC: наборы шифров/AKM из стандарта 802.11
 OUI_MS = b"\x00\x50\xf2"     # 00-50-F2: Microsoft/WFA (WPA1, WMM, WPS)
@@ -421,17 +422,17 @@ IE_NAMES = {
 }
 EXT_NAMES = {
     35: "HE Capabilities", 36: "HE Operation",
-    106: "EHT Operation (ID сверить с 802.11be)", 108: "EHT Capabilities (ID сверить с 802.11be)",
+    106: N_("EHT Operation (ID сверить с 802.11be)"), 108: N_("EHT Capabilities (ID сверить с 802.11be)"),
 }
 MS_TYPES = {1: "WPA (WPA1)", 2: "WMM", 4: "WPS"}
-SEC_OFFSET = {0: "нет", 1: "выше", 3: "ниже"}
+SEC_OFFSET = {0: N_("нет"), 1: N_("выше"), 3: N_("ниже")}
 PROTECTION = {0: "none", 1: "non-member", 2: "20 MHz", 3: "non-HT mixed"}
-VHT_WIDTH = {0: "20/40 МГц", 1: "80/160/80+80 МГц", 2: "160 МГц", 3: "80+80 МГц"}
-MCS_MAP = {0: "MCS 0-7", 1: "MCS 0-8", 2: "MCS 0-9", 3: "нет"}
+VHT_WIDTH = {0: N_("20/40 МГц"), 1: N_("80/160/80+80 МГц"), 2: N_("160 МГц"), 3: N_("80+80 МГц")}
+MCS_MAP = {0: "MCS 0-7", 1: "MCS 0-8", 2: "MCS 0-9", 3: N_("нет")}
 
 
 def _yn(v) -> str:
-    return "да" if v else "нет"
+    return tr("да") if v else tr("нет")
 
 
 def _ascii(data: bytes) -> str:
@@ -441,31 +442,31 @@ def _ascii(data: bytes) -> str:
 def _decode(eid: int, b: bytes):
     """Возвращает (краткое описание, [(поле, значение), ...])."""
     if eid == 0:
-        t = b.decode("utf-8", "replace") or "<скрыт>"
+        t = b.decode("utf-8", "replace") or tr("<скрыт>")
         return t, [("SSID", t)]
     if eid in (1, 50):
         rates = [x for x in b if not is_selector(x)]
         sels = [MEMBERSHIP_SELECTORS[x & 0x7F] for x in b if is_selector(x)]
-        s = (" ".join("%g%s" % ((x & 0x7F) / 2.0, "*" if x & 0x80 else "") for x in rates) + " Мбит/с") if rates else "—"
-        f = [("Скорости (* = basic)", s)]
+        s = (" ".join("%g%s" % ((x & 0x7F) / 2.0, "*" if x & 0x80 else "") for x in rates) + tr(" Мбит/с")) if rates else "—"
+        f = [(tr("Скорости (* = basic)"), s)]
         if sels:
             f.append(("BSS membership selectors", ", ".join(sels)))
-            return (s + "; " if rates else "") + "требуется: " + ", ".join(sels), f
+            return (s + "; " if rates else "") + tr("требуется: ") + ", ".join(sels), f
         return s, f
     if eid == 3 and b:
-        return "канал %d" % b[0], [("Канал", str(b[0]))]
+        return tr("канал %d") % b[0], [(tr("Канал"), str(b[0]))]
     if eid == 5 and len(b) >= 2:
         return "DTIM period %d" % b[1], [("DTIM count", str(b[0])), ("DTIM period", str(b[1]))]
     if eid == 7 and len(b) >= 2:
         cc = b[:2].decode("ascii", "replace")
-        return cc, [("Код страны", cc)]
+        return cc, [(tr("Код страны"), cc)]
     if eid == 11 and len(b) >= 3:
         st = int.from_bytes(b[0:2], "little")
         u = round(b[2] * 100 / 255.0, 1)
-        f = [("Станций", st), ("Загрузка канала", "%s%%" % u)]
+        f = [(tr("Станций"), st), (tr("Загрузка канала"), "%s%%" % u)]
         if len(b) >= 5:
             f.append(("Admission capacity", int.from_bytes(b[3:5], "little")))
-        return "станций %d, загрузка %s%%" % (st, u), f
+        return tr("станций %d, загрузка %s%%") % (st, u), f
     if eid == 45 and len(b) >= 3:
         flags = int.from_bytes(b[0:2], "little")
         streams = 0
@@ -475,30 +476,30 @@ def _decode(eid: int, b: bytes):
         from .mcs import ht_mask_text
         f = [
             ("HT Capability Info", "0x%04X" % flags),
-            ("Ширина 40 МГц", _yn(flags & 0x02)),
-            ("Short GI 20 МГц", _yn(flags & 0x20)),
-            ("Short GI 40 МГц", _yn(flags & 0x40)),
-            ("Пространственных потоков (Rx)", streams),
+            (tr("Ширина 40 МГц"), _yn(flags & 0x02)),
+            (tr("Short GI 20 МГц"), _yn(flags & 0x20)),
+            (tr("Short GI 40 МГц"), _yn(flags & 0x40)),
+            (tr("Пространственных потоков (Rx)"), streams),
         ]
         if len(b) >= 19:
             mask = int.from_bytes(b[3:7], "little")
             f.append(("Rx MCS (bitmask)", ht_mask_text(mask)))
             hi = int.from_bytes(b[13:15], "little") & 0x3FF
             if hi:
-                f.append(("Rx Highest Supported Data Rate", "%d Мбит/с" % hi))
+                f.append(("Rx Highest Supported Data Rate", tr("%d Мбит/с") % hi))
             tx = b[15]
-            f.append(("Tx MCS Set", "как Rx" if tx & 1 and not tx & 2 else "задан отдельно" if tx & 1 else "не указан"))
+            f.append(("Tx MCS Set", tr("как Rx") if tx & 1 and not tx & 2 else tr("задан отдельно") if tx & 1 else tr("не указан")))
             top = top_bit(mask)
-            return "потоков %d, до MCS %s" % (streams, top if top is not None else "-"), f
-        return "потоков %d" % streams, f
+            return tr("потоков %d, до MCS %s") % (streams, top if top is not None else "-"), f
+        return tr("потоков %d") % streams, f
     if eid == 48:
         r = parse_rsn_body(b)
         if r is None:
-            return "", [("Данные", b.hex(" "))]
+            return "", [(tr("Данные"), b.hex(" "))]
         akm = ", ".join(r.akm) or "—"
         pw = ", ".join(r.pairwise) or "—"
         return "%s; %s" % (akm, pw), [
-            ("Групповой шифр", r.group), ("Pairwise", pw), ("AKM", akm),
+            (tr("Групповой шифр"), r.group), ("Pairwise", pw), ("AKM", akm),
             ("PMF capable (MFPC)", _yn(r.mfp_capable)), ("PMF required (MFPR)", _yn(r.mfp_required)),
         ]
     if eid == 54 and len(b) >= 3:
@@ -506,96 +507,96 @@ def _decode(eid: int, b: bytes):
         return "MDID 0x%04X" % m, [("MDID", "0x%04X" % m), ("FT over DS", _yn(b[2] & 1))]
     if eid == 61 and len(b) >= 3:
         w40 = bool(b[1] & 4)
-        width = "40 МГц" if w40 else "20 МГц"
+        width = tr("40 МГц") if w40 else tr("20 МГц")
         from .mcs import ht_mask_text
         f = [
-            ("Основной канал", b[0]), ("Вторичный канал", SEC_OFFSET.get(b[1] & 3, "?")),
-            ("Ширина", width), ("HT protection", PROTECTION.get(b[2] & 3, "?")),
+            (tr("Основной канал"), b[0]), (tr("Вторичный канал"), tr(SEC_OFFSET.get(b[1] & 3, "?"))),
+            (tr("Ширина"), width), ("HT protection", PROTECTION.get(b[2] & 3, "?")),
         ]
         if len(b) >= 10:
-            f.append(("Basic MCS Set (обязательные)", ht_mask_text(int.from_bytes(b[6:10], "little"))))
-        return "основной %d, %s" % (b[0], width), f
+            f.append((tr("Basic MCS Set (обязательные)"), ht_mask_text(int.from_bytes(b[6:10], "little"))))
+        return tr("основной %d, %s") % (b[0], width), f
     if eid == 70 and b:
-        return "neighbor report " + _yn(b[0] & 2), [("Neighbor report", _yn(b[0] & 2)), ("Сырой байт", "0x%02X" % b[0])]
+        return "neighbor report " + _yn(b[0] & 2), [("Neighbor report", _yn(b[0] & 2)), (tr("Сырой байт"), "0x%02X" % b[0])]
     if eid == 127 and b:
         on = [(n, name) for n, name in sorted(EXT_CAP_BITS.items()) if len(b) > n // 8 and b[n // 8] >> (n % 8) & 1]
-        f = [("Бит %d" % n, name) for n, name in on]
-        f.append(("Длина поля", "%d байт" % len(b)))
+        f = [(tr("Бит %d") % n, name) for n, name in on]
+        f.append((tr("Длина поля"), tr("%d байт") % len(b)))
         bt = len(b) >= 3 and (b[2] >> 3) & 1
-        return ("BSS Transition: " + _yn(bt) + ("; ещё %d" % (len(on) - bool(bt)) if len(on) > bool(bt) else "")), f
+        return ("BSS Transition: " + _yn(bt) + (tr("; ещё %d") % (len(on) - bool(bt)) if len(on) > bool(bt) else "")), f
     if eid == 32 and b:
-        return "%d дБ" % b[0], [("Снижение мощности относительно лимита страны", "%d дБ" % b[0])]
+        return tr("%d дБ") % b[0], [(tr("Снижение мощности относительно лимита страны"), tr("%d дБ") % b[0])]
     if eid == 35 and b:
         tx = b[0] - 256 if b[0] > 127 else b[0]
-        return "TX %d дБм" % tx, [("Мощность передачи", "%d дБм" % tx)] + (
-            [("Link margin", "%d дБ" % b[1])] if len(b) >= 2 else [])
+        return tr("TX %d дБм") % tx, [(tr("Мощность передачи"), tr("%d дБм") % tx)] + (
+            [("Link margin", tr("%d дБ") % b[1])] if len(b) >= 2 else [])
     if eid == 37 and len(b) >= 3:
-        return "на канал %d через %d beacon" % (b[1], b[2]), [
-            ("Режим", "передача запрещена до переключения" if b[0] else "передача разрешена"),
-            ("Новый канал", b[1]), ("Через beacon", b[2])]
+        return tr("на канал %d через %d beacon") % (b[1], b[2]), [
+            (tr("Режим"), tr("передача запрещена до переключения") if b[0] else tr("передача разрешена")),
+            (tr("Новый канал"), b[1]), (tr("Через beacon"), b[2])]
     if eid == 107 and b:
-        ant = ACCESS_NETWORK_TYPE.get(b[0] & 0x0F, str(b[0] & 0x0F))
-        f = [("Тип сети", ant), ("Доступ в интернет", _yn(b[0] & 0x10)), ("ASRA (нужно доп. действие)", _yn(b[0] & 0x20)),
-             ("Экстренные службы (ESR)", _yn(b[0] & 0x40)), ("UESA", _yn(b[0] & 0x80))]
-        return ant + (", интернет" if b[0] & 0x10 else ""), f
+        ant = tr(ACCESS_NETWORK_TYPE.get(b[0] & 0x0F, str(b[0] & 0x0F)))
+        f = [(tr("Тип сети"), ant), (tr("Доступ в интернет"), _yn(b[0] & 0x10)), (tr("ASRA (нужно доп. действие)"), _yn(b[0] & 0x20)),
+             (tr("Экстренные службы (ESR)"), _yn(b[0] & 0x40)), ("UESA", _yn(b[0] & 0x80))]
+        return ant + (tr(", интернет") if b[0] & 0x10 else ""), f
     if eid == 114:
         t = b.decode("utf-8", "replace")
-        return t or "(пусто)", [("Mesh ID", t)]
+        return t or tr("(пусто)"), [("Mesh ID", t)]
     if eid == 191 and len(b) >= 6:
         from .mcs import VHT_MAP_MAX, map_text
         caps = int.from_bytes(b[0:4], "little")
         mm = int.from_bytes(b[4:6], "little")
-        parts = ["%d:%s" % (i + 1, MCS_MAP[(mm >> (2 * i)) & 3]) for i in range(8) if ((mm >> (2 * i)) & 3) != 3]
+        parts = ["%d:%s" % (i + 1, tr(MCS_MAP[(mm >> (2 * i)) & 3])) for i in range(8) if ((mm >> (2 * i)) & 3) != 3]
         f = [
             ("Rx VHT-MCS", map_text(mm, VHT_MAP_MAX)),
-            ("Rx VHT-MCS по потокам", " / ".join(parts) or "нет"),
-            ("Пространственных потоков", len(parts)),
-            ("Ширины сверх 80 МГц", VHT_WIDTHS.get((caps >> 2) & 3, "?")),
-            ("Short GI 80 МГц", _yn(caps & 0x20)),
-            ("Short GI 160 МГц", _yn(caps & 0x40)),
+            (tr("Rx VHT-MCS по потокам"), " / ".join(parts) or tr("нет")),
+            (tr("Пространственных потоков"), len(parts)),
+            (tr("Ширины сверх 80 МГц"), tr(VHT_WIDTHS.get((caps >> 2) & 3, "?"))),
+            (tr("Short GI 80 МГц"), _yn(caps & 0x20)),
+            (tr("Short GI 160 МГц"), _yn(caps & 0x40)),
             ("SU beamformer", _yn(caps & (1 << 11))),
             ("MU beamformer", _yn(caps & (1 << 19))),
         ]
         if len(b) >= 10:
             f.insert(1, ("Tx VHT-MCS", map_text(int.from_bytes(b[8:10], "little"), VHT_MAP_MAX)))
         mx = max([VHT_MAP_MAX[(mm >> (2 * i)) & 3] for i in range(8) if ((mm >> (2 * i)) & 3) != 3] or [0])
-        return "потоков %d, до MCS %d" % (len(parts), mx), f
+        return tr("потоков %d, до MCS %d") % (len(parts), mx), f
     if eid == 192 and len(b) >= 3:
         from .mcs import VHT_MAP_MAX, map_text
-        w = VHT_WIDTH.get(b[0], "?")
-        f = [("Ширина", w), ("Центр сегмента 0", b[1]), ("Центр сегмента 1", b[2])]
+        w = tr(VHT_WIDTH.get(b[0], "?"))
+        f = [(tr("Ширина"), w), (tr("Центр сегмента 0"), b[1]), (tr("Центр сегмента 1"), b[2])]
         if len(b) >= 5:
-            f.append(("Basic VHT-MCS and NSS (обязательные)", map_text(int.from_bytes(b[3:5], "little"), VHT_MAP_MAX)))
-        return "ширина " + w, f
+            f.append((tr("Basic VHT-MCS and NSS (обязательные)"), map_text(int.from_bytes(b[3:5], "little"), VHT_MAP_MAX)))
+        return tr("ширина ") + w, f
     if eid == 221 and len(b) >= 4:
         oui, typ = b[:3], b[3]
         if oui == OUI_MS:
             name = MS_TYPES.get(typ, "Microsoft type %d" % typ)
-            f = [("OUI", "00-50-F2 (Microsoft)"), ("Тип", "%d (%s)" % (typ, name))]
+            f = [("OUI", "00-50-F2 (Microsoft)"), (tr("Тип"), "%d (%s)" % (typ, name))]
             if typ == 1:
                 r = parse_rsn_body(b[4:])
                 if r is not None:
-                    f += [("AKM", ", ".join(r.akm) or "—"), ("Шифры", ", ".join(r.pairwise) or "—")]
+                    f += [("AKM", ", ".join(r.akm) or "—"), (tr("Шифры"), ", ".join(r.pairwise) or "—")]
             return name, f
-        return "OUI %s, тип %d" % (oui.hex("-"), typ), [
-            ("OUI", oui.hex("-")), ("Тип", typ), ("ASCII", _ascii(b[4:])), ("Hex", b[4:].hex(" ")[:120]),
+        return tr("OUI %s, тип %d") % (oui.hex("-"), typ), [
+            ("OUI", oui.hex("-")), (tr("Тип"), typ), ("ASCII", _ascii(b[4:])), ("Hex", b[4:].hex(" ")[:120]),
         ]
     if eid == 255 and b:
-        name = EXT_NAMES.get(b[0], "расширение %d" % b[0])
+        name = tr(EXT_NAMES.get(b[0], "")) or tr("расширение %d") % b[0]
         if b[0] == EXT_HE_CAP and len(b) >= 22:
             return _decode_he_cap(b)
         if b[0] == EXT_HE_OP and len(b) >= 7:
             return _decode_he_op(b)
-        return name, [("Extension ID", b[0]), ("Длина", len(b))]
-    return "", [("Данные", b.hex(" ")[:120])]
+        return name, [("Extension ID", b[0]), (tr("Длина"), len(b))]
+    return "", [(tr("Данные"), b.hex(" ")[:120])]
 
 
-VHT_WIDTHS = {0: "нет (до 80 МГц)", 1: "160 МГц", 2: "160 и 80+80 МГц", 3: "?"}
+VHT_WIDTHS = {0: N_("нет (до 80 МГц)"), 1: N_("160 МГц"), 2: N_("160 и 80+80 МГц"), 3: "?"}
 
 # Interworking: Access Network Type (802.11u)
-ACCESS_NETWORK_TYPE = {0: "частная сеть", 1: "частная с гостевым доступом", 2: "платная публичная",
-                       3: "бесплатная публичная", 4: "личное устройство", 5: "только экстренные службы",
-                       14: "тестовая", 15: "любая (wildcard)"}
+ACCESS_NETWORK_TYPE = {0: N_("частная сеть"), 1: N_("частная с гостевым доступом"), 2: N_("платная публичная"),
+                       3: N_("бесплатная публичная"), 4: N_("личное устройство"), 5: N_("только экстренные службы"),
+                       14: N_("тестовая"), 15: N_("любая (wildcard)")}
 
 # Биты Extended Capabilities (IEEE 802.11-2020, Table 9-153), которые показываем по имени
 EXT_CAP_BITS = {
@@ -615,18 +616,18 @@ def _decode_he_cap(b: bytes):
     rx80 = int.from_bytes(b[18:20], "little")
     f = [
         ("Extension ID", "35 (HE Capabilities)"),
-        ("Rx HE-MCS, до 80 МГц", map_text(rx80, HE_MAP_MAX)),
-        ("Tx HE-MCS, до 80 МГц", map_text(int.from_bytes(b[20:22], "little"), HE_MAP_MAX)),
-        ("40 МГц в 2.4 ГГц", _yn(phy0 & 0x02)),
-        ("40/80 МГц в 5/6 ГГц", _yn(phy0 & 0x04)),
-        ("160 МГц", _yn(phy0 & 0x08)),
-        ("80+80 МГц", _yn(phy0 & 0x10)),
+        (tr("Rx HE-MCS, до 80 МГц"), map_text(rx80, HE_MAP_MAX)),
+        (tr("Tx HE-MCS, до 80 МГц"), map_text(int.from_bytes(b[20:22], "little"), HE_MAP_MAX)),
+        (tr("40 МГц в 2.4 ГГц"), _yn(phy0 & 0x02)),
+        (tr("40/80 МГц в 5/6 ГГц"), _yn(phy0 & 0x04)),
+        (tr("160 МГц"), _yn(phy0 & 0x08)),
+        (tr("80+80 МГц"), _yn(phy0 & 0x10)),
     ]
     if phy0 & 0x08 and len(b) >= 26:
-        f.append(("Rx HE-MCS, 160 МГц", map_text(int.from_bytes(b[22:24], "little"), HE_MAP_MAX)))
-        f.append(("Tx HE-MCS, 160 МГц", map_text(int.from_bytes(b[24:26], "little"), HE_MAP_MAX)))
+        f.append((tr("Rx HE-MCS, 160 МГц"), map_text(int.from_bytes(b[22:24], "little"), HE_MAP_MAX)))
+        f.append((tr("Tx HE-MCS, 160 МГц"), map_text(int.from_bytes(b[24:26], "little"), HE_MAP_MAX)))
     per = [HE_MAP_MAX[(rx80 >> (2 * i)) & 3] for i in range(8) if ((rx80 >> (2 * i)) & 3) != 3]
-    summary = "потоков %d, до MCS %d" % (len(per), max(per)) if per else "HE Capabilities"
+    summary = tr("потоков %d, до MCS %d") % (len(per), max(per)) if per else "HE Capabilities"
     return summary, f
 
 
@@ -636,20 +637,20 @@ def _decode_he_op(b: bytes):
     color = b[4] & 0x3F
     f = [
         ("Extension ID", "36 (HE Operation)"),
-        ("BSS Color", "%d%s" % (color, " (отключён)" if b[4] & 0x80 else "")),
-        ("Basic HE-MCS and NSS (обязательные)", map_text(int.from_bytes(b[5:7], "little"), HE_MAP_MAX)),
+        ("BSS Color", "%d%s" % (color, tr(" (отключён)") if b[4] & 0x80 else "")),
+        (tr("Basic HE-MCS and NSS (обязательные)"), map_text(int.from_bytes(b[5:7], "little"), HE_MAP_MAX)),
         ("TWT required", _yn(params & 0x08)),
-        ("ER SU отключён", _yn(params & (1 << 16))),
+        (tr("ER SU отключён"), _yn(params & (1 << 16))),
     ]
     off = 7 + (3 if params & (1 << 14) else 0) + (1 if params & (1 << 15) else 0)
     summary = "BSS Color %d" % color
     if params & (1 << 17) and len(b) >= off + 4:
         w = HE6_WIDTH_MHZ.get(b[off + 1] & 3, 20)
-        f += [("6 ГГц: основной канал", b[off]), ("6 ГГц: ширина", "%d МГц" % w),
-              ("6 ГГц: CCFS0", b[off + 2]), ("6 ГГц: CCFS1", b[off + 3])]
+        f += [(tr("6 ГГц: основной канал"), b[off]), (tr("6 ГГц: ширина"), tr("%d МГц") % w),
+              (tr("6 ГГц: CCFS0"), b[off + 2]), (tr("6 ГГц: CCFS1"), b[off + 3])]
         if len(b) >= off + 5:
-            f.append(("6 ГГц: минимальная скорость", "%d Мбит/с" % b[off + 4]))
-        summary += ", 6 ГГц канал %d, %d МГц" % (b[off], w)
+            f.append((tr("6 ГГц: минимальная скорость"), tr("%d Мбит/с") % b[off + 4]))
+        summary += tr(", 6 ГГц канал %d, %d МГц") % (b[off], w)
     return summary, f
 
 
@@ -660,11 +661,11 @@ def describe_ies(data: bytes) -> List[dict]:
         try:
             summary, fields = _decode(eid, body)
         except Exception as e:  # noqa: BLE001 - битый IE не должен ронять весь разбор
-            summary, fields = "ошибка разбора: %s" % e, []
+            summary, fields = tr("ошибка разбора: %s") % e, []
         out.append({
             "id": eid,
-            "name": ("Extension: " + EXT_NAMES.get(body[0], "ID %d" % body[0])) if eid == 255 and body
-                    else IE_NAMES.get(eid, "Element %d" % eid),
+            "name": ("Extension: " + tr(EXT_NAMES.get(body[0], "ID %d" % body[0]))) if eid == 255 and body
+                    else tr(IE_NAMES.get(eid, "Element %d" % eid)),
             "len": len(body),
             "summary": summary,
             "fields": [[k, str(v)] for k, v in fields],

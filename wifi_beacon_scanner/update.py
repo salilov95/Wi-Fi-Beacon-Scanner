@@ -5,6 +5,7 @@ import json
 import re
 import urllib.request
 from typing import Any, Callable, Dict, Optional, Tuple
+from .i18n import tr
 
 REPO = "salilov95/Wi-Fi-Beacon-Scanner"
 API = "https://api.github.com/repos/%s/releases/latest" % REPO
@@ -30,7 +31,7 @@ def check(current: str, fetch: Callable[[str, float], Dict[str, Any]] = _fetch, 
     try:
         d = fetch(API, timeout)
     except Exception as e:  # noqa: BLE001 - нет сети, прокси, лимит API: показать причину и не падать
-        out["error"] = "не удалось связаться с GitHub: %s" % (getattr(e, "reason", None) or e)
+        out["error"] = tr("не удалось связаться с GitHub: %s") % (getattr(e, "reason", None) or e)
         return out
     tag = str(d.get("tag_name") or "")
     out["latest"] = tag.lstrip("v") or None
@@ -39,5 +40,5 @@ def check(current: str, fetch: Callable[[str, float], Dict[str, Any]] = _fetch, 
     a, b = parse_version(current), parse_version(tag)
     out["newer"] = bool(a and b and b > a)
     if b is None:
-        out["error"] = "GitHub не вернул номер версии"
+        out["error"] = tr("GitHub не вернул номер версии")
     return out

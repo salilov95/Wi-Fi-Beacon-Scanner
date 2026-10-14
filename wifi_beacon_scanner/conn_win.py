@@ -25,6 +25,7 @@ from collections import deque
 from ctypes import POINTER, byref, c_int32, c_uint32, c_void_p
 from typing import Any, Deque, Optional, Tuple
 
+from .i18n import tr
 from . import ip_win
 from . import onex as ox
 from . import scanner_win as sw
@@ -64,7 +65,7 @@ def win_error_text(code: int) -> str:
     buf = ctypes.create_unicode_buffer(512)
     n = _k32.FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, None, c_uint32(code), 0,
                             buf, 512, None)
-    return buf.value.strip() if n else "ошибка 0x%08X" % code
+    return buf.value.strip() if n else tr("ошибка 0x%08X") % code
 
 
 def reason_text(code: int) -> str:
@@ -73,7 +74,7 @@ def reason_text(code: int) -> str:
     buf = ctypes.create_unicode_buffer(512)
     if _w.WlanReasonCodeToString(code, 512, buf, None) == 0 and buf.value:
         return buf.value
-    return "код причины 0x%X" % code
+    return tr("код причины 0x%X") % code
 
 
 class WinConnMonitor(threading.Thread):
@@ -191,7 +192,7 @@ class WinConnMonitor(threading.Thread):
                 if src == ws.SRC_ACM and off == ws.ACM_DISCONNECTED and reason:
                     self.tracker.add_reason(t, "disconnected", reason, text, ssid=ssid)
                 elif src == ws.SRC_ACM and off == ws.ACM_ATTEMPT_FAIL:
-                    self.tracker.add_reason(t, "attempt_fail", reason, text or "причина не указана", ssid=ssid)
+                    self.tracker.add_reason(t, "attempt_fail", reason, text or tr("причина не указана"), ssid=ssid)
 
     def _poll_ip(self, t: float, gstr: str) -> None:
         """IPv4 и аренда DHCP: только пока последняя сессия ждёт адрес (дёшево, но зачем зря)."""
@@ -217,33 +218,33 @@ class WinConnMonitor(threading.Thread):
         bad = {k: v for k, v in ws.sizes().items()
                if ctypes.sizeof(c_void_p) == 8 and v != ws.EXPECTED_SIZES_X64[k]}
         if bad:
-            self._set_status("ошибка: раскладка структур не совпала с Windows %s" % bad)
+            self._set_status(tr("ошибка: раскладка структур не совпала с Windows %s") % bad)
             return
         h, ver = c_void_p(), c_uint32()
         if _w.WlanOpenHandle(2, None, byref(ver), byref(h)) != 0:
-            self._set_status("ошибка: не удалось открыть WLAN API")
+            self._set_status(tr("ошибка: не удалось открыть WLAN API"))
             return
         registered = False
         try:
             ifaces = sw._enum(h)
             if not ifaces:
-                self._set_status("Wi-Fi адаптер не найден")
+                self._set_status(tr("Wi-Fi адаптер не найден"))
                 return
             desc, guid = ifaces[min(self.interface_index, len(ifaces) - 1)]
             prev = c_uint32()
             cb = ctypes.cast(self._cb, c_void_p)
             rc, mode = ERROR_ACCESS_DENIED, ""
-            for mask, label in ((ws.SRC_ACM | ws.SRC_MSM | ws.SRC_ONEX, "ACM, MSM и 802.1X"),
-                                (ws.SRC_ACM | ws.SRC_ONEX, "ACM и 802.1X (MSM запрещён системой)"),
-                                (ws.SRC_ACM | ws.SRC_MSM, "ACM и MSM (802.1X запрещён системой)"),
-                                (ws.SRC_ACM, "только ACM")):
+            for mask, label in ((ws.SRC_ACM | ws.SRC_MSM | ws.SRC_ONEX, tr("ACM, MSM и 802.1X")),
+                                (ws.SRC_ACM | ws.SRC_ONEX, tr("ACM и 802.1X (MSM запрещён системой)")),
+                                (ws.SRC_ACM | ws.SRC_MSM, tr("ACM и MSM (802.1X запрещён системой)")),
+                                (ws.SRC_ACM, tr("только ACM"))):
                 rc = _w.WlanRegisterNotification(h, mask, 1, cb, None, None, byref(prev))
                 mode = label
                 if rc != ERROR_ACCESS_DENIED:
                     break
             registered = rc == 0
-            note = "уведомления: %s" % mode if registered else "уведомления недоступны (код %d), только опрос" % rc
-            self._set_status("опрос раз в %g с, %s, адаптер: %s" % (self.interval, note, desc))
+            note = tr("уведомления: %s") % mode if registered else tr("уведомления недоступны (код %d), только опрос") % rc
+            self._set_status(tr("опрос раз в %g с, %s, адаптер: %s") % (self.interval, note, desc))
             gstr = ip_win.guid_str(guid)
             while not self._halt.is_set():
                 s = self._sample(h, guid)
@@ -253,7 +254,7 @@ class WinConnMonitor(threading.Thread):
                 self._poll_ip(s.t, gstr)
                 self._halt.wait(self.interval)
         except Exception as e:  # noqa: BLE001
-            self._set_status("ошибка монитора: %s" % e)
+            self._set_status(tr("ошибка монитора: %s") % e)
         finally:
             if registered:
                 _w.WlanRegisterNotification(h, 0, 1, None, None, None, None)

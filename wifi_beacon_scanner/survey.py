@@ -13,6 +13,7 @@ import base64
 import math
 import time
 from typing import Any, Dict, List, Optional, Sequence
+from .i18n import tr
 
 FORMAT = "wifi_beacon_scanner.survey"
 VERSION = 1
@@ -23,22 +24,22 @@ MIMES = {"image/png": b"\x89PNG\r\n\x1a\n", "image/jpeg": b"\xff\xd8\xff"}
 
 def _check_plan(mime: str, data: bytes) -> None:
     if mime not in MIMES:
-        raise ValueError("план должен быть PNG или JPEG")
+        raise ValueError(tr("план должен быть PNG или JPEG"))
     if not data.startswith(MIMES[mime]):
-        raise ValueError("файл не похож на %s" % mime)
+        raise ValueError(tr("файл не похож на %s") % mime)
     if len(data) > MAX_PLAN_BYTES:
-        raise ValueError("план больше %d МБ, уменьши картинку" % (MAX_PLAN_BYTES // (1024 * 1024)))
+        raise ValueError(tr("план больше %d МБ, уменьши картинку") % (MAX_PLAN_BYTES // (1024 * 1024)))
 
 
 def _num01(v: Any, name: str) -> float:
     if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not 0 <= v <= 1:
-        raise ValueError("%s должен быть числом от 0 до 1" % name)
+        raise ValueError(tr("%s должен быть числом от 0 до 1") % name)
     return float(v)
 
 
 class Survey:
     def __init__(self) -> None:
-        self.name = "Обход"
+        self.name = tr("Обход")
         self.plan_mime = ""
         self.plan = b""
         self.points: List[Dict[str, Any]] = []
@@ -51,7 +52,7 @@ class Survey:
         try:
             data = base64.b64decode(data_b64, validate=True)
         except (ValueError, TypeError):
-            raise ValueError("картинка плана повреждена (base64)") from None
+            raise ValueError(tr("картинка плана повреждена (base64)")) from None
         _check_plan(mime, data)
         self.plan_mime, self.plan = mime, data
         self.points, self._next_id = [], 1
@@ -67,12 +68,12 @@ class Survey:
     # ---------- точки ----------
     def add_point(self, x: Any, y: Any, t: Optional[float] = None) -> Dict[str, Any]:
         if not self.has_plan:
-            raise ValueError("сначала загрузи план этажа")
+            raise ValueError(tr("сначала загрузи план этажа"))
         if self.has_pending():
             # иначе несколько точек получат один и тот же скан, сделанный уже из новой позиции
-            raise ValueError("дождись окончания замера предыдущей точки (около 5 секунд)")
+            raise ValueError(tr("дождись окончания замера предыдущей точки (около 5 секунд)"))
         if len(self.points) >= MAX_POINTS:
-            raise ValueError("в проекте уже %d точек" % MAX_POINTS)
+            raise ValueError(tr("в проекте уже %d точек") % MAX_POINTS)
         p = {"id": self._next_id, "x": _num01(x, "x"), "y": _num01(y, "y"), "t": t if t is not None else time.time(),
              "status": "pending", "results": {}, "conn": None}
         self._next_id += 1
@@ -136,24 +137,24 @@ class Survey:
 
     def load_project(self, d: Any) -> None:
         if not isinstance(d, dict) or d.get("format") != FORMAT:
-            raise ValueError("это не файл проекта обхода")
+            raise ValueError(tr("это не файл проекта обхода"))
         if d.get("version") != VERSION:
-            raise ValueError("неподдерживаемая версия проекта: %r" % d.get("version"))
+            raise ValueError(tr("неподдерживаемая версия проекта: %r") % d.get("version"))
         plan = d.get("plan")
         if not isinstance(plan, dict):
-            raise ValueError("в проекте нет плана этажа")
+            raise ValueError(tr("в проекте нет плана этажа"))
         new = Survey()
         new.set_plan(str(plan.get("mime", "")), str(plan.get("data", "")), d.get("name"))
         pts = d.get("points") or []
         if not isinstance(pts, list) or len(pts) > MAX_POINTS:
-            raise ValueError("список точек повреждён")
+            raise ValueError(tr("список точек повреждён"))
         for raw in pts:
             if not isinstance(raw, dict):
-                raise ValueError("точка повреждена")
+                raise ValueError(tr("точка повреждена"))
             p = new.add_point(raw.get("x"), raw.get("y"), float(raw.get("t") or 0))
             res = raw.get("results") or {}
             if not isinstance(res, dict):
-                raise ValueError("результаты точки повреждены")
+                raise ValueError(tr("результаты точки повреждены"))
             clean = {}
             for k, v in list(res.items())[:2000]:
                 if (isinstance(k, str) and len(k) <= 32 and isinstance(v, list) and len(v) == 4

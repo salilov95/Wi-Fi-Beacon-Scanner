@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List, Optional, Tuple
 
+from .i18n import N_, tr
 from .ie import ACCESS_NETWORK_TYPE, BssInfo
 from .model import Bss
 
@@ -17,20 +18,20 @@ CAP_RADIO_MEASUREMENT = 1 << 12  # 802.11k
 
 # код, подпись в таблице, полное название
 STANDARDS: List[Tuple[str, str, str]] = [
-    ("d", "d", "802.11d - код страны и разрешённые каналы"),
+    ("d", "d", N_("802.11d - код страны и разрешённые каналы")),
     ("e", "e", "802.11e - QoS (WMM / EDCA)"),
-    ("h", "h", "802.11h - DFS/TPC: управление спектром и мощностью"),
+    ("h", "h", N_("802.11h - DFS/TPC: управление спектром и мощностью")),
     ("i", "i", "802.11i - RSN (WPA2/WPA3)"),
     ("k", "k", "802.11k - Radio Measurement, neighbor report"),
     ("r", "r", "802.11r - Fast BSS Transition (FT)"),
     ("u", "u", "802.11u - Interworking"),
     ("v", "v", "802.11v - BSS Transition Management"),
-    ("w", "w", "802.11w - PMF, защита management-кадров"),
-    ("mc", "mc", "802.11mc - FTM, измерение расстояния (RTT)"),
-    ("ai", "ai", "802.11ai - FILS, быстрая первичная аутентификация"),
+    ("w", "w", N_("802.11w - PMF, защита management-кадров")),
+    ("mc", "mc", N_("802.11mc - FTM, измерение расстояния (RTT)")),
+    ("ai", "ai", N_("802.11ai - FILS, быстрая первичная аутентификация")),
     ("s", "s", "802.11s - mesh"),
     ("twt", "TWT", "TWT - Target Wake Time (802.11ax)"),
-    ("mbssid", "MBSSID", "Multiple BSSID: несколько SSID в одном beacon"),
+    ("mbssid", "MBSSID", N_("Multiple BSSID: несколько SSID в одном beacon")),
     ("hs", "HS2.0", "Hotspot 2.0 / Passpoint"),
 ]
 CODES = [c for c, _, _ in STANDARDS]
@@ -39,11 +40,11 @@ TITLE = {c: t for c, _, t in STANDARDS}
 
 
 def _d(b: Bss, i: BssInfo) -> Optional[str]:
-    return "страна %s" % i.country if i.country else None
+    return tr("страна %s") % i.country if i.country else None
 
 
 def _e(b: Bss, i: BssInfo) -> Optional[str]:
-    parts = [x for x, on in (("WMM", i.wmm), ("EDCA", i.edca), ("QoS в Capability", b.capability & CAP_QOS)) if on]
+    parts = [x for x, on in (("WMM", i.wmm), ("EDCA", i.edca), (tr("QoS в Capability"), b.capability & CAP_QOS)) if on]
     return ", ".join(parts) or None
 
 
@@ -52,11 +53,11 @@ def _h(b: Bss, i: BssInfo) -> Optional[str]:
     if b.capability & CAP_SPECTRUM_MGMT:
         parts.append("Spectrum Management")
     if i.power_constraint is not None:
-        parts.append("Power Constraint %d дБ" % i.power_constraint)
+        parts.append(tr("Power Constraint %d дБ") % i.power_constraint)
     if i.tpc_tx_power is not None:
-        parts.append("TPC Report %d дБм" % i.tpc_tx_power)
+        parts.append(tr("TPC Report %d дБм") % i.tpc_tx_power)
     if i.csa:
-        parts.append("объявлена смена канала (CSA)")
+        parts.append(tr("объявлена смена канала (CSA)"))
     return ", ".join(parts) or None
 
 
@@ -67,7 +68,7 @@ def _i(b: Bss, i: BssInfo) -> Optional[str]:
 def _k(b: Bss, i: BssInfo) -> Optional[str]:
     if not i.dot11k:
         return None
-    return "neighbor report" if i.neighbor_report else "без neighbor report"
+    return "neighbor report" if i.neighbor_report else tr("без neighbor report")
 
 
 def _r(b: Bss, i: BssInfo) -> Optional[str]:
@@ -81,9 +82,9 @@ def _u(b: Bss, i: BssInfo) -> Optional[str]:
         return None
     parts = []
     if i.interworking is not None:
-        parts.append(ACCESS_NETWORK_TYPE.get(i.interworking & 0x0F, "тип %d" % (i.interworking & 0x0F)))
+        parts.append(tr(ACCESS_NETWORK_TYPE.get(i.interworking & 0x0F, "")) or tr("тип %d") % (i.interworking & 0x0F))
         if i.interworking & 0x10:
-            parts.append("интернет")
+            parts.append(tr("интернет"))
     if i.anqp:
         parts.append("ANQP")
     if i.roaming_consortium:
@@ -104,7 +105,7 @@ def _v(b: Bss, i: BssInfo) -> Optional[str]:
 def _w(b: Bss, i: BssInfo) -> Optional[str]:
     if not i.rsn or not (i.rsn.mfp_capable or i.rsn.mfp_required):
         return None
-    return "обязательна" if i.rsn.mfp_required else "поддерживается"
+    return tr("обязательна") if i.rsn.mfp_required else tr("поддерживается")
 
 
 def _mc(b: Bss, i: BssInfo) -> Optional[str]:
@@ -119,7 +120,7 @@ def _ai(b: Bss, i: BssInfo) -> Optional[str]:
 def _s(b: Bss, i: BssInfo) -> Optional[str]:
     if i.mesh_id is None:
         return None
-    return "Mesh ID %s" % (i.mesh_id.decode("utf-8", "replace") or "(пусто)")
+    return "Mesh ID %s" % (i.mesh_id.decode("utf-8", "replace") or tr("(пусто)"))
 
 
 def _twt(b: Bss, i: BssInfo) -> Optional[str]:

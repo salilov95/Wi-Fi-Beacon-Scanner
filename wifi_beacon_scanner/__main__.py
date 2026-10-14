@@ -12,6 +12,7 @@ import sys
 from typing import List, Optional
 
 from . import oui, report
+from .i18n import LANGS, set_lang, system_lang
 from .model import Snapshot
 from .rules import Thresholds, analyze
 
@@ -27,6 +28,7 @@ def _build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--csv", help="куда сохранить CSV со списком BSS")
         sp.add_argument("--manuf", help="путь к файлу manuf (Wireshark) для определения вендора")
         sp.add_argument("--weak-rssi", type=int, default=Thresholds.weak_rssi)
+        sp.add_argument("--lang", choices=LANGS, help="язык отчётов: ru или en (по умолчанию - язык Windows)")
 
     sub.add_parser("interfaces", help="показать Wi-Fi адаптеры")
     s = sub.add_parser("scan", help="просканировать эфир (только Windows)")
@@ -42,6 +44,7 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--port", type=int, default=0, help="порт (по умолчанию случайный свободный)")
     g.add_argument("--no-browser", action="store_true", help="не открывать окно, только напечатать адрес")
     g.add_argument("--keep-running", action="store_true", help="не завершаться, когда окно закрыто")
+    g.add_argument("--lang", choices=LANGS, help="язык интерфейса на этот запуск: ru или en (без него - из «Вид» → «Язык» или язык Windows)")
     a = sub.add_parser("analyze", help="разобрать ранее сохранённый снапшот")
     a.add_argument("snapshot")
     common(a)
@@ -50,6 +53,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = _build_parser().parse_args(argv)
+    if args.cmd in ("scan", "analyze"):
+        set_lang(args.lang or system_lang())
 
     if args.cmd == "gui":
         from . import backends
@@ -69,6 +74,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         if db is None:
             print("предупреждение: файл manuf не найден, вендоры не определяются (укажи --manuf)", file=sys.stderr)
         state = AppState(backend, db, args.ssid, prefs_path=default_prefs_path(), legacy_prefs_path=legacy_prefs_path())
+        state.set_lang(args.lang or state.prefs.get("lang") or system_lang())   # язык: --lang, выбранный в «Вид», язык Windows
         state.start_scan(0, 4.0)        # первый скан идёт, пока открывается окно
         serve(state, port=args.port, open_browser=not args.no_browser,
               exit_when_closed=False if args.keep_running else None)

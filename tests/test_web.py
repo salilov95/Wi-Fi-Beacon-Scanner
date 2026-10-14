@@ -249,10 +249,10 @@ class PrefsTests(unittest.TestCase):
             th.start()
             try:
                 c = Client(server, server.token)
-                self.assertEqual(c.j("GET", "/api/prefs"), (200, {}))
+                self.assertEqual(c.j("GET", "/api/prefs"), (200, {"lang": "ru"}))   # язык - всегда, даже без настроек
                 self.assertEqual(Client(server, None).req("POST", "/api/prefs", {"theme": "nord"})[0], 403)
                 self.assertEqual(c.j("POST", "/api/prefs", {"theme": "nord", "density": "compact", "x": "<i>"})[1],
-                                 {"theme": "nord", "density": "compact"})
+                                 {"theme": "nord", "density": "compact", "lang": "ru"})
                 self.assertEqual(c.j("POST", "/api/config", {"focus": ["CORP", "Guest"]})[0], 200)
                 html = c.req("GET", "/")[2]
                 self.assertIn(b'<html lang="ru" data-theme="nord" data-density="compact">', html)
