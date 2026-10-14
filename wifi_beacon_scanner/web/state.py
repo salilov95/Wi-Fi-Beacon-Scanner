@@ -12,6 +12,7 @@ from collections import deque
 from dataclasses import asdict
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
+from ..i18n import LANGS, get_lang, set_lang, tr
 from ..amend import standards
 from ..backends import Backend
 from ..conn import ConnTracker
@@ -81,6 +82,8 @@ def sanitize_prefs(d: Any) -> Dict[str, Any]:
         out["sigMode"] = d["sigMode"]
     if d.get("sigColor") in ("level", "bss"):
         out["sigColor"] = d["sigColor"]
+    if d.get("lang") in LANGS:
+        out["lang"] = d["lang"]
     if d.get("interval") in (5, 10, 30, 60):
         out["interval"] = d["interval"]
     for k in ("group", "heatAll", "auto"):
@@ -221,9 +224,21 @@ class AppState:
             clean.pop("focus", None)                       # focus меняется только через /api/config
             if "focus" in self.prefs:
                 clean["focus"] = self.prefs["focus"]
+            if "lang" not in clean and "lang" in self.prefs:   # язык сбрасывается только явным выбором
+                clean["lang"] = self.prefs["lang"]
             self.prefs = clean
             self._save_prefs()
-            return dict(self.prefs)
+        if clean.get("lang") and clean["lang"] != get_lang():
+            self.set_lang(clean["lang"])
+        return dict(self.prefs, lang=get_lang())
+
+    def set_lang(self, lang: str) -> str:
+        """Язык интерфейса и отчётов. Проблемы пересчитываются сразу: их текст собирается при анализе."""
+        lang = set_lang(lang)
+        with self.lock:
+            if self.snapshot is not None:
+                self.findings = analyze(self.snapshot.bss, self.thresholds, self.focus)
+        return lang
 
     # ---- интерфейсы ----
     def refresh_interfaces(self) -> None:
@@ -297,9 +312,9 @@ class AppState:
         try:
             self.monitor = self.backend.start_conn_monitor(self.conn, self.lock, interface_index)
             if self.monitor is None:
-                self.conn.status = "журнал подключения недоступен для этого источника данных"
+                self.conn.status = tr("журнал подключения недоступен для этого источника данных")
         except Exception as e:  # noqa: BLE001 - журнал не должен мешать сканеру
-            self.conn.status = "журнал подключения не запустился: %s" % e
+            self.conn.status = tr("журнал подключения не запустился: %s") % e
 
     def stop_monitors(self) -> None:
         if self.monitor is not None:
@@ -393,22 +408,22 @@ class AppState:
         if snap is None:
             return None
         if scope == "all":
-            return snap, findings, focus, hist, "все сети (%d BSS)" % len(snap.bss)
+            return snap, findings, focus, hist, tr("все сети (%d BSS)") % len(snap.bss)
         if scope == "focus":
             if not focus:
-                raise ValueError("не заданы «Мои SSID»: впиши их в поле вверху или выбери «Все сети»")
+                raise ValueError(tr("не заданы «Мои SSID»: впиши их в поле вверху или выбери «Все сети»"))
             keep = [b for b in snap.bss if b.ssid in focus]
-            note = "только мои SSID: %s" % ", ".join(focus)
+            note = tr("только мои SSID: %s") % ", ".join(focus)
         elif scope == "list":
             if not isinstance(bssids, list) or not all(isinstance(x, str) for x in bssids) or len(bssids) > 20000:
-                raise ValueError("bssids должен быть списком строк")
+                raise ValueError(tr("bssids должен быть списком строк"))
             wanted = set(x.lower() for x in bssids)
             keep = [b for b in snap.bss if b.bssid in wanted]
-            note = "сети, видимые в таблице с текущими фильтрами"
+            note = tr("сети, видимые в таблице с текущими фильтрами")
         else:
-            raise ValueError("неизвестный scope: %r" % (scope,))
+            raise ValueError(tr("неизвестный scope: %r") % (scope,))
         if not keep:
-            raise ValueError("в выбранном наборе нет ни одной сети")
+            raise ValueError(tr("в выбранном наборе нет ни одной сети"))
         ids = {b.bssid for b in keep}
         ssids = {b.ssid_display for b in keep}
         sub = Snapshot(snap.taken_at, snap.interface, keep)
@@ -470,6 +485,7 @@ class AppState:
                 "scanning": self.scanning,
                 "error": self.error,
                 "error_kind": self.error_kind,
+                "lang": get_lang(),
                 "last_scan_ms": self.last_scan_ms,
                 "scan_count": self.scan_count,
                 "backend": self.backend.name,

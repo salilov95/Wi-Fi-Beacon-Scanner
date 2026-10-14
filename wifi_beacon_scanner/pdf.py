@@ -25,6 +25,7 @@ import tempfile
 import threading
 import time
 from typing import List, Optional
+from .i18n import tr
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +126,7 @@ def _rmtree_later(path: str) -> None:
 def html_to_pdf(html: str, timeout: float = 60.0) -> bytes:
     exe = find_browser()
     if not exe:
-        raise PdfError("не найден Microsoft Edge (или Chrome) для печати в PDF")
+        raise PdfError(tr("не найден Microsoft Edge (или Chrome) для печати в PDF"))
     d = tempfile.mkdtemp(prefix="wbs_pdf_")
     try:
         src = os.path.join(d, "report.html")
@@ -170,9 +171,9 @@ def html_to_pdf(html: str, timeout: float = 60.0) -> bytes:
                 pass
             log.warning("PDF не создан: %s, код выхода %s, вывод браузера: %s", exe, proc.returncode, tail)
             if time.monotonic() - t0 >= timeout:
-                raise PdfError("браузер не успел напечатать PDF за %d с" % timeout)
-            raise PdfError("браузер не создал PDF (код выхода %s). Возможно, печать без окна запрещена политикой; "
-                           "открой отчёт для печати и сохрани в PDF через Ctrl+P" % proc.returncode)
+                raise PdfError(tr("браузер не успел напечатать PDF за %d с") % timeout)
+            raise PdfError(tr("браузер не создал PDF (код выхода %s). Возможно, печать без окна запрещена политикой; "
+                           "открой отчёт для печати и сохрани в PDF через Ctrl+P") % proc.returncode)
         with open(out, "rb") as f:
             return f.read()
     finally:

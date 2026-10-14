@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import List, Optional
 
+from .i18n import N_, tr
 from .ie import BssInfo, parse_ies
 
 SNAPSHOT_VERSION = 1
@@ -176,7 +177,7 @@ class Snapshot:
     def from_json(text: str) -> "Snapshot":
         d = json.loads(text)
         if d.get("version") != SNAPSHOT_VERSION:
-            raise ValueError("неподдерживаемая версия снапшота: %r" % d.get("version"))
+            raise ValueError(tr("неподдерживаемая версия снапшота: %r") % d.get("version"))
         bss = [
             Bss(
                 bssid=x["bssid"],
@@ -198,15 +199,15 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
-LOCATION_HINT = ("Windows не дала программе доступ к Wi-Fi-сканированию: с Windows 11 24H2 для этого нужно "
+LOCATION_HINT = (N_("Windows не дала программе доступ к Wi-Fi-сканированию: с Windows 11 24H2 для этого нужно "
                  "разрешение на расположение. Нажми «Да» в запросе Windows или включи «Параметры → "
                  "Конфиденциальность и защита → Расположение → Разрешить классическим приложениям доступ к "
-                 "расположению». Скан повторится сам.")
+                 "расположению». Скан повторится сам."))
 
 
 class ScanAccessDenied(OSError):
     """Windows вернула ERROR_ACCESS_DENIED на сканирование: нет разрешения на расположение."""
     kind = "location"
 
-    def __init__(self, msg: str = LOCATION_HINT) -> None:
-        super().__init__(msg)
+    def __init__(self, msg: str = "") -> None:
+        super().__init__(msg or tr(LOCATION_HINT))

@@ -10,6 +10,7 @@ import sys
 from ctypes import POINTER, byref, c_uint32, c_void_p, c_wchar_p
 from typing import Any, Dict, List
 
+from .i18n import tr
 from .winlog import CHANNEL, PUBLISHER, parse_event_xml
 
 EvtQueryChannelPath = 0x1
@@ -71,10 +72,10 @@ def read_events(hours: float = 24, limit: int = 2000) -> List[Dict[str, Any]]:
     if not q:
         err = ctypes.get_last_error()
         if err == ERROR_ACCESS_DENIED:
-            raise OSError("нет прав на чтение журнала %s" % CHANNEL)
+            raise OSError(tr("нет прав на чтение журнала %s") % CHANNEL)
         if err == ERROR_EVT_CHANNEL_NOT_FOUND:
-            raise OSError("журнал %s не найден (нет службы WLAN?)" % CHANNEL)
-        raise OSError("не удалось открыть журнал %s (код %d)" % (CHANNEL, err))
+            raise OSError(tr("журнал %s не найден (нет службы WLAN?)") % CHANNEL)
+        raise OSError(tr("не удалось открыть журнал %s (код %d)") % (CHANNEL, err))
     meta = _e.EvtOpenPublisherMetadata(None, PUBLISHER, None, 0, 0)
     out: List[Dict[str, Any]] = []
     arr = (c_void_p * 64)()

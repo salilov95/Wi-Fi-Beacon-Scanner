@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+from .i18n import tr
 from .ie import BssInfo, map_streams
 
 # (бит на поднесущую, кодовая скорость) для MCS 0..13; одинаково для VHT и HE, для HT - MCS по модулю 8
@@ -70,10 +71,10 @@ def map_text(m: Optional[int], table: Dict[int, int]) -> str:
         return ""
     per = [table[(m >> (2 * i)) & 3] for i in range(8) if ((m >> (2 * i)) & 3) != 3]
     if not per:
-        return "нет"
+        return tr("нет")
     if len(set(per)) == 1:
-        return "MCS 0-%d, потоков %d" % (per[0], len(per))
-    return ", ".join("поток %d: MCS 0-%d" % (i + 1, v) for i, v in enumerate(per))
+        return tr("MCS 0-%d, потоков %d") % (per[0], len(per))
+    return ", ".join(tr("поток %d: MCS 0-%d") % (i + 1, v) for i, v in enumerate(per))
 
 
 def ht_mask_text(mask: Optional[int]) -> str:
@@ -81,7 +82,7 @@ def ht_mask_text(mask: Optional[int]) -> str:
         return ""
     idx = [i for i in range(32) if mask >> i & 1]
     if not idx:
-        return "нет"
+        return tr("нет")
     # сжатие в диапазоны: 0-7, 8-15
     out, start = [], idx[0]
     for a, b in zip(idx, idx[1:] + [None]):
@@ -170,5 +171,5 @@ def rate_to_mcs(rate_mbps: Optional[float], max_phy: str = "HE", width_max: int 
 
 def mcs_text(c: Dict[str, Any]) -> str:
     if c["phy"] == "legacy":
-        return "legacy %g Мбит/с" % c["rate"]
-    return "%s MCS %d (%s), потоков %d, %d МГц, GI %g мкс" % (c["phy"], c["mcs"], c["mod"], c["nss"], c["width"], c["gi"])
+        return tr("legacy %g Мбит/с") % c["rate"]
+    return tr("%s MCS %d (%s), потоков %d, %d МГц, GI %g мкс") % (c["phy"], c["mcs"], c["mod"], c["nss"], c["width"], c["gi"])

@@ -30,27 +30,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/main.png" alt="Main window: network table and 2.4 GHz channel spectrum">
+  <img src="docs/images/en/main.png" alt="Main window: network table and 2.4 GHz channel spectrum">
 </p>
-
-> The user interface is in Russian. Screenshots below show the Russian UI; the documentation is available
-> in both English and Russian.
-
-<details>
-<summary>UI glossary: tab and menu names</summary>
-
-| In the app | Meaning |
-|---|---|
-| Сканировать · Авто | Scan · Auto-scan |
-| Мои SSID | My SSIDs (your networks; problems are reported for them) |
-| Каналы · Обзор · Утилизация | Channels · Overview · Utilization |
-| Сигнал во времени · Подключение · Обход | Signal over time · Connection journal · Floor plan survey |
-| Проблемы · Beacon | Problems · Beacon decoder |
-| Сессии · Журнал Windows · Сравнение | Sessions · Windows event log · Compare |
-| Экспорт · Вид · О программе | Export · View · About |
-| Проверить обновления · Папка с журналом | Check for updates · Log folder |
-
-</details>
 
 ## Features
 
@@ -72,6 +53,8 @@
 - **Problems** - 29 checks for security, roaming, RF and network hygiene, each with a hint on what to check.
 - **Beacon decoder** - every Information Element of the selected AP.
 - **Reports** - PDF, Excel, HTML, CSV, JSON: all networks, only yours, or exactly what the table shows.
+- **English and Russian** - the interface, problems, beacon decoding and reports; the language follows Windows
+  and can be switched in View → Language.
 - **Ready for fleet deployment** - silent installer, seven themes, no external dependencies.
 
 ### 802.11 amendments
@@ -82,7 +65,7 @@ Multiple BSSID and Hotspot 2.0. The table shows a row of letters; the filter off
 type, Power Constraint, Extended Capabilities bits) are on the Beacon tab. Where each letter comes from is
 described in the [documentation](docs/en/diagnostics.md#80211-amendments-column-and-filter).
 
-<img src="docs/images/standards.png" alt="802.11 amendments filter">
+<img src="docs/images/en/standards.png" alt="802.11 amendments filter">
 
 ### Laptop connection journal
 
@@ -91,7 +74,7 @@ You see every roam (from, to, RSSI before and after, time spent on the previous 
 reason from Windows, ping-pong between two APs, and the sticky client case when the laptop holds on to a weak
 AP while a stronger one is available. The MCS of the current connection is estimated from the Rx/Tx rates.
 
-<img src="docs/images/connection.png" alt="Connection journal: signal chart with roams and a disconnect">
+<img src="docs/images/en/connection.png" alt="Connection journal: signal chart with roams and a disconnect">
 
 ### Connection sessions
 
@@ -102,7 +85,7 @@ credentials), when the DHCP lease arrived and from which server. A fast FT roam 
 distinguishable from a roam with full 802.1X authentication (hundreds of ms). Session details also list the
 Windows event log entries around it. No administrator rights required.
 
-<img src="docs/images/sessions.png" alt="Connection sessions: stages, 802.1X, DHCP">
+<img src="docs/images/en/sessions.png" alt="Connection sessions: stages, 802.1X, DHCP">
 
 ### Windows event log
 
@@ -111,7 +94,7 @@ connection start and result, association, security checks and 4-way handshake, 8
 the reason. The last day is loaded on start and refreshed every minute; filters by stage and level, a summary
 of the most frequent reasons, all event fields on click, CSV export.
 
-<img src="docs/images/winlog.png" alt="Windows WLAN-AutoConfig event log">
+<img src="docs/images/en/winlog.png" alt="Windows WLAN-AutoConfig event log">
 
 ### Floor plan survey
 
@@ -120,23 +103,23 @@ builds a coverage map: signal of the selected network, the laptop's own connecti
 heard for roaming. Far from the measurement points the map shows nothing rather than guessing. The project is
 saved to a file, the map to PNG.
 
-<img src="docs/images/survey.png" alt="Coverage map on a floor plan">
+<img src="docs/images/en/survey.png" alt="Coverage map on a floor plan">
 
 ### Signal over time
 
 RSSI of every AP of the selected network across scans: lines are colored by level, the background shows quality
 zones. The "AP × scan" heat map shows at a glance which AP disappears.
 
-<img src="docs/images/signal.png" alt="Signal over time per AP">
+<img src="docs/images/en/signal.png" alt="Signal over time per AP">
 
-<img src="docs/images/heatmap.png" alt="Signal heat map">
+<img src="docs/images/en/heatmap.png" alt="Signal heat map">
 
 ### Channel utilization
 
 How much airtime is busy on each channel according to the APs themselves (QBSS Load), the number of clients
 and the history across scans. Channels where APs do not report load are listed separately.
 
-<img src="docs/images/utilization.png" alt="Channel utilization">
+<img src="docs/images/en/utilization.png" alt="Channel utilization">
 
 ### Problems
 
@@ -144,20 +127,20 @@ Open and WEP networks, TKIP, no PMF, 802.11k/r/v enabled on some APs only, diffe
 one SSID, overlapping 2.4 GHz channels, overloaded channels, weak signal. Clicking a problem highlights the
 affected APs in the table. Full list in the [documentation](docs/en/diagnostics.md).
 
-<img src="docs/images/findings.png" alt="Problems with hints">
+<img src="docs/images/en/findings.png" alt="Problems with hints">
 
 ### Beacon decoder
 
 All Information Elements of the selected AP, decoded and in hex: RSN, HT/VHT/HE Capabilities and Operation,
 MCS sets, BSS Color, 6 GHz parameters, vendor IEs.
 
-<img src="docs/images/beacon.png" alt="Beacon decoder">
+<img src="docs/images/en/beacon.png" alt="Beacon decoder">
 
 ### Overview
 
 Number of APs per channel, distribution by signal level, security, Wi-Fi generation, channel width and vendor.
 
-<img src="docs/images/overview.png" alt="Air overview">
+<img src="docs/images/en/overview.png" alt="Air overview">
 
 ### Reports and themes
 
@@ -166,8 +149,8 @@ journal, JSON snapshot. Seven color themes, including a dark one.
 
 <table>
   <tr>
-    <td width="50%" valign="top"><img src="docs/images/report.png" alt="PDF report"></td>
-    <td width="50%" valign="top"><img src="docs/images/dark.png" alt="Dark theme"></td>
+    <td width="50%" valign="top"><img src="docs/images/en/report.png" alt="PDF report"></td>
+    <td width="50%" valign="top"><img src="docs/images/en/dark.png" alt="Dark theme"></td>
   </tr>
 </table>
 

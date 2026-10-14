@@ -25,6 +25,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, List, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
+from ..i18n import get_lang, tr
 from .. import applog, report
 from ..pdf import PdfError, html_to_pdf
 from ..rules import channel_utilization
@@ -37,6 +38,7 @@ STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 STATIC_FILES = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/i18n.js": ("i18n.js", "text/javascript; charset=utf-8"),
     "/app.css": ("app.css", "text/css; charset=utf-8"),
 }
 MAX_BODY = 12 * 1024 * 1024     # план этажа до 8 МБ в base64
@@ -95,7 +97,7 @@ class Lifeline:
             if w.poll() is None:
                 # окно живо; выходим только если его явно закрыли (bye при видимой странице),
                 # а Edge остался работать в фоне
-                return "окно закрыто" if self._bye_expired(now, last, bye_at) else None
+                return "окно закрыто" if self._bye_expired(now, last, bye_at) else None   # no-i18n: только для журнала
             if self.window_gone_at is None:
                 self.window_gone_at = now
                 log.info("процесс окна Edge завершился (код %s)", w.poll())
@@ -107,15 +109,15 @@ class Lifeline:
             elif now - self.window_gone_at < self.relaunch_grace_s:
                 return None
             elif last is not None or now - self.started > 10:
-                return "окно Edge закрыто"
+                return "окно Edge закрыто"   # no-i18n: только для журнала
             else:
                 self.window = None      # Edge сразу отдал окно уже запущенному экземпляру: следим по запросам
         if self._bye_expired(now, last, bye_at):
-            return "окно закрыто"
+            return "окно закрыто"   # no-i18n: только для журнала
         if last is None:
-            return "окно так и не открылось" if now - self.started >= self.first_s else None
+            return "окно так и не открылось" if now - self.started >= self.first_s else None   # no-i18n: только для журнала
         if now - last >= self.idle_s:
-            return "окно не отвечает %d мин" % (self.idle_s // 60)
+            return "окно не отвечает %d мин" % (self.idle_s // 60)   # no-i18n: только для журнала
         return None
 
 
@@ -194,19 +196,19 @@ class Handler(BaseHTTPRequestHandler):
         elif target == "logs":
             uri = applog.log_dir()
         else:
-            return self._json(400, {"error": "неизвестная цель"})
+            return self._json(400, {"error": tr("неизвестная цель")})
         if sys.platform != "win32":
             return self._json(200, {"ok": False, "path": uri})
         try:
             os.startfile(uri)       # type: ignore[attr-defined]
         except OSError as e:
-            return self._json(500, {"error": "не удалось открыть %s: %s" % (uri, e)})
+            return self._json(500, {"error": tr("не удалось открыть %s: %s") % (uri, e)})
         return self._json(200, {"ok": True, "path": uri})
 
     def _body_json(self) -> Any:
         n = int(self.headers.get("Content-Length") or 0)
         if n > MAX_BODY:
-            raise ValueError("слишком большое тело запроса")
+            raise ValueError(tr("слишком большое тело запроса"))
         raw = self.rfile.read(n) if n else b""
         return json.loads(raw.decode("utf-8")) if raw else {}
 
@@ -231,7 +233,8 @@ class Handler(BaseHTTPRequestHandler):
                     attrs += ' data-theme="%s"' % pr["theme"]
                 if pr.get("density") in ("normal", "compact"):
                     attrs += ' data-density="%s"' % pr["density"]
-                data = data.replace(b'<html lang="ru">', ('<html lang="ru"%s>' % attrs).encode("ascii"), 1)
+                # язык - тоже сразу: страница переводит себя до первой отрисовки (i18n.js)
+                data = data.replace(b'<html lang="ru">', ('<html lang="%s"%s>' % (get_lang(), attrs)).encode("ascii"), 1)
             return self._send(200, data, ctype)
         if not self._token_ok():
             return self._json(403, {"error": "bad token"})
@@ -253,7 +256,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, {"events": [], "error": "%s: %s" % (type(e).__name__, e)})
             return self._json(200, {"events": events, "error": "", "hours": hours})
         if u.path == "/api/prefs":
-            return self._json(200, st.prefs)
+            return self._json(200, dict(st.prefs, lang=get_lang()))
         if u.path == "/api/about":
             return self._json(200, about(st))
         if u.path == "/api/update":
@@ -263,7 +266,7 @@ class Handler(BaseHTTPRequestHandler):
             with st.lock:
                 mime, data = st.survey.plan_mime, st.survey.plan
             if not data:
-                return self._json(404, {"error": "план не загружен"})
+                return self._json(404, {"error": tr("план не загружен")})
             return self._send(200, data, mime)
         if u.path == "/api/survey/points":
             with st.lock:
@@ -271,7 +274,7 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/survey/project":
             with st.lock:
                 if not st.survey.has_plan:
-                    return self._json(409, {"error": "нечего сохранять: план не загружен"})
+                    return self._json(409, {"error": tr("нечего сохранять: план не загружен")})
                 data = json.dumps(st.survey.to_project(), ensure_ascii=False).encode("utf-8")
             return self._send(200, data, "application/json",
                               {"Content-Disposition": 'attachment; filename="wifi-survey.json"'})
@@ -302,7 +305,7 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/config":
                 focus = body.get("focus")
                 if focus is not None and not (isinstance(focus, list) and all(isinstance(x, str) for x in focus)):
-                    return self._json(400, {"error": "focus должен быть списком строк"})
+                    return self._json(400, {"error": tr("focus должен быть списком строк")})
                 st.set_config(focus, body.get("weak_rssi"))
                 return self._json(200, {"ok": True})
             if path == "/api/load":
@@ -338,7 +341,7 @@ class Handler(BaseHTTPRequestHandler):
                     st.set_baseline(None)
                 elif body.get("current"):
                     if not st.set_baseline_current():
-                        return self._json(409, {"error": "ещё нет данных: сначала выполни скан"})
+                        return self._json(409, {"error": tr("ещё нет данных: сначала выполни скан")})
                 else:
                     st.set_baseline(Snapshot.from_json(json.dumps(body)))
                 return self._json(200, {"ok": True})
@@ -351,10 +354,10 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError as e:              # наши проверки: текст уже понятен человеку
             return self._json(400, {"error": str(e)})
         except (KeyError, TypeError, AttributeError) as e:
-            return self._json(400, {"error": "неверный запрос (%s: %s)" % (type(e).__name__, e)})
+            return self._json(400, {"error": tr("неверный запрос (%s: %s)") % (type(e).__name__, e)})
         except Exception as e:  # noqa: BLE001 - окно должно получить ответ, а не оборванное соединение
             log.exception("ошибка обработки %s", path)
-            return self._json(500, {"error": "внутренняя ошибка (%s: %s), подробности в журнале программы" % (type(e).__name__, e)})
+            return self._json(500, {"error": tr("внутренняя ошибка (%s: %s), подробности в журнале программы") % (type(e).__name__, e)})
         return self._json(404, {"error": "not found"})
 
     def _export(self, fmt: str, scope: str = "all", bssids: Optional[List[str]] = None) -> None:
@@ -370,13 +373,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, report.render_journal_csv(events).encode("utf-8-sig"), "text/csv; charset=utf-8",
                               {"Content-Disposition": 'attachment; filename="wifi-journal.csv"'})
         if fmt not in ("html", "csv", "json", "history", "xlsx", "pdf"):
-            return self._json(404, {"error": "неизвестный формат"})
+            return self._json(404, {"error": tr("неизвестный формат")})
         try:
             view = st.export_view(scope, bssids)
         except ValueError as e:
             return self._json(400, {"error": str(e)})
         if view is None:
-            return self._json(409, {"error": "ещё нет данных: сначала выполни скан"})
+            return self._json(409, {"error": tr("ещё нет данных: сначала выполни скан")})
         snap, findings, focus, hist, note = view
         suffix = {"all": "", "focus": "-my", "list": "-filtered"}.get(scope, "")
         extra = {}
@@ -397,7 +400,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(500, {"error": str(e), "fallback": "html"})
             except Exception as e:  # noqa: BLE001
                 log.exception("печать PDF")
-                return self._json(500, {"error": "PDF не получился (%s: %s)" % (type(e).__name__, e), "fallback": "html"})
+                return self._json(500, {"error": tr("PDF не получился (%s: %s)") % (type(e).__name__, e), "fallback": "html"})
             ctype, fname = "application/pdf", "wifi-report%s.pdf" % suffix
         elif fmt == "xlsx":
             data = report.build_xlsx_report(snap, findings, focus, note, history=hist, **extra)
@@ -409,7 +412,7 @@ class Handler(BaseHTTPRequestHandler):
             data, ctype, fname = snap.to_json().encode("utf-8"), "application/json", "wifi-snapshot%s.json" % suffix
         else:
             if not hist:
-                return self._json(409, {"error": "истории ещё нет: сделай хотя бы два скана"})
+                return self._json(409, {"error": tr("истории ещё нет: сделай хотя бы два скана")})
             names = {x.bssid: (x.ssid_display, x.band, x.channel) for x in snap.bss}
             data, ctype, fname = (report.render_history_csv(hist, names).encode("utf-8-sig"),
                                   "text/csv; charset=utf-8", "wifi-history%s.csv" % suffix)
@@ -429,7 +432,7 @@ def about(st: AppState) -> dict:
     """Окно «О программе»: что запущено и где искать журнал."""
     import platform
     from .. import __version__
-    return {"version": __version__, "backend": st.backend.name, "python": platform.python_version(),
+    return {"version": __version__, "backend": st.backend.name, "lang": get_lang(), "python": platform.python_version(),
             "os": "%s %s" % (platform.system(), platform.version()), "exe": sys.executable,
             "frozen": bool(getattr(sys, "frozen", False)), "log": applog.log_path() or "", "log_dir": applog.log_dir(),
             "prefs": st.prefs_path or "", "repo": "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"}

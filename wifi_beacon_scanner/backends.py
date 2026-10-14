@@ -7,6 +7,7 @@ import threading
 import time
 from typing import List, Optional
 
+from .i18n import tr
 from .conn import ConnSample, ConnTracker
 from .mcs import phy_rate
 from .demo import build_demo_snapshot
@@ -28,7 +29,7 @@ class Backend:
 
     def read_winlog(self, hours: float = 24) -> List[dict]:
         """События журнала WLAN-AutoConfig/Operational за последние hours часов (новые первыми)."""
-        raise OSError("журнал Windows недоступен для этого источника данных")
+        raise OSError(tr("журнал Windows недоступен для этого источника данных"))
 
 
 class WindowsBackend(Backend):
@@ -121,8 +122,8 @@ def demo_connect(ses, t: float, bssid: str, ip_after: float, eap_s: float = 0.6,
     ses.onex(t + 0.10, 1, eap_type=13, identity=1)
     if fail:
         ses.onex(t + 0.10 + eap_s, 4, 0x50005, fail, 0x80092013,
-                 "демо: функции отзыва не смогли проверить отзыв сертификата", eap_type=13, identity=1)
-        ses.stage(t + 0.2 + eap_s, "fail", "CORP", bssid, 0x50005, "демо: " + fail)
+                 tr("демо: функции отзыва не смогли проверить отзыв сертификата"), eap_type=13, identity=1)
+        ses.stage(t + 0.2 + eap_s, "fail", "CORP", bssid, 0x50005, tr("демо: ") + fail)
         return
     ses.onex(t + 0.10 + eap_s, 3, eap_type=13, identity=1)
     ses.stage(t + 0.14 + eap_s, "connected", "CORP", bssid)
@@ -151,35 +152,35 @@ def demo_winlog(now: float) -> List[dict]:
     ok = {"ProfileName": "CORP", "SSID": "CORP", "BSSType": "Infrastructure", "PHYType": "802.11ax",
           "AuthenticationAlgorithm": "WPA2-Enterprise", "CipherAlgorithm": "AES-CCMP", "OnexEnabled": "1"}
     rows = [
-        (-30500, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
-        (-21900, 8003, 4, "демо: отключено от сети CORP. Причина: пользователь отключил беспроводное подключение",
-         {"SSID": "CORP", "Reason": "Пользователь отключил подключение", "ReasonCode": "0x00028002"}),
-        (-21850, 8002, 2, "демо: не удалось подключиться к сети Hotel-WiFi. Причина: сеть недоступна",
-         {"SSID": "Hotel-WiFi", "FailureReason": "Сеть недоступна", "ReasonCode": "0x00028002"}),
-        (-9000, 11006, 3, "демо: проверка безопасности беспроводной сети не выполнена: истекло время ожидания 4-way handshake",
-         {"SSID": "CORP", "PeerMac": "00:e0:fc:10:04:02", "FailureReason": "Тайм-аут 4-way handshake", "ReasonCode": "0x00048001"}),
-        (-8990, 8002, 2, "демо: не удалось подключиться к сети CORP. Причина: тайм-аут 4-way handshake",
-         {"SSID": "CORP", "FailureReason": "Тайм-аут 4-way handshake", "ReasonCode": "0x00048001"}),
-        (-8950, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
-        (-290, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
-        (-289.9, 11000, 4, "демо: начата ассоциация с беспроводной сетью", {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
-        (-289.8, 11001, 4, "демо: ассоциация с беспроводной сетью выполнена", {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
-        (-289.8, 11010, 4, "демо: начата проверка безопасности беспроводной сети", {"SSID": "CORP"}),
-        (-289.7, 12011, 4, "демо: начата проверка подлинности 802.1X", {"SSID": "CORP", "EAPType": "13"}),
-        (-289.1, 12012, 4, "демо: проверка подлинности 802.1X выполнена (EAP-TLS, учётные данные компьютера)",
+        (-30500, 8001, 4, tr("демо: служба WLAN AutoConfig успешно подключилась к сети CORP"), ok),
+        (-21900, 8003, 4, tr("демо: отключено от сети CORP. Причина: пользователь отключил беспроводное подключение"),
+         {"SSID": "CORP", "Reason": tr("Пользователь отключил подключение"), "ReasonCode": "0x00028002"}),
+        (-21850, 8002, 2, tr("демо: не удалось подключиться к сети Hotel-WiFi. Причина: сеть недоступна"),
+         {"SSID": "Hotel-WiFi", "FailureReason": tr("Сеть недоступна"), "ReasonCode": "0x00028002"}),
+        (-9000, 11006, 3, tr("демо: проверка безопасности беспроводной сети не выполнена: истекло время ожидания 4-way handshake"),
+         {"SSID": "CORP", "PeerMac": "00:e0:fc:10:04:02", "FailureReason": tr("Тайм-аут 4-way handshake"), "ReasonCode": "0x00048001"}),
+        (-8990, 8002, 2, tr("демо: не удалось подключиться к сети CORP. Причина: тайм-аут 4-way handshake"),
+         {"SSID": "CORP", "FailureReason": tr("Тайм-аут 4-way handshake"), "ReasonCode": "0x00048001"}),
+        (-8950, 8001, 4, tr("демо: служба WLAN AutoConfig успешно подключилась к сети CORP"), ok),
+        (-290, 8000, 4, tr("демо: служба WLAN AutoConfig начала подключение к сети CORP"), {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-289.9, 11000, 4, tr("демо: начата ассоциация с беспроводной сетью"), {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
+        (-289.8, 11001, 4, tr("демо: ассоциация с беспроводной сетью выполнена"), {"SSID": "CORP", "PeerMac": "00:e0:fc:10:01:02"}),
+        (-289.8, 11010, 4, tr("демо: начата проверка безопасности беспроводной сети"), {"SSID": "CORP"}),
+        (-289.7, 12011, 4, tr("демо: начата проверка подлинности 802.1X"), {"SSID": "CORP", "EAPType": "13"}),
+        (-289.1, 12012, 4, tr("демо: проверка подлинности 802.1X выполнена (EAP-TLS, учётные данные компьютера)"),
          {"SSID": "CORP", "EAPType": "13", "Identity": "host/LAPTOP-01"}),
-        (-289.0, 11005, 4, "демо: проверка безопасности беспроводной сети выполнена", {"SSID": "CORP"}),
-        (-288.9, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
-        (-158, 8003, 4, "демо: отключено от сети CORP. Причина: точка доступа разорвала ассоциацию",
-         {"SSID": "CORP", "Reason": "Точка доступа разорвала ассоциацию", "ReasonCode": "0x00038004"}),
-        (-157, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
-        (-156.5, 12013, 2, "демо: ошибка проверки подлинности 802.1X: не удалось проверить отзыв сертификата",
-         {"SSID": "CORP", "EAPType": "13", "Reason": "Не удалось проверить отзыв сертификата", "ErrorCode": "0x80092013"}),
-        (-156.4, 8002, 2, "демо: не удалось подключиться к сети CORP. Причина: ошибка 802.1X",
-         {"SSID": "CORP", "FailureReason": "Ошибка проверки подлинности 802.1X", "ReasonCode": "0x00050005"}),
-        (-154, 8000, 4, "демо: служба WLAN AutoConfig начала подключение к сети CORP", {"SSID": "CORP", "ConnectionMode": "Auto"}),
-        (-152.6, 12012, 4, "демо: проверка подлинности 802.1X выполнена", {"SSID": "CORP", "EAPType": "13"}),
-        (-152.5, 8001, 4, "демо: служба WLAN AutoConfig успешно подключилась к сети CORP", ok),
+        (-289.0, 11005, 4, tr("демо: проверка безопасности беспроводной сети выполнена"), {"SSID": "CORP"}),
+        (-288.9, 8001, 4, tr("демо: служба WLAN AutoConfig успешно подключилась к сети CORP"), ok),
+        (-158, 8003, 4, tr("демо: отключено от сети CORP. Причина: точка доступа разорвала ассоциацию"),
+         {"SSID": "CORP", "Reason": tr("Точка доступа разорвала ассоциацию"), "ReasonCode": "0x00038004"}),
+        (-157, 8000, 4, tr("демо: служба WLAN AutoConfig начала подключение к сети CORP"), {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-156.5, 12013, 2, tr("демо: ошибка проверки подлинности 802.1X: не удалось проверить отзыв сертификата"),
+         {"SSID": "CORP", "EAPType": "13", "Reason": tr("Не удалось проверить отзыв сертификата"), "ErrorCode": "0x80092013"}),
+        (-156.4, 8002, 2, tr("демо: не удалось подключиться к сети CORP. Причина: ошибка 802.1X"),
+         {"SSID": "CORP", "FailureReason": tr("Ошибка проверки подлинности 802.1X"), "ReasonCode": "0x00050005"}),
+        (-154, 8000, 4, tr("демо: служба WLAN AutoConfig начала подключение к сети CORP"), {"SSID": "CORP", "ConnectionMode": "Auto"}),
+        (-152.6, 12012, 4, tr("демо: проверка подлинности 802.1X выполнена"), {"SSID": "CORP", "EAPType": "13"}),
+        (-152.5, 8001, 4, tr("демо: служба WLAN AutoConfig успешно подключилась к сети CORP"), ok),
     ]
     out = []
     for dt, eid, level, msg, data in rows:
@@ -217,16 +218,16 @@ class DemoConnMonitor(threading.Thread):
         ses.ip_update(t0 - 5, "0.0.0.0", True, "", t0 - 7200)
         demo_connect(ses, t0 - 1.0, ap[0], ip_after=0.8)
         demo_roam(ses, t0 + 70 - 0.06, ap[0], ap[1], 42)                       # FT: десятки мс
-        ses.stage(t0 + 141.5, "disconnected", "CORP", ap[1], 0x38003, "демо: точка доступа разорвала ассоциацию")
+        ses.stage(t0 + 141.5, "disconnected", "CORP", ap[1], 0x38003, tr("демо: точка доступа разорвала ассоциацию"))
         ses.ip_update(t0 + 142, "0.0.0.0", True, "", t0 - 1)
-        demo_connect(ses, t0 + 143.0, ap[1], ip_after=0, eap_s=0.5, fail="EAP-TLS: сервер отклонил аутентификацию")
+        demo_connect(ses, t0 + 143.0, ap[1], ip_after=0, eap_s=0.5, fail=tr("EAP-TLS: сервер отклонил аутентификацию"))
         demo_connect(ses, t0 + 144.4, ap[1], ip_after=1.9, eap_s=1.3)
         demo_roam(ses, t0 + 175 - 0.05, ap[1], ap[2], 38)
         demo_roam(ses, t0 + 190 - 0.2, ap[2], ap[1], 186)                     # медленный роуминг обратно
         demo_roam(ses, t0 + 240 - 0.4, ap[1], ap[3], 410, full_auth=True)     # без FT: полный 802.1X
 
     def _prefill(self, now: float) -> None:
-        t0, tr, j = now - 300, self.tracker, lambda: self.rng.uniform(-1.5, 1.5)
+        t0, trk, j = now - 300, self.tracker, lambda: self.rng.uniform(-1.5, 1.5)
         self._prefill_sessions(t0)
         for k in range(300):
             t = t0 + k
@@ -237,7 +238,7 @@ class DemoConnMonitor(threading.Thread):
             elif k < 146:
                 s = ConnSample(t=t, state="disconnected" if k > 141 else "authenticating")
                 if k == 142:
-                    tr.add_reason(t, "disconnected", 0x00038003, "демо: точка доступа разорвала ассоциацию (deauth)")
+                    trk.add_reason(t, "disconnected", 0x00038003, tr("демо: точка доступа разорвала ассоциацию (deauth)"))
             elif k < 175:
                 s = self._s(t, 1, -60 + j())
             elif k < 190:
@@ -246,13 +247,13 @@ class DemoConnMonitor(threading.Thread):
                 s = self._s(t, 1, -61 + j())                                 # ... и быстро обратно: пинг-понг
             else:
                 s = self._s(t, 3, -79 + j())                                 # залипание на слабой AP3
-            tr.add_sample(s)
+            trk.add_sample(s)
             if k >= 240 and k % 5 == 0:
-                tr.check_scan(t, [type("B", (), {"bssid": b, "ssid": "CORP", "rssi": r})() for b, r, _ in self.aps])
+                trk.check_scan(t, [type("B", (), {"bssid": b, "ssid": "CORP", "rssi": r})() for b, r, _ in self.aps])
 
     def run(self) -> None:
         with self.lock:
-            self.tracker.status = "демо-режим: синтетический журнал (5 минут истории + живые замеры)"
+            self.tracker.status = tr("демо-режим: синтетический журнал (5 минут истории + живые замеры)")
             self._prefill(time.time())
         rssi, i, k = -58.0, 0, 0
         while not self._halt.wait(1.0):
@@ -270,4 +271,4 @@ class DemoConnMonitor(threading.Thread):
 def default_backend() -> Backend:
     if sys.platform == "win32":
         return WindowsBackend()
-    raise RuntimeError("Сканирование доступно только на Windows. Для просмотра интерфейса запусти с --demo.")
+    raise RuntimeError(tr("Сканирование доступно только на Windows. Для просмотра интерфейса запусти с --demo."))

@@ -34,7 +34,7 @@ The installed version runs without a console window and exits by itself when the
 | What | Where |
 |---|---|
 | Program | `C:\Program Files\Wi-Fi Beacon Scanner` (with `/CURRENTUSER` - in the user profile) |
-| View settings, "My SSIDs", column widths | `%APPDATA%\WiFiBeaconScanner\prefs.json` |
+| View settings, language, "My SSIDs", column widths | `%APPDATA%\WiFiBeaconScanner\prefs.json` |
 | App log | `%LOCALAPPDATA%\WiFiBeaconScanner\logs\app.log` (up to 1 MB plus three previous files): start-up, scans, page errors |
 | Console output of the installed version | `%LOCALAPPDATA%\WiFiBeaconScanner\logs\console.log` |
 | Edge window profile | `%LOCALAPPDATA%\WiFiBeaconScanner\edge-profile` |
@@ -42,6 +42,15 @@ The installed version runs without a console window and exits by itself when the
 
 Uninstall keeps the settings and the log. Settings of versions before 0.7.0 (`%APPDATA%\WifiDiag`) are picked up
 on first start.
+
+## Interface language
+
+English or Russian. On first start the app follows the Windows display language (Russian for a Russian
+Windows, English otherwise); the user can switch it in View → Language, and the choice is saved in `prefs.json`
+(`"lang": "en"` or `"ru"`). For a whole fleet the language can be fixed in that file or with the `--lang en`
+command-line option (for one run). Problems, beacon decoding and PDF/Excel/HTML reports use the same language.
+Windows event log messages are shown as Windows provides them, in the system language; connection journal
+events keep the language they were recorded in.
 
 ## How the app works
 

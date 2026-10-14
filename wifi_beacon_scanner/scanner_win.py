@@ -21,6 +21,7 @@ import time
 from ctypes import POINTER, Structure, byref, c_int32, c_ubyte, c_uint, c_uint16, c_uint32, c_uint64, c_void_p
 from typing import List, Optional, Tuple
 
+from .i18n import tr
 from .model import Bss, ScanAccessDenied, Snapshot, now_iso
 
 if sys.platform != "win32":  # pragma: no cover
@@ -94,7 +95,7 @@ _wlan.WlanFreeMemory.restype = None
 
 def _check(code: int, what: str) -> None:
     if code != ERROR_SUCCESS:
-        raise OSError("%s: код ошибки %d (%s)" % (what, code, ctypes.FormatError(code).strip()))
+        raise OSError(tr("%s: код ошибки %d (%s)") % (what, code, ctypes.FormatError(code).strip()))
 
 
 def list_interfaces() -> List[Tuple[str, GUID]]:
@@ -126,7 +127,7 @@ def _enum(handle) -> List[Tuple[str, GUID]]:
 
 def scan(interface_index: int = 0, wait_s: float = 5.0) -> Snapshot:
     if ctypes.sizeof(WLAN_BSS_ENTRY) != EXPECTED_BSS_ENTRY_SIZE:
-        raise RuntimeError("sizeof(WLAN_BSS_ENTRY)=%d, ожидалось %d: раскладка структуры неверна"
+        raise RuntimeError(tr("sizeof(WLAN_BSS_ENTRY)=%d, ожидалось %d: раскладка структуры неверна")
                            % (ctypes.sizeof(WLAN_BSS_ENTRY), EXPECTED_BSS_ENTRY_SIZE))
     handle = c_void_p()
     ver = c_uint32()
@@ -134,9 +135,9 @@ def scan(interface_index: int = 0, wait_s: float = 5.0) -> Snapshot:
     try:
         ifaces = _enum(handle)
         if not ifaces:
-            raise OSError("Wi-Fi адаптеры не найдены")
+            raise OSError(tr("Wi-Fi адаптеры не найдены"))
         if interface_index >= len(ifaces):
-            raise OSError("Нет адаптера с индексом %d (всего %d)" % (interface_index, len(ifaces)))
+            raise OSError(tr("Нет адаптера с индексом %d (всего %d)") % (interface_index, len(ifaces)))
         desc, guid = ifaces[interface_index]
         # Запуск скана: код != 0 не фатален (служба может отклонить слишком частый запрос,
         # тогда просто читаем то, что уже в кэше). Код 5 - Windows 11 24H2+ не дала доступ к расположению:

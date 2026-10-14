@@ -17,17 +17,18 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import asdict, dataclass, field
 from typing import Any, Deque, Dict, List, Optional
+from .i18n import N_, tr
 
 STAGE_RU = {
-    "start": "начало подключения", "associating": "ассоциация", "associated": "ассоциирован",
-    "authenticating": "аутентификация", "connected": "подключён", "complete": "подключение завершено",
-    "roam_start": "начало роуминга", "roam_end": "роуминг завершён", "disassociating": "разрыв ассоциации",
-    "disconnected": "отключён", "fail": "не удалось подключиться", "ip": "получен IPv4",
-    "dhcp": "аренда DHCP", "onex": "802.1X", "onex_restart": "802.1X перезапущен",
+    "start": N_("начало подключения"), "associating": N_("ассоциация"), "associated": N_("ассоциирован"),
+    "authenticating": N_("аутентификация"), "connected": N_("подключён"), "complete": N_("подключение завершено"),
+    "roam_start": N_("начало роуминга"), "roam_end": N_("роуминг завершён"), "disassociating": N_("разрыв ассоциации"),
+    "disconnected": N_("отключён"), "fail": N_("не удалось подключиться"), "ip": N_("получен IPv4"),
+    "dhcp": N_("аренда DHCP"), "onex": "802.1X", "onex_restart": N_("802.1X перезапущен"),
 }
-ONEX_STATUS_RU = {0: "не начата", 1: "идёт", 2: "нет ответа от аутентификатора (802.1X не включён на AP?)",
-                  3: "успех", 4: "отказ", 5: "неизвестно"}
-ONEX_IDENTITY_RU = {0: "нет", 1: "компьютер", 2: "пользователь", 3: "явно заданный пользователь", 4: "гость"}
+ONEX_STATUS_RU = {0: N_("не начата"), 1: N_("идёт"), 2: N_("нет ответа от аутентификатора (802.1X не включён на AP?)"),
+                  3: N_("успех"), 4: N_("отказ"), 5: N_("неизвестно")}
+ONEX_IDENTITY_RU = {0: N_("нет"), 1: N_("компьютер"), 2: N_("пользователь"), 3: N_("явно заданный пользователь"), 4: N_("гость")}
 EAP_TYPES = {1: "Identity", 4: "MD5", 6: "GTC", 13: "EAP-TLS", 17: "LEAP", 18: "EAP-SIM", 21: "EAP-TTLS",
              23: "EAP-AKA", 25: "PEAP", 26: "MSCHAPv2", 43: "EAP-FAST", 50: "EAP-AKA'"}
 
@@ -75,6 +76,7 @@ class Session:
     dhcp: Optional[bool] = None
     lease_obtained: Optional[float] = None
     ip_note: str = ""
+    ip_kind: str = ""                   # lease / appeared / kept / static / apipa - для логики, не для показа
     ip_checked: bool = False
     ip_at_connect: str = ""
     lease_at_connect: Optional[float] = None
@@ -91,8 +93,8 @@ class Session:
             total_ms=self.ms(first, self.t_connected),
             ip_ms=self.ms(self.t_connected, self.t_ip),
             eap_name=EAP_TYPES.get(self.eap_type, "EAP %d" % self.eap_type) if self.eap_type is not None else "",
-            onex_status_ru=ONEX_STATUS_RU.get(self.onex_status, "") if self.onex_status is not None else "",
-            onex_identity_ru=ONEX_IDENTITY_RU.get(self.onex_identity, "") if self.onex_identity is not None else "",
+            onex_status_ru=tr(ONEX_STATUS_RU.get(self.onex_status, "")) if self.onex_status is not None else "",
+            onex_identity_ru=tr(ONEX_IDENTITY_RU.get(self.onex_identity, "")) if self.onex_identity is not None else "",
         )
         return d
 
@@ -109,7 +111,7 @@ class SessionTracker:
     # ---------- служебное ----------
     def _new(self, t: float, kind: str, ssid: str = "", bssid: str = "", bssid_from: str = "") -> Session:
         if self._open is not None and self._open.result == "in_progress":
-            self._finish(self._open, t, "aborted", "прервано новой попыткой")
+            self._finish(self._open, t, "aborted", tr("прервано новой попыткой"))
         s = Session(self._next_id, kind, t, ssid=ssid, bssid=bssid, bssid_from=bssid_from)
         self._next_id += 1
         self.sessions.append(s)
@@ -130,7 +132,7 @@ class SessionTracker:
             if s.t_connected is not None:
                 self._finish(s, t, "ok")            # подключились, а завершающее уведомление не пришло
             else:
-                self._finish(s, t, "aborted", "нет исхода за %d с" % SESSION_TIMEOUT_S)
+                self._finish(s, t, "aborted", tr("нет исхода за %d с") % SESSION_TIMEOUT_S)
         return s
 
     def last_connected(self, t: float, within: float = IP_WAIT_S) -> Optional[Session]:
@@ -197,7 +199,7 @@ class SessionTracker:
             self._finish(s, t, "ok" if s.result == "in_progress" else s.result)
         elif stage in ("fail", "disconnected", "disassociating"):
             if s.result == "in_progress":
-                self._finish(s, t, "fail", reason or STAGE_RU[stage], reason_code)
+                self._finish(s, t, "fail", reason or tr(STAGE_RU[stage]), reason_code)
         if s.result != "in_progress" and self._open is s:
             self._open = None if s.t_connected is None else s     # подключённую держим для IP
         return s
@@ -223,12 +225,12 @@ class SessionTracker:
             s.eap_type = eap_type
         if identity is not None:
             s.onex_identity = identity
-        detail = ONEX_STATUS_RU.get(status, str(status))
+        detail = tr(ONEX_STATUS_RU.get(status, str(status)))
         if reason:
             detail += ": " + reason
         s.stages.append(Stage(t, "onex", detail))
         if status in (2, 4) and s.result == "in_progress":
-            self._finish(s, t, "fail", "802.1X: " + (reason or error or ONEX_STATUS_RU.get(status, "")),
+            self._finish(s, t, "fail", "802.1X: " + (reason or error or tr(ONEX_STATUS_RU.get(status, ""))),
                          reason_code or error_code or None)
         return s
 
@@ -248,20 +250,21 @@ class SessionTracker:
         if lease_obtained is not None and lease_obtained != s.lease_at_connect and lease_obtained >= s.t_connected - 2:
             s.t_ip = min(t, max(s.t_connected, float(lease_obtained)))
             s.lease_obtained = lease_obtained
-            s.ip_note = "новая аренда DHCP"
+            s.ip_note, s.ip_kind = tr("новая аренда DHCP"), "lease"
         elif ip != s.ip_at_connect:
             s.t_ip = t
-            s.ip_note = "адрес появился" + (" (DHCP)" if dhcp else "")
+            s.ip_note, s.ip_kind = tr("адрес появился") + (" (DHCP)" if dhcp else ""), "appeared"
         elif t - s.t_connected >= 10:
-            s.ip_note = ("адрес сохранился с прошлого подключения, новой аренды DHCP не было" if dhcp
-                         else "статический адрес")
+            s.ip_kind = "kept" if dhcp else "static"
+            s.ip_note = (tr("адрес сохранился с прошлого подключения, новой аренды DHCP не было") if dhcp
+                         else tr("статический адрес"))
         else:
             return None
         if ip.startswith("169.254."):
-            s.ip_note = "APIPA 169.254.x.x: DHCP-сервер не ответил"
+            s.ip_note, s.ip_kind = tr("APIPA 169.254.x.x: DHCP-сервер не ответил"), "apipa"
         s.ip_checked = True
-        s.stages.append(Stage(s.t_ip if s.t_ip is not None else t, "dhcp" if s.ip_note == "новая аренда DHCP" else "ip",
-                              "%s%s, %s" % (ip, (", DHCP-сервер " + dhcp_server) if dhcp_server else "", s.ip_note)))
+        s.stages.append(Stage(s.t_ip if s.t_ip is not None else t, "dhcp" if s.ip_kind == "lease" else "ip",
+                              "%s%s, %s" % (ip, (tr(", DHCP-сервер ") + dhcp_server) if dhcp_server else "", s.ip_note)))
         return s
 
     # ---------- сводка ----------
@@ -281,7 +284,7 @@ class SessionTracker:
             "connect_ms_med": med(x["total_ms"] for x in d if x["kind"] == "connect" and x["result"] == "ok"),
             "roam_ms_med": med(x["total_ms"] for x in d if x["kind"] == "roam" and x["result"] == "ok"),
             "auth_ms_med": med(x["auth_ms"] for x in d),
-            "ip_ms_med": med(x["ip_ms"] for x in d if x["ip_note"].startswith(("новая", "адрес появился"))),
+            "ip_ms_med": med(x["ip_ms"] for x in d if x.get("ip_kind") in ("lease", "appeared")),
             "onex_ok": sum(1 for s in ss if s.onex_status == 3),
             "onex_fail": sum(1 for s in ss if s.onex_status in (2, 4)),
         }

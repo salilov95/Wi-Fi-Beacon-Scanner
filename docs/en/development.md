@@ -80,6 +80,20 @@ less often than the single-file exe.
 also prints a PDF with the real Edge, opens the app window with a clean Edge profile and checks that the app exits
 when the window is closed, and calls the Windows APIs used by sessions and the event log.
 
+## Translations
+
+The source language is Russian, and a Russian string is its own translation key.
+
+- Python: user-visible text goes through `tr("…")` (`wifi_beacon_scanner/i18n.py`); strings in module-level
+  tables are marked `N_("…")` and passed through `tr()` where they are shown. Format after translating:
+  `tr("слабый сигнал %d дБм") % rssi`. Translations live in `wifi_beacon_scanner/i18n_en.py` with the same
+  `%s`/`%d` in the same order.
+- Page: `T('…', {name: value})` in `app.js`, translations in `web/static/i18n.js`; static text of `index.html`
+  is translated on load. Switching the language reloads the page.
+- `python tools/i18n_scan.py missing` and `python tools/i18n_scan.py js` list strings without a translation,
+  `report` shows Cyrillic text outside `tr()`. `tests/test_i18n.py` fails if a translation is missing or loses
+  a placeholder.
+
 ## Layout
 
     wifi_beacon_scanner/ie.py          IE parsing (RSN, HT/VHT/HE/EHT, QBSS Load, Extended Capabilities, ...)
@@ -105,6 +119,7 @@ when the window is closed, and calls the Windows APIs used by sessions and the e
     wifi_beacon_scanner/applog.py      app log file (logs\app.log)
     wifi_beacon_scanner/update.py      new version check on GitHub Releases (on demand)
     wifi_beacon_scanner/synth.py       synthetic IEs built from the spec (tests and demo)
+    wifi_beacon_scanner/i18n*.py       interface language: tr()/N_() and the English catalog
     wifi_beacon_scanner/web/           server (stdlib) and UI (HTML/CSS/JS without external libraries)
     run_gui.py               entry point for the exe
     installer/               Inno Setup script and exe version file
@@ -115,5 +130,6 @@ when the window is closed, and calls the Windows APIs used by sessions and the e
     tools/smoke_window.py              CI: app window with a clean Edge profile, exit on close
     tools/smoke_winapi.py              CI: GetAdaptersInfo and event log reading on a real Windows
     tools/release_notes.py             release notes from CHANGELOG.md and CHANGELOG.ru.md
+    tools/i18n_scan.py                 untranslated strings in Python and the page
     tools/run_tests.py                 tests in CI: failures shown as annotations
     tests/                   unittest

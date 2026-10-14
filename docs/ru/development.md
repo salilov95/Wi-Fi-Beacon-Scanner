@@ -79,6 +79,19 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
 печатает PDF настоящим Edge, открывает окно программы с чистым профилем Edge и проверяет выход при закрытии,
 вызывает Windows API, на которых держатся сессии и журнал Windows.
 
+## Переводы
+
+Исходный язык - русский, и русская строка сама служит ключом перевода.
+
+- Python: видимый пользователю текст идёт через `tr("…")` (`wifi_beacon_scanner/i18n.py`); строки в таблицах
+  уровня модуля помечаются `N_("…")` и проходят через `tr()` там, где показываются. Подстановка - после
+  перевода: `tr("слабый сигнал %d дБм") % rssi`. Переводы - в `wifi_beacon_scanner/i18n_en.py`, с теми же
+  `%s`/`%d` в том же порядке.
+- Страница: `T('…', {name: value})` в `app.js`, переводы - в `web/static/i18n.js`; статический текст
+  `index.html` переводится при загрузке. Смена языка перезагружает страницу.
+- `python tools/i18n_scan.py missing` и `python tools/i18n_scan.py js` показывают строки без перевода,
+  `report` - кириллицу вне `tr()`. `tests/test_i18n.py` падает, если перевода нет или в нём потерялась подстановка.
+
 ## Структура
 
     wifi_beacon_scanner/ie.py          разбор IE (RSN, 11k/r/v, HT/VHT/HE, QBSS Load, ...)
@@ -104,6 +117,7 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     wifi_beacon_scanner/xlsx.py        запись .xlsx без библиотек
     wifi_beacon_scanner/pdf.py         PDF через Edge/Chromium headless
     wifi_beacon_scanner/synth.py       сборка синтетических IE по спецификации (тесты и демо)
+    wifi_beacon_scanner/i18n*.py       язык интерфейса: tr()/N_() и английский каталог
     wifi_beacon_scanner/web/           сервер (stdlib) и интерфейс (HTML/CSS/JS без внешних библиотек)
     run_gui.py               точка входа для exe
     installer/               сценарий Inno Setup и файл версии для exe
@@ -114,5 +128,6 @@ Inno Setup упаковывает её по сценарию `installer\WiFiBeac
     tools/smoke_window.py              CI: окно программы с чистым профилем Edge, выход при закрытии
     tools/smoke_winapi.py              CI: GetAdaptersInfo и чтение журнала на настоящей Windows
     tools/release_notes.py             текст релиза из CHANGELOG.md и CHANGELOG.ru.md
+    tools/i18n_scan.py                 строки без перевода в Python и на странице
     tools/run_tests.py                 тесты в CI: упавшие видны аннотациями
     tests/                   unittest

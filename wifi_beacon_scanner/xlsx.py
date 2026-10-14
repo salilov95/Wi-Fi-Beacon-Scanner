@@ -15,6 +15,7 @@ import re
 import zipfile
 from typing import Any, List, Sequence, Tuple
 from xml.sax.saxutils import escape
+from .i18n import tr
 
 _BAD_XML = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff￾￿]")
 _BAD_SHEET = re.compile(r"[\[\]:*?/\\]")
@@ -40,7 +41,7 @@ def _cell(ref: str, v: Any, style: int) -> str:
     if v is None or v == "":
         return '<c r="%s"%s/>' % (ref, st) if style else ""
     if isinstance(v, bool):
-        v = "да" if v else "нет"
+        v = tr("да") if v else tr("нет")
     if isinstance(v, (int, float)) and v == v and abs(v) != float("inf"):
         return '<c r="%s"%s><v>%s</v></c>' % (ref, st, repr(v) if isinstance(v, float) else v)
     return '<c r="%s" t="inlineStr"%s><is><t xml:space="preserve">%s</t></is></c>' % (ref, st, _text(v))
@@ -50,7 +51,7 @@ RED, YELLOW, GREEN = "FFF8696B", "FFFFEB84", "FF63BE7B"
 # (признак в заголовке, точки шкалы, цвета)
 SCALES = [
     (re.compile(r"rssi", re.I), ("-85", "-67", "-50"), (RED, YELLOW, GREEN)),
-    (re.compile(r"загрузка|util", re.I), ("0", "50", "75"), (GREEN, YELLOW, RED)),
+    (re.compile(r"загрузка|util|load", re.I), ("0", "50", "75"), (GREEN, YELLOW, RED)),
 ]
 
 
@@ -108,7 +109,7 @@ def _sheet_xml(rows: Sequence[Sequence[Any]]) -> str:
 def _sheet_names(names: List[str]) -> List[str]:
     used, out = set(), []
     for n in names:
-        base = (_BAD_SHEET.sub("_", _BAD_XML.sub("", n)).strip() or "Лист")[:31]
+        base = (_BAD_SHEET.sub("_", _BAD_XML.sub("", n)).strip() or tr("Лист"))[:31]
         cand, k = base, 2
         while cand.lower() in used:
             suf = " (%d)" % k
@@ -133,7 +134,7 @@ _STYLES = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 
 def build_xlsx(sheets: Sequence[Sheet]) -> bytes:
     if not sheets:
-        raise ValueError("нет листов")
+        raise ValueError(tr("нет листов"))
     names = _sheet_names([n for n, _ in sheets])
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:

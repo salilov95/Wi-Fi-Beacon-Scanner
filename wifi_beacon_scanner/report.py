@@ -8,12 +8,13 @@ from datetime import datetime
 from collections import Counter
 from typing import Any, Dict, List, Optional, Sequence
 
+from .i18n import N_, tr
 from . import amend
 from .mcs import capability
 from .model import Bss, Snapshot
 from .rules import CRITICAL, INFO, WARNING, Finding
 
-SEV_RU = {CRITICAL: "Критично", WARNING: "Внимание", INFO: "Информация"}
+SEV_RU = {CRITICAL: N_("Критично"), WARNING: N_("Внимание"), INFO: N_("Информация")}
 
 CSV_COLUMNS = [
     "ssid", "bssid", "vendor", "band_ghz", "channel", "width_mhz", "rssi_dbm", "link_quality",
@@ -55,10 +56,10 @@ def write_csv(path: str, bss: Sequence[Bss]) -> None:
 
 def console_summary(findings: Sequence[Finding]) -> str:
     c = Counter(f.severity for f in findings)
-    lines = ["Найдено: %d критичных, %d предупреждений, %d информационных"
+    lines = [tr("Найдено: %d критичных, %d предупреждений, %d информационных")
              % (c[CRITICAL], c[WARNING], c[INFO])]
     for f in findings:
-        lines.append("[%s] %s: %s" % (SEV_RU[f.severity], f.title, f.detail))
+        lines.append("[%s] %s: %s" % (tr(SEV_RU[f.severity]), f.title, f.detail))
     return "\n".join(lines)
 
 
@@ -97,9 +98,9 @@ th{position:sticky;top:0;background:var(--card)}
 """
 
 JOURNAL_KIND_RU = {
-    "connected": "подключение", "disconnected": "обрыв", "roam": "роуминг", "ssid_change": "смена сети",
-    "pingpong": "пинг-понг", "sticky": "залипание", "attempt_fail": "неудачное подключение",
-    "disconnect_reason": "отключение (по данным Windows)",
+    "connected": N_("подключение"), "disconnected": N_("обрыв"), "roam": N_("роуминг"), "ssid_change": N_("смена сети"),
+    "pingpong": N_("пинг-понг"), "sticky": N_("залипание"), "attempt_fail": N_("неудачное подключение"),
+    "disconnect_reason": N_("отключение (по данным Windows)"),
 }
 
 def util_color(u: float) -> str:
@@ -130,18 +131,18 @@ def _rssi_td(v: Any) -> str:
     return "<td>%s</td>" % html.escape("" if v is None else str(v))
 
 
-SESSION_KIND_RU = {"connect": "подключение", "roam": "роуминг"}
-SESSION_RESULT_RU = {"ok": "успешно", "fail": "ошибка", "aborted": "прервано", "in_progress": "идёт"}
-SESSION_HEAD = ["Время", "Тип", "Итог", "SSID", "Откуда", "Куда", "Ассоциация, мс", "Аутентификация, мс",
-                "Всего, мс", "IP через, мс", "IPv4", "DHCP-сервер", "IP/DHCP", "EAP", "Учётка 802.1X", "802.1X",
-                "Причина", "Код причины", "Ошибка EAP"]
+SESSION_KIND_RU = {"connect": N_("подключение"), "roam": N_("роуминг")}
+SESSION_RESULT_RU = {"ok": N_("успешно"), "fail": N_("ошибка"), "aborted": N_("прервано"), "in_progress": N_("идёт")}
+SESSION_HEAD = [N_("Время"), N_("Тип"), N_("Итог"), "SSID", N_("Откуда"), N_("Куда"), N_("Ассоциация, мс"), N_("Аутентификация, мс"),
+                N_("Всего, мс"), N_("IP через, мс"), "IPv4", N_("DHCP-сервер"), "IP/DHCP", "EAP", N_("Учётка 802.1X"), "802.1X",
+                N_("Причина"), N_("Код причины"), N_("Ошибка EAP")]
 
 
 def session_rows(sessions: Sequence[Dict[str, Any]]) -> List[List[Any]]:
-    rows: List[List[Any]] = [list(SESSION_HEAD)]
+    rows: List[List[Any]] = [[tr(h) for h in SESSION_HEAD]]
     for s in sessions:
         rows.append([datetime.fromtimestamp(s["t_start"]).strftime("%Y-%m-%d %H:%M:%S"),
-                     SESSION_KIND_RU.get(s["kind"], s["kind"]), SESSION_RESULT_RU.get(s["result"], s["result"]),
+                     tr(SESSION_KIND_RU.get(s["kind"], s["kind"])), tr(SESSION_RESULT_RU.get(s["result"], s["result"])),
                      s["ssid"], s["bssid_from"], s["bssid"], s["assoc_ms"], s["auth_ms"], s["total_ms"], s["ip_ms"],
                      s["ip"], s["dhcp_server"], s["ip_note"], s["eap_name"], s["onex_identity_ru"], s["onex_status_ru"],
                      s["reason"], "0x%X" % s["reason_code"] if s["reason_code"] else None,
@@ -159,17 +160,17 @@ def render_sessions_csv(sessions: Sequence[Dict[str, Any]]) -> str:
 
 def survey_rows(points: Sequence[Dict[str, Any]], focus: Sequence[str]) -> List[List[Any]]:
     """Таблица точек обхода: для каждого «моего» SSID лучший сигнал и сколько его BSS слышно от −75."""
-    names = list(focus) or ["(все сети)"]
-    head = ["Точка", "X, %", "Y, %", "Время", "Статус", "Подключение", "RSSI подключения"]
+    names = list(focus) or [tr("(все сети)")]
+    head = [tr("Точка"), "X, %", "Y, %", tr("Время"), tr("Статус"), tr("Подключение"), tr("RSSI подключения")]
     for n in names:
-        head += ["Лучший RSSI: %s" % n, "BSS от −75: %s" % n]
+        head += [tr("Лучший RSSI: %s") % n, tr("BSS от −75: %s") % n]
     rows: List[List[Any]] = [head]
     for p in points:
         res = p.get("results") or {}
         c = p.get("conn") or {}
         r: List[Any] = [p["id"], round(p["x"] * 100, 1), round(p["y"] * 100, 1),
                         datetime.fromtimestamp(p["t"]).strftime("%Y-%m-%d %H:%M:%S") if p.get("t") else "",
-                        {"done": "готово", "pending": "ожидает скан", "failed": "ошибка"}.get(p.get("status"), ""),
+                        {"done": tr("готово"), "pending": tr("ожидает скан"), "failed": tr("ошибка")}.get(p.get("status"), ""),
                         ("%s %s" % (c.get("ssid", ""), c.get("bssid", ""))).strip(), c.get("rssi")]
         for n in names:
             vals = [v[3] for v in res.values() if focus == [] or v[0] == n]
@@ -189,14 +190,14 @@ def _rate_cell(b: Bss) -> str:
 
 
 _TABLE_COLS = [
-    ("SSID", lambda b: b.ssid_display), ("BSSID", lambda b: b.bssid), ("Вендор", lambda b: b.vendor or ""),
-    ("ГГц", lambda b: b.band), ("Канал", lambda b: b.channel), ("Ширина", lambda b: b.info.width_mhz),
-    ("RSSI", lambda b: b.rssi), ("Безопасность", lambda b: b.security), ("Поколение", lambda b: b.generation_label),
-    ("Макс. MCS", lambda b: _mcs_cell(b)), ("Макс. PHY, Мбит/с", lambda b: _rate_cell(b)),
+    ("SSID", lambda b: b.ssid_display), ("BSSID", lambda b: b.bssid), (N_("Вендор"), lambda b: b.vendor or ""),
+    (N_("ГГц"), lambda b: b.band), (N_("Канал"), lambda b: b.channel), (N_("Ширина"), lambda b: b.info.width_mhz),
+    ("RSSI", lambda b: b.rssi), (N_("Безопасность"), lambda b: b.security), (N_("Поколение"), lambda b: b.generation_label),
+    (N_("Макс. MCS"), lambda b: _mcs_cell(b)), (N_("Макс. PHY, Мбит/с"), lambda b: _rate_cell(b)),
     ("802.11", lambda b: amend.short(amend.standards(b))),
-    ("Загрузка", lambda b: "" if b.info.qbss_util_pct is None else "%.0f%%" % b.info.qbss_util_pct),
-    ("Станций", lambda b: "" if b.info.qbss_stations is None else b.info.qbss_stations),
-    ("Страна", lambda b: b.info.country or ""),
+    (N_("Загрузка"), lambda b: "" if b.info.qbss_util_pct is None else "%.0f%%" % b.info.qbss_util_pct),
+    (N_("Станций"), lambda b: "" if b.info.qbss_stations is None else b.info.qbss_stations),
+    (N_("Страна"), lambda b: b.info.country or ""),
 ]
 
 
@@ -206,86 +207,86 @@ def render_html(snap: Snapshot, findings: Sequence[Finding], focus: Sequence[str
     e = html.escape
     c = Counter(f.severity for f in findings)
     out: List[str] = []
-    out.append("<!doctype html><html lang='ru'><head><meta charset='utf-8'>"
+    out.append(tr("<!doctype html><html lang='ru'><head><meta charset='utf-8'>"
                "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; style-src 'unsafe-inline'; img-src data:\">"
                "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-               "<title>Wi-Fi Beacon Scanner: отчёт</title><style>%s</style></head><body><main>" % _CSS)
-    out.append("<h1>Wi-Fi Beacon Scanner: отчёт</h1>")
-    out.append("<div class='mut'>Снято: %s · адаптер: %s · BSS в отчёте: %d%s</div>" % (
+               "<title>Wi-Fi Beacon Scanner: отчёт</title><style>%s</style></head><body><main>") % _CSS)
+    out.append(tr("<h1>Wi-Fi Beacon Scanner: отчёт</h1>"))
+    out.append(tr("<div class='mut'>Снято: %s · адаптер: %s · BSS в отчёте: %d%s</div>") % (
         e(snap.taken_at), e(snap.interface or "-"), len(snap.bss),
-        (" · мои SSID: " + e(", ".join(focus))) if focus else ""))
+        (tr(" · мои SSID: ") + e(", ".join(focus))) if focus else ""))
     if scope_note:
-        out.append("<div class='mut'>В отчёт включены: %s</div>" % e(scope_note))
+        out.append(tr("<div class='mut'>В отчёт включены: %s</div>") % e(scope_note))
     ssids = len({b.ssid_display for b in snap.bss if not b.hidden})
-    out.append("<div class='sum'><div><b>%d</b>BSS</div><div><b>%d</b>SSID</div>"
-               "<div><b>%d</b>Критично</div><div><b>%d</b>Внимание</div><div><b>%d</b>Информация</div></div>"
+    out.append(tr("<div class='sum'><div><b>%d</b>BSS</div><div><b>%d</b>SSID</div>"
+               "<div><b>%d</b>Критично</div><div><b>%d</b>Внимание</div><div><b>%d</b>Информация</div></div>")
                % (len(snap.bss), ssids, c[CRITICAL], c[WARNING], c[INFO]))
-    out.append("<h2>Проблемы</h2>")
+    out.append(tr("<h2>Проблемы</h2>"))
     if not findings:
-        out.append("<p class='mut'>Проблем по заданным правилам не найдено.</p>")
+        out.append(tr("<p class='mut'>Проблем по заданным правилам не найдено.</p>"))
     for f in findings:
         out.append("<div class='f %s'><span class='tag'>%s · %s</span><h3>%s</h3><div>%s</div>"
-                   % (f.severity, SEV_RU[f.severity], e(f.code), e(f.title), e(f.detail)))
+                   % (f.severity, tr(SEV_RU[f.severity]), e(f.code), e(f.title), e(f.detail)))
         if f.recommendation:
-            out.append("<div class='rec'><b>Что проверить:</b> %s</div>" % e(f.recommendation))
+            out.append(tr("<div class='rec'><b>Что проверить:</b> %s</div>") % e(f.recommendation))
         if f.bssids:
             shown = f.bssids[:8]
             more = " … (+%d)" % (len(f.bssids) - 8) if len(f.bssids) > 8 else ""
             out.append("<code>%s%s</code>" % (e(", ".join(shown)), more))
         out.append("</div>")
     if util and util.get("channels"):
-        out.append("<h2>Загрузка каналов (QBSS Load)</h2><p class='mut'>Доля времени, когда сама AP считает канал занятым; "
-                   "на канал взят максимум среди AP, сообщающих эту цифру.</p>")
-        out.append("<div class='wrap'><table><thead><tr><th>ГГц</th><th>Канал</th><th>Загрузка</th><th></th><th>Уровень</th>"
-                   "<th>Среднее</th><th>AP с данными</th><th>Станций</th><th>Самые загруженные</th></tr></thead><tbody>")
+        out.append(tr("<h2>Загрузка каналов (QBSS Load)</h2><p class='mut'>Доля времени, когда сама AP считает канал занятым; "
+                   "на канал взят максимум среди AP, сообщающих эту цифру.</p>"))
+        out.append(tr("<div class='wrap'><table><thead><tr><th>ГГц</th><th>Канал</th><th>Загрузка</th><th></th><th>Уровень</th>"
+                   "<th>Среднее</th><th>AP с данными</th><th>Станций</th><th>Самые загруженные</th></tr></thead><tbody>"))
         for ch in util["channels"]:
             top = ", ".join("%s %.0f%%" % (a["ssid"], a["util"]) for a in ch["aps"][:3])
-            out.append("<tr><td>%s</td><td>%s</td><td><span class='ubar'><i style='width:%.0f%%;background:%s'></i></span></td>"
-                       "<td>%.0f%%</td><td>%s</td><td>%.0f%%</td><td>%d из %d</td><td>%d</td><td>%s</td></tr>"
+            out.append(tr("<tr><td>%s</td><td>%s</td><td><span class='ubar'><i style='width:%.0f%%;background:%s'></i></span></td>"
+                       "<td>%.0f%%</td><td>%s</td><td>%.0f%%</td><td>%d из %d</td><td>%d</td><td>%s</td></tr>")
                        % (e(ch["band"]), ch["channel"], max(ch["max"], 1), util_color(ch["max"]), ch["max"],
                           e(ch["label"]), ch["avg"], ch["reporting"], ch["bss"],
                           ch["stations"], e(top)))
         out.append("</tbody></table></div>")
         if util.get("no_data"):
-            out.append("<p class='mut'>Нет данных QBSS Load: %s.</p>" % e(", ".join(
-                "%s ГГц канал %s" % (x["band"], x["channel"]) for x in util["no_data"])))
+            out.append(tr("<p class='mut'>Нет данных QBSS Load: %s.</p>") % e(", ".join(
+                tr("%s ГГц канал %s") % (x["band"], x["channel"]) for x in util["no_data"])))
     if journal and journal.get("events"):
         st = journal.get("stats", {})
-        out.append("<h2>Подключение ноутбука</h2>")
-        out.append("<dl class='kv'><dt>Роумингов</dt><dd>%d</dd><dt>Обрывов</dt><dd>%d (без связи %.0f с)</dd>"
-                   "<dt>Пинг-понгов</dt><dd>%d</dd><dt>Залипаний</dt><dd>%d</dd><dt>Неудачных подключений</dt><dd>%d</dd></dl>"
+        out.append(tr("<h2>Подключение ноутбука</h2>"))
+        out.append(tr("<dl class='kv'><dt>Роумингов</dt><dd>%d</dd><dt>Обрывов</dt><dd>%d (без связи %.0f с)</dd>"
+                   "<dt>Пинг-понгов</dt><dd>%d</dd><dt>Залипаний</dt><dd>%d</dd><dt>Неудачных подключений</dt><dd>%d</dd></dl>")
                    % (st.get("roams", 0), st.get("disconnects", 0), st.get("down_s", 0), st.get("pingpong", 0),
                       st.get("sticky", 0), st.get("attempt_fail", 0)))
-        out.append("<div class='wrap'><table><thead><tr><th>Время</th><th>Событие</th><th>SSID</th><th>Откуда</th><th>Куда</th>"
-                   "<th>RSSI</th><th>Длительность</th><th>Причина</th></tr></thead><tbody>")
+        out.append(tr("<div class='wrap'><table><thead><tr><th>Время</th><th>Событие</th><th>SSID</th><th>Откуда</th><th>Куда</th>"
+                   "<th>RSSI</th><th>Длительность</th><th>Причина</th></tr></thead><tbody>"))
         for ev in list(journal["events"])[-200:][::-1]:
             rs = " → ".join("<span style='color:%s;font-weight:600'>%s</span>" % (rssi_color(x), x)
                             for x in (ev["rssi_from"], ev["rssi_to"]) if x is not None)
             out.append("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
-                datetime.fromtimestamp(ev["t"]).strftime("%H:%M:%S"), e(JOURNAL_KIND_RU.get(ev["kind"], ev["kind"])),
+                datetime.fromtimestamp(ev["t"]).strftime("%H:%M:%S"), e(tr(JOURNAL_KIND_RU.get(ev["kind"], ev["kind"]))),
                 e(ev["ssid"]), e(ev["bssid_from"]), e(ev["bssid_to"]), rs,
-                "" if ev["duration_s"] is None else "%.0f с" % ev["duration_s"], e(ev["reason"])))
+                "" if ev["duration_s"] is None else tr("%.0f с") % ev["duration_s"], e(ev["reason"])))
         out.append("</tbody></table></div>")
     if journal and journal.get("sessions"):
         rows = session_rows(journal["sessions"][-200:][::-1])
         keep = [0, 1, 2, 4, 5, 6, 7, 8, 9, 13, 15, 16]
-        out.append("<h2>Сессии подключения</h2><p class='mut'>Стадии по уведомлениям Windows: ассоциация, "
-                   "аутентификация (802.1X и 4-way handshake), получение IPv4.</p>")
+        out.append(tr("<h2>Сессии подключения</h2><p class='mut'>Стадии по уведомлениям Windows: ассоциация, "
+                   "аутентификация (802.1X и 4-way handshake), получение IPv4.</p>"))
         out.append("<div class='wrap'><table><thead><tr>%s</tr></thead><tbody>" % "".join("<th>%s</th>" % e(rows[0][i]) for i in keep))
         for r in rows[1:]:
             out.append("<tr>%s</tr>" % "".join("<td>%s</td>" % e("" if r[i] is None else str(r[i])) for i in keep))
         out.append("</tbody></table></div>")
     if survey:
         rows = survey_rows(survey, list(focus))
-        out.append("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>")
+        out.append(tr("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>"))
         out.append("<div class='wrap'><table><thead><tr>%s</tr></thead><tbody>" % "".join("<th>%s</th>" % e(str(h)) for h in rows[0]))
         rcols = {i for i, h in enumerate(rows[0]) if "RSSI" in str(h)}
         for r in rows[1:]:
             out.append("<tr>%s</tr>" % "".join(_rssi_td(v) if i in rcols else "<td>%s</td>" % e("" if v is None else str(v))
                                                for i, v in enumerate(r)))
         out.append("</tbody></table></div>")
-    out.append("<h2>Все BSS</h2><div class='wrap'><table><thead><tr>")
-    out.extend("<th>%s</th>" % e(name) for name, _ in _TABLE_COLS)
+    out.append(tr("<h2>Все BSS</h2><div class='wrap'><table><thead><tr>"))
+    out.extend("<th>%s</th>" % e(tr(name)) for name, _ in _TABLE_COLS)
     out.append("</tr></thead><tbody>")
     for b in sorted(snap.bss, key=lambda x: (x.ssid_display.lower(), x.band, x.channel, -x.rssi)):
         out.append("<tr>%s</tr>" % "".join(_rssi_td(fn(b)) if name == "RSSI" else "<td>%s</td>" % e(str(fn(b)))
@@ -300,48 +301,48 @@ def build_xlsx_report(snap: Snapshot, findings: Sequence[Finding], focus: Sequen
                       survey: Optional[Sequence[Dict[str, Any]]] = None) -> bytes:
     from .xlsx import build_xlsx
     c = Counter(f.severity for f in findings)
-    summary: List[List[Any]] = [["Параметр", "Значение"],
-                                ["Снято", snap.taken_at], ["Адаптер", snap.interface or "-"],
-                                ["В отчёт включены", scope_note or "все сети"], ["Мои SSID", ", ".join(focus) or "-"],
+    summary: List[List[Any]] = [[tr("Параметр"), tr("Значение")],
+                                [tr("Снято"), snap.taken_at], [tr("Адаптер"), snap.interface or "-"],
+                                [tr("В отчёт включены"), scope_note or tr("все сети")], [tr("Мои SSID"), ", ".join(focus) or "-"],
                                 ["BSS", len(snap.bss)], ["SSID", len({b.ssid_display for b in snap.bss if not b.hidden})],
-                                ["Проблемы: критично", c[CRITICAL]], ["Проблемы: внимание", c[WARNING]], ["Проблемы: информация", c[INFO]]]
+                                [tr("Проблемы: критично"), c[CRITICAL]], [tr("Проблемы: внимание"), c[WARNING]], [tr("Проблемы: информация"), c[INFO]]]
     if journal and journal.get("events"):
         st = journal.get("stats", {})
-        summary += [["Роумингов ноутбука", st.get("roams", 0)], ["Обрывов", st.get("disconnects", 0)],
-                    ["Без связи, с", st.get("down_s", 0)], ["Пинг-понгов", st.get("pingpong", 0)], ["Залипаний", st.get("sticky", 0)]]
-    sheets: List[Any] = [("Сводка", summary)]
+        summary += [[tr("Роумингов ноутбука"), st.get("roams", 0)], [tr("Обрывов"), st.get("disconnects", 0)],
+                    [tr("Без связи, с"), st.get("down_s", 0)], [tr("Пинг-понгов"), st.get("pingpong", 0)], [tr("Залипаний"), st.get("sticky", 0)]]
+    sheets: List[Any] = [(tr("Сводка"), summary)]
     bss_rows = [CSV_COLUMNS] + [_row(b) for b in sorted(snap.bss, key=lambda x: (x.ssid_display.lower(), x.band, x.channel, -x.rssi))]
     sheets.append(("BSS", bss_rows))
-    fr: List[List[Any]] = [["Важность", "Код", "Проблема", "Подробности", "Что проверить", "SSID", "BSSID"]]
-    fr += [[SEV_RU[f.severity], f.code, f.title, f.detail, f.recommendation, f.ssid, ", ".join(f.bssids)] for f in findings]
-    sheets.append(("Проблемы", fr))
+    fr: List[List[Any]] = [[tr("Важность"), tr("Код"), tr("Проблема"), tr("Подробности"), tr("Что проверить"), "SSID", "BSSID"]]
+    fr += [[tr(SEV_RU[f.severity]), f.code, f.title, f.detail, f.recommendation, f.ssid, ", ".join(f.bssids)] for f in findings]
+    sheets.append((tr("Проблемы"), fr))
     if util and util.get("channels"):
-        ur: List[List[Any]] = [["ГГц", "Канал", "Загрузка макс, %", "Загрузка средн, %", "Уровень", "AP с данными", "BSS на канале",
-                                "Станций", "Самые загруженные"]]
+        ur: List[List[Any]] = [[tr("ГГц"), tr("Канал"), tr("Загрузка макс, %"), tr("Загрузка средн, %"), tr("Уровень"), tr("AP с данными"), tr("BSS на канале"),
+                                tr("Станций"), tr("Самые загруженные")]]
         for ch in util["channels"]:
             ur.append([ch["band"], ch["channel"], ch["max"], ch["avg"], ch["label"], ch["reporting"],
                        ch["bss"], ch["stations"], ", ".join("%s %.0f%%" % (a["ssid"], a["util"]) for a in ch["aps"][:5])])
-        sheets.append(("Загрузка каналов", ur))
+        sheets.append((tr("Загрузка каналов"), ur))
     if history:
         names = {b.bssid: (b.ssid_display, b.band, b.channel) for b in snap.bss}
-        hr: List[List[Any]] = [["Время", "SSID", "BSSID", "ГГц", "Канал", "RSSI, дБм", "Загрузка, %"]]
+        hr: List[List[Any]] = [[tr("Время"), "SSID", "BSSID", tr("ГГц"), tr("Канал"), tr("RSSI, дБм"), tr("Загрузка, %")]]
         for k in sorted(history):
             n = names.get(k, ("", "", ""))
             for t, r, u in history[k]:
                 hr.append([datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S"), n[0], k, n[1], n[2], r, u])
-        sheets.append(("История", hr))
+        sheets.append((tr("История"), hr))
     if journal and journal.get("events"):
-        jr: List[List[Any]] = [["Время", "Событие", "SSID", "Откуда", "Куда", "RSSI до", "RSSI после", "Длительность, с",
-                                "Код причины", "Причина", "Описание"]]
+        jr: List[List[Any]] = [[tr("Время"), tr("Событие"), "SSID", tr("Откуда"), tr("Куда"), tr("RSSI до"), tr("RSSI после"), tr("Длительность, с"),
+                                tr("Код причины"), tr("Причина"), tr("Описание")]]
         for ev in journal["events"]:
-            jr.append([datetime.fromtimestamp(ev["t"]).strftime("%Y-%m-%d %H:%M:%S"), JOURNAL_KIND_RU.get(ev["kind"], ev["kind"]),
+            jr.append([datetime.fromtimestamp(ev["t"]).strftime("%Y-%m-%d %H:%M:%S"), tr(JOURNAL_KIND_RU.get(ev["kind"], ev["kind"])),
                        ev["ssid"], ev["bssid_from"], ev["bssid_to"], ev["rssi_from"], ev["rssi_to"], ev["duration_s"],
                        "0x%X" % ev["reason_code"] if ev["reason_code"] is not None else None, ev["reason"], ev["text"]])
-        sheets.append(("Журнал подключения", jr))
+        sheets.append((tr("Журнал подключения"), jr))
     if journal and journal.get("sessions"):
-        sheets.append(("Сессии", session_rows(journal["sessions"])))
+        sheets.append((tr("Сессии"), session_rows(journal["sessions"])))
     if survey:
-        sheets.append(("Обход", survey_rows(survey, list(focus))))
+        sheets.append((tr("Обход"), survey_rows(survey, list(focus))))
     return build_xlsx(sheets)
 
 
@@ -370,7 +371,7 @@ def render_journal_csv(events) -> str:
     w.writerow(["time", "event", "ssid", "bssid_from", "bssid_to", "rssi_from", "rssi_to", "duration_s",
                 "reason_code", "reason", "text"])
     for e in events:
-        w.writerow([datetime.fromtimestamp(e["t"]).isoformat(timespec="seconds"), JOURNAL_KIND_RU.get(e["kind"], e["kind"]),
+        w.writerow([datetime.fromtimestamp(e["t"]).isoformat(timespec="seconds"), tr(JOURNAL_KIND_RU.get(e["kind"], e["kind"])),
                     e["ssid"], e["bssid_from"], e["bssid_to"],
                     "" if e["rssi_from"] is None else e["rssi_from"], "" if e["rssi_to"] is None else e["rssi_to"],
                     "" if e["duration_s"] is None else e["duration_s"],
