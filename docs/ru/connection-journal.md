@@ -1,6 +1,6 @@
 # Журнал подключения и сессии
 
-[← README](../README.md)
+[← README](../../README.ru.md) · [English](../en/connection-journal.md)
 
 Что фиксируется:
 

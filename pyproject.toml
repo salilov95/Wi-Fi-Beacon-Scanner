@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "wifi-beacon-scanner"
 dynamic = ["version"]
-description = "Wi-Fi сканер для Windows: разбор beacon, диагностика, журнал подключения, обход по плану этажа, отчёты PDF/Excel"
+description = "Wi-Fi scanner and troubleshooting tool for Windows: beacon decoding, diagnostics, connection journal and sessions, floor plan survey, PDF/Excel reports"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "salilov95" }]
@@ -16,12 +16,15 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Environment :: Web Environment",
     "Topic :: System :: Networking :: Monitoring",
+    "Natural Language :: English",
+    "Natural Language :: Russian",
     "License :: OSI Approved :: MIT License",
 ]
 
 [project.urls]
 Homepage = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"
 Issues = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/issues"
+Documentation = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/tree/main/docs"
 Changelog = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/blob/main/CHANGELOG.md"
 
 [project.scripts]

@@ -1,139 +1,149 @@
 # Changelog
 
-Формат: [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии по [SemVer](https://semver.org/lang/ru/).
+**English** · [Русский](CHANGELOG.ru.md)
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Documentation in English: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md` and `docs/en/`; the Russian versions
+  are `README.ru.md`, `CHANGELOG.ru.md`, `CONTRIBUTING.ru.md` and `docs/ru/`, with a language switch on every page.
+- `SECURITY.md` and `CODE_OF_CONDUCT.md`; bilingual issue and pull request templates.
+- Release notes are built from both changelogs (English first, then Russian).
 
 ## [1.0.1] - 2026-10-11
 
-### Исправлено
-- Supported Rates / Extended Supported Rates: служебные коды BSS membership selector (HT PHY, VHT PHY,
-  SAE H2E only, HE PHY, EHT PHY и др.) больше не считаются скоростями. Раньше во вкладке «Beacon»
-  появлялись несуществующие «63.5* 61.5* Мбит/с», а у legacy-точки с селектором - завышенная скорость.
-  Селекторы показываются отдельным полем; признак «SAE только H2E» теперь виден.
-- Ширина канала по VHT Operation в устаревшей записи (2 = 160 МГц, 3 = 80+80 МГц) - такие точки
-  показывались как 40 МГц; от этого зависели PHY-скорость, график каналов и свободность каналов.
-- AKM 14-17 (FILS), 23 (802.1X SHA-384), 24 (SAE-EXT-KEY) и 25 (FT-SAE-EXT-KEY) распознаются по имени.
-  WPA3-Personal на SAE-EXT-KEY (Wi-Fi 7) раньше показывался как `RSN(type24)`, а PSK + SAE-EXT-KEY - как
-  WPA2-Personal; теперь это WPA3-Personal и WPA2/WPA3-Personal.
-- 6 ГГц, канал 2 (5935 МГц) показывался как канал −3.
+### Fixed
+- Supported Rates / Extended Supported Rates: BSS membership selector values (HT PHY, VHT PHY, SAE H2E only,
+  HE PHY, EHT PHY etc.) are no longer treated as rates. Previously the Beacon tab showed non-existent
+  "63.5* 61.5* Mbit/s", and a legacy AP with a selector got an inflated rate. Selectors are shown as a separate
+  field; the "SAE H2E only" flag is now visible.
+- Channel width from VHT Operation in the deprecated encoding (2 = 160 MHz, 3 = 80+80 MHz): such APs were shown
+  as 40 MHz, which affected the PHY rate, the channel chart and the channel ranking.
+- AKM 14-17 (FILS), 23 (802.1X SHA-384), 24 (SAE-EXT-KEY) and 25 (FT-SAE-EXT-KEY) are recognized by name.
+  WPA3-Personal on SAE-EXT-KEY (Wi-Fi 7) used to be shown as `RSN(type24)`, and PSK + SAE-EXT-KEY as
+  WPA2-Personal; now they are WPA3-Personal and WPA2/WPA3-Personal.
+- 6 GHz channel 2 (5935 MHz) was shown as channel −3.
 
-### Изменено
-- Несколько SSID одного радио считаются одним передатчиком в «Много BSS на одном канале» (`RF_COCHANNEL`),
-  в оценке свободности каналов и в «Высокой загрузке канала» (`RF_UTIL`). Одна AP с 4 SSID больше не даёт
-  предупреждение о соседях, мощность на канале не завышается (было +6 дБ при 4 SSID), загрузка - одна
-  находка на радио. Радио = тот же канал, ширина и центр, BSSID отличаются только младшими 4 битами
-  последнего октета. Если BSSID раздаются иначе, BSS считаются разными радио, как раньше.
-- История замеров не растёт без предела на долгом обходе: BSSID, которого нет в последних 240 сканах
-  и не слышно дольше 30 минут, из неё убирается. На графиках ничего не пропадает - глубже 240 сканов
-  они не смотрят.
+### Changed
+- Several SSIDs of one radio count as one transmitter in "Many BSSs on one channel" (`RF_COCHANNEL`), in the
+  channel ranking and in "High channel utilization" (`RF_UTIL`). One AP with 4 SSIDs no longer triggers the
+  neighbors warning, power on the channel is no longer overestimated (it was +6 dB with 4 SSIDs), and load is
+  reported once per radio. A radio = same channel, width and center, BSSIDs differ only in the lower 4 bits of the
+  last octet. If BSSIDs are assigned differently, BSSs are treated as separate radios, as before.
+- Measurement history no longer grows without bound during a long survey: a BSSID absent from the last 240 scans
+  and not heard for more than 30 minutes is dropped. Nothing disappears from the charts - they never look deeper
+  than 240 scans.
 
 ## [1.0.0] - 2026-10-11
 
-### Добавлено
-- Ширину столбцов таблицы сетей можно менять: потянуть границу заголовка, двойной щелчок - ширина
-  по содержимому. Ширины запоминаются; «Вид» → «Сбросить ширину столбцов» возвращает автоматическую.
-- Вкладка «Журнал Windows» отдельно от «Сессий». Журнал WLAN-AutoConfig за сутки загружается сам при
-  запуске и обновляется раз в минуту; период 24 ч / 3 дня / неделя, фильтр по стадии (подключение,
-  ассоциация, безопасность / 4-way, 802.1X) и уровню, сводка (подключения 8001, неудачи 8002, отключения 8003,
-  ошибки 802.1X 12013), частые причины, поля события по нажатию, выгрузка в CSV. Число ошибок за сутки -
-  на ярлыке вкладки.
-- В подробностях сессии - события журнала Windows рядом с ней (от 3 с до начала до 10 с после конца).
-- «Вид» → «О программе»: версия, источник данных, путь к журналу; «Проверить обновления» (только по кнопке,
-  запрос к GitHub Releases).
+### Added
+- Columns of the network table can be resized: drag a header border, double-click to fit the content. Widths are
+  remembered; View → "Reset column widths" restores automatic layout.
+- A "Windows log" tab separate from Sessions. The WLAN-AutoConfig log for the last day loads on start and refreshes
+  every minute; period 24 h / 3 days / week, filters by stage (connection, association, security / 4-way, 802.1X)
+  and level, a summary (connections 8001, failures 8002, disconnects 8003, 802.1X errors 12013), most frequent
+  reasons, event fields on click, CSV export. The number of errors in the last day is shown on the tab label.
+- Session details list Windows log events around the session (from 3 s before the start to 10 s after the end).
+- View → About: version, data source, log path; "Check for updates" (only on click, a request to GitHub Releases).
 
-### Изменено
-- Консоль переносной версии показывает только предупреждения и ошибки; подробности - в `app.log`.
-- Журнал программы без шума: первый скан, пустые сканы, восстановление после ошибки, одинаковая ошибка
-  подряд - один раз, сводка по сканам раз в 10 минут.
+### Changed
+- The console of the portable version shows warnings and errors only; details go to `app.log`.
+- A quieter app log: first scan, empty scans, recovery after an error, the same error in a row logged once,
+  a scan summary every 10 minutes.
 
 ## [0.9.0] - 2026-10-11
 
-### Добавлено
-- Вкладка «Сессии»: машина состояний клиента по уведомлениям Windows. Каждое подключение и роуминг
-  разложены на стадии (ассоциация, аутентификация 802.1X/4-way, получение IPv4) с длительностями и таймлайном.
-- 802.1X: подписка на уведомления ONEX - результат аутентификации, причина отказа, код ошибки EAP, тип EAP,
-  учётка компьютера или пользователя, перезапуски.
-- DHCP: время от подключения до новой аренды (DORA), адрес, DHCP-сервер, APIPA (GetAdaptersInfo).
-- Журнал Windows WLAN-AutoConfig/Operational за 24 часа, 3 дня или неделю, с текстом событий из Windows.
-- Сессии в CSV и в отчётах PDF/HTML/Excel.
-- CI на Windows проверяет GetAdaptersInfo и чтение журнала на настоящей системе.
-- Дополнения 802.11 из beacon: d, e, h, i, k, r, u, v, w, mc, ai, s, TWT, Multiple BSSID, Hotspot 2.0.
-  Колонка «802.11» вместо «k·r·v», фильтр «802.11» (есть / нет отмеченных), строки на вкладке «Beacon»,
-  колонка `standards` в CSV и Excel, столбец в HTML/PDF, поле в «Сравнении». Расшифровка IE 12, 32, 35, 37,
-  71, 107, 108, 111, 114 и всех известных битов Extended Capabilities.
-- Журнал программы в файл: `%LOCALAPPDATA%\WiFiBeaconScanner\logs\app.log` - запуск, каждый скан
-  (сколько BSS, код WlanScan), ошибки, ошибки страницы. «Вид» → «Открыть папку с журналом».
+### Added
+- Sessions tab: a client state machine driven by Windows notifications. Every connection and roam is broken down
+  into stages (association, 802.1X/4-way authentication, IPv4) with durations and a timeline.
+- 802.1X: subscription to ONEX notifications - authentication result, failure reason, EAP error code, EAP type,
+  machine or user credentials, restarts.
+- DHCP: time from connection to a new lease (DORA), address, DHCP server, APIPA (GetAdaptersInfo).
+- Windows WLAN-AutoConfig/Operational log for 24 hours, 3 days or a week, with event text from Windows.
+- Sessions in CSV and in PDF/HTML/Excel reports.
+- CI on Windows checks GetAdaptersInfo and event log reading on a real system.
+- 802.11 amendments from beacons: d, e, h, i, k, r, u, v, w, mc, ai, s, TWT, Multiple BSSID, Hotspot 2.0.
+  An "802.11" column instead of "k·r·v", an "802.11" filter (has / has none of the selected), rows on the Beacon
+  tab, a `standards` column in CSV and Excel, a column in HTML/PDF, a field in Compare. Decoding of IEs 12, 32,
+  35, 37, 71, 107, 108, 111, 114 and all known Extended Capabilities bits.
+- App log file: `%LOCALAPPDATA%\WiFiBeaconScanner\logs\app.log` - start-up, every scan (BSS count, WlanScan code),
+  errors, page errors. View → "Open log folder".
 
-### Исправлено
-- Первый запуск показывал «Данных пока нет», пока не нажмёшь «Сканировать»: первый скан возвращал пустой
-  список и не повторялся. Вероятная причина - запрос доступа к расположению, который Windows 11 24H2 показывает
-  при первом скане (`ERROR_ACCESS_DENIED`), или ещё не готовый кэш скана. Теперь: первый скан
-  стартует сразу при запуске, пустой список дочитывается ещё до 6 с, отказ в доступе показан понятной
-  плашкой с кнопкой «Открыть параметры расположения», автоскан сам повторяет попытку.
-- Если Edge при первом запуске с новым профилем перезапускал своё окно, программа считала окно закрытым.
-  Теперь после выхода процесса Edge программа ждёт несколько секунд и продолжает работу, если страница жива.
+### Fixed
+- The first start showed "No data yet" until "Scan" was clicked: the first scan returned an empty list and was not
+  retried. Likely cause - the location consent prompt Windows 11 24H2 shows on the first scan
+  (`ERROR_ACCESS_DENIED`), or a scan cache that was not ready yet. Now the first scan starts right at launch, an
+  empty list is re-read for up to 6 s, access denial is shown as a clear banner with an "Open location settings"
+  button, and auto-scan retries by itself.
+- If Edge relaunched its window on the first start with a new profile, the app considered the window closed.
+  Now after the Edge process exits the app waits a few seconds and keeps running if the page is alive.
 
-### Изменено
-- Автоскан включён по умолчанию, интервал 5 с; выбор запоминается.
-- Вкладки «Сессии» и «Сравнение» перенесены вправо.
+### Changed
+- Auto-scan is on by default, every 5 s; the choice is remembered.
+- The Sessions and Compare tabs moved to the right.
 
 ## [0.8.0] - 2026-10-11
 
-### Исправлено
-- Программа завершалась, пока окно было свёрнуто: Edge усыплял страницу, опрос прекращался, и через
-  15 минут тишины программа считала окно закрытым (а при выгрузке страницы из памяти - через 5 секунд).
-  Теперь программа открывает своё окно Edge с отдельным профилем и без фонового замедления и завершается,
-  только когда закрыт сам процесс окна. Тишина свёрнутого окна больше не считается закрытием.
+### Fixed
+- The app exited while its window was minimized: Edge put the page to sleep, polling stopped, and after 15 minutes
+  of silence the app considered the window closed (and after 5 seconds if the page was unloaded from memory).
+  Now the app opens its own Edge window with a separate profile and without background throttling, and exits only
+  when the window process itself is closed. Silence from a minimized window is no longer treated as closing.
 
-### Изменено
-- Вкладка «Находки» называется «Проблемы» (и в отчётах PDF/HTML/Excel), скриншоты в README обновлены.
-- В журнале подключения можно показать последнюю минуту (1, 5, 15, 30 мин).
+### Changed
+- The "Findings" tab is now called "Problems" (also in PDF/HTML/Excel reports); README screenshots updated.
+- The connection journal can show the last minute (1, 5, 15, 30 min).
 
 ## [0.7.1] - 2026-10-11
 
-### Изменено
-- README переписан: возможности, скриншоты, установка; подробности вынесены в `docs/`
-  (диагностика, журнал подключения, установка и раздача, разработка).
-- В легенде графика сигнала вернулся пробел перед значением.
+### Changed
+- README rewritten: features, screenshots, installation; details moved to `docs/`
+  (diagnostics, connection journal, installation and deployment, development).
+- The space before the value in the signal chart legend is back.
 
-### Добавлено
-- Шаблоны issue и pull request, CONTRIBUTING.md.
+### Added
+- Issue and pull request templates, CONTRIBUTING.md.
 
 ## [0.7.0] - 2026-10-08
 
-### Изменено
-- Приложение называется **Wi-Fi Beacon Scanner**: пакет `wifi_beacon_scanner`, `WiFiBeaconScanner.exe`,
-  установщик `WiFiBeaconScanner-Setup-<версия>.exe`, папка настроек `%APPDATA%\WiFiBeaconScanner`.
-  Настройки прежней версии (`%APPDATA%\WifiDiag`) подхватываются при первом запуске.
+### Changed
+- The app is now called **Wi-Fi Beacon Scanner**: package `wifi_beacon_scanner`, `WiFiBeaconScanner.exe`,
+  installer `WiFiBeaconScanner-Setup-<version>.exe`, settings folder `%APPDATA%\WiFiBeaconScanner`.
+  Settings of the previous version (`%APPDATA%\WifiDiag`) are picked up on first start.
 
-### Исправлено
-- Отчёт в PDF не выгружался на Windows: Edge после печати держал файлы временного профиля, удаление папки
-  падало, и окно бесконечно ждало ответа. Теперь ждём готовый файл, закрываем процессы Edge, папку чистим
-  без ошибок. Если печать всё равно не удалась, видно причину и есть запасной путь: открыть отчёт и
-  сохранить в PDF через Ctrl+P.
-- Сообщения об ошибках экспорта пропадали через секунду: их стирало обновление состояния.
+### Fixed
+- PDF export did not work on Windows: after printing, Edge kept files of the temporary profile open, deleting the
+  folder failed and the window waited forever. Now the app waits for the finished file, closes the Edge processes
+  and cleans up the folder without errors. If printing still fails, the reason is shown and there is a fallback:
+  open the report and save it as PDF with Ctrl+P.
+- Export error messages disappeared after a second: the state refresh erased them.
 
-### Добавлено
-- Лицензия MIT, CHANGELOG, `pyproject.toml` (команда `wifi-beacon-scanner` после `pip install .`).
-- GitHub Actions: тесты на Windows и Linux при каждом push (на Windows ещё печать PDF через настоящий Edge);
-  Release собирает exe и установщик, проверяет собранный exe (запуск, скан, выгрузка PDF и Excel)
-  и публикует их с контрольными суммами в Releases.
+### Added
+- MIT license, CHANGELOG, `pyproject.toml` (the `wifi-beacon-scanner` command after `pip install .`).
+- GitHub Actions: tests on Windows and Linux on every push (on Windows also PDF printing with the real Edge);
+  Release builds the exe and the installer, checks the built exe (start-up, scan, PDF and Excel export)
+  and publishes them with checksums in Releases.
 
-## 0.6.0 - 2026-10-08 (под именем WifiDiag, не публиковалась)
+## 0.6.0 - 2026-10-08 (as WifiDiag, not published)
 
-### Добавлено
-- Разбор MCS из beacon: HT/VHT/HE Capabilities и Operation, Basic MCS, Short GI, BSS Color, ширина
-  и центр канала в 6 ГГц. Колонки «Макс. MCS» и «Макс. PHY», оценка MCS своего подключения по скорости.
-- Единая шкала сигнала от красного к зелёному во всех вкладках и отчётах, цветовые шкалы в Excel.
-- Установщик Inno Setup (тихая установка для массовой раздачи), иконка, версия в свойствах exe.
-- Программа завершается сама, когда закрыто окно; журнал программы в `%LOCALAPPDATA%`.
+### Added
+- MCS parsing from beacons: HT/VHT/HE Capabilities and Operation, Basic MCS, Short GI, BSS Color, channel width
+  and center on 6 GHz. "Max MCS" and "Max PHY" columns, MCS estimate for the own connection from its rate.
+- One red-to-green signal scale across all tabs and reports, color scales in Excel.
+- Inno Setup installer (silent install for mass deployment), icon, version in the exe properties.
+- The app exits by itself when the window is closed; app log in `%LOCALAPPDATA%`.
 
-## 0.5.0 - 2026-10-08 (под именем WifiDiag, не публиковалась)
+## 0.5.0 - 2026-10-08 (as WifiDiag, not published)
 
-### Добавлено
-- Первая версия: скан через Native Wifi API, разбор IE, правила диагностики, интерфейс с вкладками
-  (каналы, обзор, утилизация, сигнал во времени, журнал подключения, обход по плану этажа, находки,
-  beacon, сравнение), отчёты PDF/Excel/HTML/CSV/JSON, темы оформления.
+### Added
+- First version: scanning via the Native Wifi API, IE parsing, diagnostic rules, a tabbed UI (channels, overview,
+  utilization, signal over time, connection journal, floor plan survey, findings, beacon, compare), PDF/Excel/
+  HTML/CSV/JSON reports, color themes.
 
+[Unreleased]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.0.1...HEAD
 [1.0.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.1
 [1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0
 [0.9.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v0.9.0
