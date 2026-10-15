@@ -174,7 +174,14 @@ impl Backend for Denied {
         "denied"
     }
     fn interfaces(&self) -> Result<Vec<String>, String> {
-        Err("WlanOpenHandle: код ошибки 1062".into())
+        Err(wbs_core::i18n::trf(
+            "%s: код ошибки %d (%s)",
+            &[
+                wbs_core::i18n::Arg::S("WlanOpenHandle".into()),
+                wbs_core::i18n::Arg::I(1062),
+                wbs_core::i18n::Arg::S("-".into()),
+            ],
+        ))
     }
     fn scan(&self, _: usize, _: f64) -> Result<Snapshot, ScanError> {
         Err(ScanError::location())
@@ -192,11 +199,9 @@ fn scan_errors_and_misc_routes() {
     );
     let (_, s) = call(&a, "GET", "/api/state", "");
     assert_eq!(s.get("interfaces").unwrap().to_json(), "[]");
-    assert!(s
-        .get("interfaces_error")
-        .and_then(Value::as_str)
-        .unwrap()
-        .contains("1062"));
+    // ошибка перечисления адаптеров при запуске - тоже на языке программы
+    let ie = s.get("interfaces_error").and_then(Value::as_str).unwrap();
+    assert!(ie.contains("error code 1062"), "{ie}");
     call(&a, "POST", "/api/scan", "{}");
     let s = wait_scan(&a);
     assert_eq!(s.get("error_kind"), Some(&Value::Str("location".into())));

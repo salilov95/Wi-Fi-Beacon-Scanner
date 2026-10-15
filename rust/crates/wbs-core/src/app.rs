@@ -292,7 +292,8 @@ impl App {
             log_lock: Mutex::new(()),
             connected: std::sync::atomic::AtomicBool::new(false),
         });
-        app.refresh_interfaces();
+        // текст ошибки адаптера - на языке программы, как и всё остальное
+        with_lang(lang, || app.refresh_interfaces());
         app
     }
 
