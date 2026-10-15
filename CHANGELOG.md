@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   utilisation, Russian and English), its JSON Schema and three fixtures, one of them a real anonymised scan.
   `tests/test_contract.py` compares the program with it. This is the reference for the Rust + Tauri version.
 - `tools/anonymize_snapshot.py`: anonymises a scan before it goes into the public repository.
+- `rust/`: start of version 2.x in Rust + Tauri 2. The `wbs-core` crate parses beacons (IE), the BSS model,
+  security, MCS and PHY rate and builds the network table row; 37 row fields match 1.x on every golden file
+  (`rust/crates/wbs-core/tests/contract.rs`). Separate workflow `.github/workflows/rust.yml`
+  (Windows and Linux: rustfmt, clippy, tests); 1.x build and releases are not affected.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14
