@@ -1,9 +1,10 @@
 //! Строка таблицы сетей - то, что окно получает про каждый BSS.
 //!
 //! Повторяет `bss_to_dict()` из `wifi_beacon_scanner/web/state.py`: те же поля, в том же порядке.
-//! Пока без двух полей, которые зависят от языка: `std` (пояснения к дополнениям 802.11) и `ie_tree`
-//! (дерево IE для вкладки Beacon) - они придут вместе с каталогом переводов.
+//! Поля `std` (пояснения к дополнениям 802.11) и `ie_tree` (вкладка Beacon) - на текущем языке потока.
 
+use crate::amend::standards;
+use crate::describe::describe_ies;
 use crate::ie::round1;
 use crate::json::Value;
 use crate::mcs::capability;
@@ -39,6 +40,7 @@ pub const FIELDS: &[&str] = &[
     "nr",
     "r",
     "v",
+    "std",
     "mdid",
     "util",
     "stations",
@@ -48,9 +50,10 @@ pub const FIELDS: &[&str] = &[
     "cap",
     "ht_prot",
     "ie_len",
+    "ie_tree",
 ];
 
-/// Строка таблицы для одного BSS (без `std` и `ie_tree`).
+/// Строка таблицы для одного BSS.
 pub fn bss_row(b: &Bss) -> Value {
     let i = &b.info;
     let cap = capability(i);
@@ -89,6 +92,15 @@ pub fn bss_row(b: &Bss) -> Value {
         ("nr", i.neighbor_report().into()),
         ("r", i.dot11r().into()),
         ("v", i.dot11v().into()),
+        (
+            "std",
+            Value::Obj(
+                standards(b)
+                    .into_iter()
+                    .map(|(k, v)| (k.to_string(), v.into()))
+                    .collect(),
+            ),
+        ),
         ("mdid", i.mdid.into()),
         ("util", i.qbss_util_pct.into()),
         ("stations", i.qbss_stations.into()),
@@ -98,6 +110,10 @@ pub fn bss_row(b: &Bss) -> Value {
         ("cap", format!("0x{:04X}", b.capability).into()),
         ("ht_prot", i.ht_protection.into()),
         ("ie_len", b.ie_raw.len().into()),
+        (
+            "ie_tree",
+            Value::Arr(describe_ies(&b.ie_raw).iter().map(|n| n.to_value()).collect()),
+        ),
     ];
     debug_assert_eq!(row.iter().map(|(k, _)| *k).collect::<Vec<_>>(), FIELDS);
     Value::Obj(row.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
