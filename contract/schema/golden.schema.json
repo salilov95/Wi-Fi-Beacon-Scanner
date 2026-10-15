@@ -1,0 +1,639 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://github.com/salilov95/Wi-Fi-Beacon-Scanner/contract/schema/golden.schema.json",
+ "title": "Wi-Fi Beacon Scanner: эталон контракта (contract 1)",
+ "description": "Что программа выдаёт на одном снапшоте: разбор BSS, проблемы, свободность и загрузка каналов. Общий формат для Python 1.x и версии на Rust. Правила - contract/README.md.",
+ "type": "object",
+ "required": [
+  "contract",
+  "fixture",
+  "lang",
+  "bss",
+  "findings",
+  "advice",
+  "util"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "type": "integer",
+   "enum": [
+    1
+   ]
+  },
+  "fixture": {
+   "type": "string"
+  },
+  "lang": {
+   "type": "string",
+   "enum": [
+    "ru",
+    "en"
+   ]
+  },
+  "bss": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/bss"
+   }
+  },
+  "findings": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/finding"
+   }
+  },
+  "advice": {
+   "type": "object",
+   "required": [
+    "2.4",
+    "5"
+   ],
+   "properties": {
+    "2.4": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/advice"
+     }
+    },
+    "5": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/advice"
+     }
+    }
+   },
+   "additionalProperties": false
+  },
+  "util": {
+   "type": "object",
+   "required": [
+    "channels",
+    "no_data"
+   ],
+   "properties": {
+    "channels": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/util_channel"
+     }
+    },
+    "no_data": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/util_no_data"
+     }
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ "$defs": {
+  "bss": {
+   "type": "object",
+   "required": [
+    "bssid",
+    "ssid",
+    "hidden",
+    "vendor",
+    "random_mac",
+    "band",
+    "channel",
+    "center",
+    "width",
+    "rssi",
+    "quality",
+    "security",
+    "ciphers",
+    "akm",
+    "pmf",
+    "wps",
+    "gen",
+    "gen_n",
+    "streams",
+    "phy",
+    "mcs",
+    "nss",
+    "rate",
+    "bss_color",
+    "k",
+    "nr",
+    "r",
+    "v",
+    "std",
+    "mdid",
+    "util",
+    "stations",
+    "country",
+    "beacon",
+    "dtim",
+    "cap",
+    "ht_prot",
+    "ie_len",
+    "ie_tree"
+   ],
+   "properties": {
+    "bssid": {
+     "type": "string",
+     "description": "aa:bb:cc:dd:ee:ff, строчные"
+    },
+    "ssid": {
+     "type": "string",
+     "description": "имя сети; <hidden> для скрытой"
+    },
+    "hidden": {
+     "type": "boolean"
+    },
+    "vendor": {
+     "type": "string",
+     "description": "из OUI-базы; в эталоне пусто (базы нет)"
+    },
+    "random_mac": {
+     "type": "boolean",
+     "description": "бит locally administered"
+    },
+    "band": {
+     "type": "string",
+     "enum": [
+      "2.4",
+      "5",
+      "6"
+     ]
+    },
+    "channel": {
+     "type": "integer"
+    },
+    "center": {
+     "type": "number",
+     "description": "центр полосы в номерах каналов"
+    },
+    "width": {
+     "type": "integer",
+     "enum": [
+      20,
+      40,
+      80,
+      160
+     ]
+    },
+    "rssi": {
+     "type": "integer"
+    },
+    "quality": {
+     "type": "integer"
+    },
+    "security": {
+     "type": "string",
+     "description": "WPA2-Personal, WPA2/WPA3-Personal, WPA2/3-Enterprise, Open, RSN(...) и т. п."
+    },
+    "ciphers": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "akm": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "pmf": {
+     "type": "string",
+     "enum": [
+      "",
+      "required",
+      "capable",
+      "no"
+     ]
+    },
+    "wps": {
+     "type": "boolean"
+    },
+    "gen": {
+     "type": "string",
+     "description": "legacy / Wi-Fi 4..7 / Wi-Fi 6E"
+    },
+    "gen_n": {
+     "type": "integer",
+     "enum": [
+      0,
+      4,
+      5,
+      6,
+      7
+     ]
+    },
+    "streams": {
+     "type": "integer"
+    },
+    "phy": {
+     "type": "string",
+     "enum": [
+      "legacy",
+      "HT",
+      "VHT",
+      "HE"
+     ]
+    },
+    "mcs": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "nss": {
+     "type": "integer"
+    },
+    "rate": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "description": "PHY-скорость по beacon, Мбит/с, округлена до 0.1"
+    },
+    "bss_color": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "k": {
+     "type": "boolean"
+    },
+    "nr": {
+     "type": "boolean"
+    },
+    "r": {
+     "type": "boolean"
+    },
+    "v": {
+     "type": "boolean"
+    },
+    "std": {
+     "type": "object",
+     "description": "дополнения 802.11: код -> пояснение (только объявленные)",
+     "additionalProperties": {
+      "type": "string"
+     },
+     "properties": {
+      "d": {
+       "type": "string"
+      },
+      "e": {
+       "type": "string"
+      },
+      "h": {
+       "type": "string"
+      },
+      "i": {
+       "type": "string"
+      },
+      "k": {
+       "type": "string"
+      },
+      "r": {
+       "type": "string"
+      },
+      "u": {
+       "type": "string"
+      },
+      "v": {
+       "type": "string"
+      },
+      "w": {
+       "type": "string"
+      },
+      "mc": {
+       "type": "string"
+      },
+      "ai": {
+       "type": "string"
+      },
+      "s": {
+       "type": "string"
+      },
+      "twt": {
+       "type": "string"
+      },
+      "mbssid": {
+       "type": "string"
+      },
+      "hs": {
+       "type": "string"
+      }
+     }
+    },
+    "mdid": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "util": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "description": "QBSS Load, %, округлена до 0.1"
+    },
+    "stations": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "country": {
+     "type": "string"
+    },
+    "beacon": {
+     "type": "integer"
+    },
+    "dtim": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "cap": {
+     "type": "string",
+     "description": "Capability Information, 0xABCD"
+    },
+    "ht_prot": {
+     "type": "integer"
+    },
+    "ie_len": {
+     "type": "integer"
+    },
+    "ie_tree": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/ie_node"
+     }
+    }
+   },
+   "additionalProperties": false,
+   "description": "строка таблицы сетей и вкладки Beacon (web/state.py: bss_to_dict)"
+  },
+  "ie_node": {
+   "type": "object",
+   "required": [
+    "id",
+    "name",
+    "len",
+    "summary",
+    "fields",
+    "hex"
+   ],
+   "properties": {
+    "id": {
+     "type": "integer"
+    },
+    "name": {
+     "type": "string"
+    },
+    "len": {
+     "type": "integer"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "fields": {
+     "type": "array",
+     "items": {
+      "type": "array",
+      "prefixItems": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "string"
+       }
+      ]
+     }
+    },
+    "hex": {
+     "type": "string",
+     "description": "тело IE, байты через пробел"
+    }
+   },
+   "additionalProperties": false,
+   "description": "один IE во вкладке Beacon (ie.py: describe_ies)"
+  },
+  "finding": {
+   "type": "object",
+   "required": [
+    "severity",
+    "code",
+    "title",
+    "detail",
+    "ssid",
+    "bssids",
+    "recommendation"
+   ],
+   "properties": {
+    "severity": {
+     "type": "string",
+     "enum": [
+      "critical",
+      "warning",
+      "info"
+     ]
+    },
+    "code": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "detail": {
+     "type": "string"
+    },
+    "ssid": {
+     "type": "string"
+    },
+    "bssids": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "recommendation": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "description": "проблема (rules.py: Finding)"
+  },
+  "advice": {
+   "type": "object",
+   "required": [
+    "channel",
+    "dbm",
+    "count",
+    "radios",
+    "util",
+    "dfs",
+    "busy",
+    "best"
+   ],
+   "properties": {
+    "channel": {
+     "type": "integer"
+    },
+    "dbm": {
+     "type": "number"
+    },
+    "count": {
+     "type": "integer",
+     "description": "BSS"
+    },
+    "radios": {
+     "type": "integer",
+     "description": "радиомодулей"
+    },
+    "util": {
+     "type": "number"
+    },
+    "dfs": {
+     "type": "boolean"
+    },
+    "busy": {
+     "type": "boolean"
+    },
+    "best": {
+     "type": "boolean"
+    }
+   },
+   "additionalProperties": false,
+   "description": "свободность канала (rules.py: channel_advice)"
+  },
+  "util_channel": {
+   "type": "object",
+   "required": [
+    "band",
+    "channel",
+    "max",
+    "avg",
+    "level",
+    "label",
+    "reporting",
+    "bss",
+    "stations",
+    "aps",
+    "series"
+   ],
+   "properties": {
+    "band": {
+     "type": "string",
+     "enum": [
+      "2.4",
+      "5",
+      "6"
+     ]
+    },
+    "channel": {
+     "type": "integer"
+    },
+    "max": {
+     "type": "number"
+    },
+    "avg": {
+     "type": "number"
+    },
+    "level": {
+     "type": "string",
+     "enum": [
+      "crit",
+      "high",
+      "mid",
+      "low"
+     ]
+    },
+    "label": {
+     "type": "string"
+    },
+    "reporting": {
+     "type": "integer"
+    },
+    "bss": {
+     "type": "integer"
+    },
+    "stations": {
+     "type": "integer"
+    },
+    "aps": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "bssid",
+       "ssid",
+       "util",
+       "stations"
+      ],
+      "properties": {
+       "bssid": {
+        "type": "string"
+       },
+       "ssid": {
+        "type": "string"
+       },
+       "util": {
+        "type": "number"
+       },
+       "stations": {
+        "type": [
+         "integer",
+         "null"
+        ]
+       }
+      },
+      "additionalProperties": false
+     }
+    },
+    "series": {
+     "type": "array",
+     "items": {
+      "type": "array",
+      "prefixItems": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       }
+      ]
+     }
+    }
+   },
+   "additionalProperties": false,
+   "description": "загрузка канала по QBSS Load (rules.py: channel_utilization)"
+  },
+  "util_no_data": {
+   "type": "object",
+   "required": [
+    "band",
+    "channel",
+    "bss"
+   ],
+   "properties": {
+    "band": {
+     "type": "string",
+     "enum": [
+      "2.4",
+      "5",
+      "6"
+     ]
+    },
+    "channel": {
+     "type": "integer"
+    },
+    "bss": {
+     "type": "integer"
+    }
+   },
+   "additionalProperties": false
+  }
+ }
+}
