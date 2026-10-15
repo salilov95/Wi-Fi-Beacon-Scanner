@@ -1,0 +1,7166 @@
+{
+ "contract": 1,
+ "fixture": "demo-office",
+ "lang": "ru",
+ "bss": [
+  {
+   "bssid": "00:e0:fc:10:01:01",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 1,
+   "center": 1.0,
+   "width": 20,
+   "rssi": -50,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается"
+   },
+   "mdid": 20306,
+   "util": 23.5,
+   "stations": 14,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1611",
+   "ht_prot": 0,
+   "ie_len": 166,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: да; ещё 2",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 14, загрузка 23.5%",
+     "fields": [
+      [
+       "Станций",
+       "14"
+      ],
+      [
+       "Загрузка канала",
+       "23.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "0e 00 3c 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 8,
+     "summary": "6* 9 12* 18 24* 36 48 54 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Мбит/с"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 1, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "1"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:01:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -44,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 1,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 23.5,
+   "stations": 14,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 219,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 14, загрузка 23.5%",
+     "fields": [
+      [
+       "Станций",
+       "14"
+      ],
+      [
+       "Загрузка канала",
+       "23.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "0e 00 3c 00 00"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 36, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "36"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "42"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 2a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 1",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "1"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 01 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:02:01",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -54,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается"
+   },
+   "mdid": 20306,
+   "util": 15.7,
+   "stations": 9,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1611",
+   "ht_prot": 0,
+   "ie_len": 166,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: да; ещё 2",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 9, загрузка 15.7%",
+     "fields": [
+      [
+       "Станций",
+       "9"
+      ],
+      [
+       "Загрузка канала",
+       "15.7%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "09 00 28 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 8,
+     "summary": "6* 9 12* 18 24* 36 48 54 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Мбит/с"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 6, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "6"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:02:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 52,
+   "center": 58.0,
+   "width": 80,
+   "rssi": -54,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 2,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 15.7,
+   "stations": 9,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 219,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 9, загрузка 15.7%",
+     "fields": [
+      [
+       "Станций",
+       "9"
+      ],
+      [
+       "Загрузка канала",
+       "15.7%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "09 00 28 00 00"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 52, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "52"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "34 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "58"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 3a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 2",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "2"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 02 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:03:01",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 11,
+   "center": 11.0,
+   "width": 20,
+   "rssi": -62,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается"
+   },
+   "mdid": 20306,
+   "util": 80.4,
+   "stations": 31,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1611",
+   "ht_prot": 0,
+   "ie_len": 166,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: да; ещё 2",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 31, загрузка 80.4%",
+     "fields": [
+      [
+       "Станций",
+       "31"
+      ],
+      [
+       "Загрузка канала",
+       "80.4%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "1f 00 cd 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 8,
+     "summary": "6* 9 12* 18 24* 36 48 54 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Мбит/с"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 11, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "11"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:03:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 100,
+   "center": 106.0,
+   "width": 80,
+   "rssi": -57,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 3,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 80.4,
+   "stations": 31,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 219,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 31, загрузка 80.4%",
+     "fields": [
+      [
+       "Станций",
+       "31"
+      ],
+      [
+       "Загрузка канала",
+       "80.4%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "1f 00 cd 00 00"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 100, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "100"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "64 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "106"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 6a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 3",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "3"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 03 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:04:01",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 1,
+   "center": 1.0,
+   "width": 20,
+   "rssi": -72,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "802.1X",
+    "w": "поддерживается"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x0611",
+   "ht_prot": 0,
+   "ie_len": 133,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 01 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 8,
+     "summary": "6* 9 12* 18 24* 36 48 54 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Мбит/с"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 1, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "1"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:04:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 149,
+   "center": 155.0,
+   "width": 80,
+   "rssi": -64,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 4,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X",
+    "w": "поддерживается"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x0711",
+   "ht_prot": 0,
+   "ie_len": 184,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 01 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 149, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "149"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "95 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "155"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 9b 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 00 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 4",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "4"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 04 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:05:01",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -76,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP",
+    "TKIP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается"
+   },
+   "mdid": 20306,
+   "util": 9.8,
+   "stations": 5,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1611",
+   "ht_prot": 0,
+   "ie_len": 170,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 28,
+     "summary": "802.1X, FT-802.1X; CCMP, TKIP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP, TKIP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 02 00 00 0f ac 04 00 0f ac 02 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: да; ещё 2",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 5, загрузка 9.8%",
+     "fields": [
+      [
+       "Станций",
+       "5"
+      ],
+      [
+       "Загрузка канала",
+       "9.8%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "05 00 19 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 8,
+     "summary": "6* 9 12* 18 24* 36 48 54 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Мбит/с"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 6, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "6"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:05:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 44,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -73,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP",
+    "TKIP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 5,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 9.8,
+   "stations": 5,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 223,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 28,
+     "summary": "802.1X, FT-802.1X; CCMP, TKIP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP, TKIP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 02 00 00 0f ac 04 00 0f ac 02 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 5, загрузка 9.8%",
+     "fields": [
+      [
+       "Станций",
+       "5"
+      ],
+      [
+       "Загрузка канала",
+       "9.8%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "05 00 19 00 00"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 44, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "44"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "2c 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "42"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 2a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 5",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "5"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 05 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:06:02",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 132,
+   "center": 138.0,
+   "width": 80,
+   "rssi": -77,
+   "quality": 60,
+   "security": "WPA2-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 6,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 3 дБ, TPC Report 17 дБм",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "поддерживается",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": null,
+   "stations": null,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 212,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 80 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "3 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "3 дБ"
+      ]
+     ],
+     "hex": "03"
+    },
+    {
+     "id": 35,
+     "name": "TPC Report (802.11h)",
+     "len": 2,
+     "summary": "TX 17 дБм",
+     "fields": [
+      [
+       "Мощность передачи",
+       "17 дБм"
+      ],
+      [
+       "Link margin",
+       "0 дБ"
+      ]
+     ],
+     "hex": "11 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 132, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "132"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "84 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "138"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 8a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 6",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "6"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ]
+     ],
+     "hex": "24 00 00 00 06 fc ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:01:03",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "6",
+   "channel": 37,
+   "center": 39.0,
+   "width": 80,
+   "rssi": -56,
+   "quality": 60,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 6E",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": 1,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 0 дБ",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "обязательна",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 11.8,
+   "stations": 6,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 148,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "да"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 c0 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "0 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "0 дБ"
+      ]
+     ],
+     "hex": "00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 6, загрузка 11.8%",
+     "fields": [
+      [
+       "Станций",
+       "6"
+      ],
+      [
+       "Загрузка канала",
+       "11.8%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "06 00 1e 00 00"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 26,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "да"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ],
+      [
+       "Rx HE-MCS, 160 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, 160 МГц",
+       "MCS 0-11, потоков 2"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 0e 00 00 00 00 00 00 00 00 00 00 fa ff fa ff fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 12,
+     "summary": "BSS Color 1, 6 ГГц канал 37, 80 МГц",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "1"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ],
+      [
+       "6 ГГц: основной канал",
+       "37"
+      ],
+      [
+       "6 ГГц: ширина",
+       "80 МГц"
+      ],
+      [
+       "6 ГГц: CCFS0",
+       "39"
+      ],
+      [
+       "6 ГГц: CCFS1",
+       "0"
+      ],
+      [
+       "6 ГГц: минимальная скорость",
+       "6 Мбит/с"
+      ]
+     ],
+     "hex": "24 00 00 02 01 fc ff 25 02 27 00 06"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:10:02:03",
+   "ssid": "CORP",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "6",
+   "channel": 69,
+   "center": 79.0,
+   "width": 160,
+   "rssi": -66,
+   "quality": 60,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FT-802.1X"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 6E",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 2402.0,
+   "bss_color": 2,
+   "k": true,
+   "nr": true,
+   "r": true,
+   "v": true,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "h": "Spectrum Management, Power Constraint 0 дБ",
+    "i": "802.1X, FT-802.1X",
+    "k": "neighbor report",
+    "r": "MDID 0x4F52, FT over DS",
+    "v": "BTM, Proxy ARP, WNM Sleep",
+    "w": "обязательна",
+    "mc": "FTM responder",
+    "twt": "TWT responder"
+   },
+   "mdid": 20306,
+   "util": 7.1,
+   "stations": 3,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": 1,
+   "cap": "0x1711",
+   "ht_prot": 0,
+   "ie_len": 148,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "CORP",
+     "fields": [
+      [
+       "SSID",
+       "CORP"
+      ]
+     ],
+     "hex": "43 4f 52 50"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "802.1X, FT-802.1X; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FT-802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "да"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 01 00 0f ac 03 c0 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 5,
+     "name": "TIM",
+     "len": 4,
+     "summary": "DTIM period 1",
+     "fields": [
+      [
+       "DTIM count",
+       "0"
+      ],
+      [
+       "DTIM period",
+       "1"
+      ]
+     ],
+     "hex": "00 01 00 00"
+    },
+    {
+     "id": 54,
+     "name": "Mobility Domain (802.11r)",
+     "len": 3,
+     "summary": "MDID 0x4F52",
+     "fields": [
+      [
+       "MDID",
+       "0x4F52"
+      ],
+      [
+       "FT over DS",
+       "да"
+      ]
+     ],
+     "hex": "52 4f 01"
+    },
+    {
+     "id": 70,
+     "name": "RM Enabled Capabilities (802.11k)",
+     "len": 5,
+     "summary": "neighbor report да",
+     "fields": [
+      [
+       "Neighbor report",
+       "да"
+      ],
+      [
+       "Сырой байт",
+       "0x02"
+      ]
+     ],
+     "hex": "02 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 10,
+     "summary": "BSS Transition: да; ещё 4",
+     "fields": [
+      [
+       "Бит 12",
+       "Proxy ARP (802.11v)"
+      ],
+      [
+       "Бит 17",
+       "WNM Sleep Mode (802.11v)"
+      ],
+      [
+       "Бит 19",
+       "BSS Transition (802.11v)"
+      ],
+      [
+       "Бит 70",
+       "FTM Responder (802.11mc)"
+      ],
+      [
+       "Бит 78",
+       "TWT Responder"
+      ],
+      [
+       "Длина поля",
+       "10 байт"
+      ]
+     ],
+     "hex": "00 10 0a 00 00 00 00 00 40 40"
+    },
+    {
+     "id": 32,
+     "name": "Power Constraint (802.11h)",
+     "len": 1,
+     "summary": "0 дБ",
+     "fields": [
+      [
+       "Снижение мощности относительно лимита страны",
+       "0 дБ"
+      ]
+     ],
+     "hex": "00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "станций 3, загрузка 7.1%",
+     "fields": [
+      [
+       "Станций",
+       "3"
+      ],
+      [
+       "Загрузка канала",
+       "7.1%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "03 00 12 00 00"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 26,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "да"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ],
+      [
+       "Rx HE-MCS, 160 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, 160 МГц",
+       "MCS 0-11, потоков 2"
+      ]
+     ],
+     "hex": "23 04 00 00 00 00 00 0e 00 00 00 00 00 00 00 00 00 00 fa ff fa ff fa ff fa ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 12,
+     "summary": "BSS Color 2, 6 ГГц канал 69, 160 МГц",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "2"
+      ],
+      [
+       "Basic HE-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ],
+      [
+       "TWT required",
+       "нет"
+      ],
+      [
+       "ER SU отключён",
+       "нет"
+      ],
+      [
+       "6 ГГц: основной канал",
+       "69"
+      ],
+      [
+       "6 ГГц: ширина",
+       "160 МГц"
+      ],
+      [
+       "6 ГГц: CCFS0",
+       "71"
+      ],
+      [
+       "6 ГГц: CCFS1",
+       "79"
+      ],
+      [
+       "6 ГГц: минимальная скорость",
+       "6 Мбит/с"
+      ]
+     ],
+     "hex": "24 00 00 02 02 fc ff 45 03 47 4f 06"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:20:01:01",
+   "ssid": "CORP-Guest",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 1,
+   "center": 1.0,
+   "width": 20,
+   "rssi": -51,
+   "quality": 60,
+   "security": "Open",
+   "ciphers": [],
+   "akm": [],
+   "pmf": "",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "d": "страна RU"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0401",
+   "ht_prot": 0,
+   "ie_len": 75,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 10,
+     "summary": "CORP-Guest",
+     "fields": [
+      [
+       "SSID",
+       "CORP-Guest"
+      ]
+     ],
+     "hex": "43 4f 52 50 2d 47 75 65 73 74"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 1, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "1"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:20:02:01",
+   "ssid": "CORP-Guest",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -55,
+   "quality": 60,
+   "security": "WPA3-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "SAE"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "d": "страна RU",
+    "e": "WMM, QoS в Capability",
+    "i": "SAE",
+    "u": "частная с гостевым доступом, интернет",
+    "w": "обязательна"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "RU",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0611",
+   "ht_prot": 0,
+   "ie_len": 136,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 10,
+     "summary": "CORP-Guest",
+     "fields": [
+      [
+       "SSID",
+       "CORP-Guest"
+      ]
+     ],
+     "hex": "43 4f 52 50 2d 47 75 65 73 74"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "SAE; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "SAE"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "да"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 08 c0 00"
+    },
+    {
+     "id": 7,
+     "name": "Country",
+     "len": 6,
+     "summary": "RU",
+     "fields": [
+      [
+       "Код страны",
+       "RU"
+      ]
+     ],
+     "hex": "52 55 20 01 0d 14"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 24,
+     "summary": "WMM",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "2 (WMM)"
+      ]
+     ],
+     "hex": "00 50 f2 02 01 01 80 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 107,
+     "name": "Interworking (802.11u)",
+     "len": 1,
+     "summary": "частная с гостевым доступом, интернет",
+     "fields": [
+      [
+       "Тип сети",
+       "частная с гостевым доступом"
+      ],
+      [
+       "Доступ в интернет",
+       "да"
+      ],
+      [
+       "ASRA (нужно доп. действие)",
+       "нет"
+      ],
+      [
+       "Экстренные службы (ESR)",
+       "нет"
+      ],
+      [
+       "UESA",
+       "нет"
+      ]
+     ],
+     "hex": "11"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: нет; ещё 1",
+     "fields": [
+      [
+       "Бит 31",
+       "Interworking (802.11u)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 00 00 80 00 00 00 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 6, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "6"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:e0:fc:30:01:01",
+   "ssid": "IoT-Sensors",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 11,
+   "center": 11.0,
+   "width": 20,
+   "rssi": -64,
+   "quality": 60,
+   "security": "WPA2-Personal+WPA1",
+   "ciphers": [
+    "TKIP",
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "no",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 1,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 1,
+   "rate": 72.2,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0411",
+   "ht_prot": 3,
+   "ie_len": 144,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 11,
+     "summary": "IoT-Sensors",
+     "fields": [
+      [
+       "SSID",
+       "IoT-Sensors"
+      ]
+     ],
+     "hex": "49 6f 54 2d 53 65 6e 73 6f 72 73"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "PSK; TKIP, CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "TKIP, CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "нет"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 02 00 00 0f ac 02 00 0f ac 04 01 00 00 0f ac 02 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 22,
+     "summary": "WPA (WPA1)",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "1 (WPA (WPA1))"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "Шифры",
+       "TKIP"
+      ]
+     ],
+     "hex": "00 50 f2 01 01 00 00 50 f2 02 01 00 00 50 f2 02 01 00 00 50 f2 02"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 5,
+     "summary": "1* 2* 5.5* 11* 6 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "1* 2* 5.5* 11* 6 Мбит/с"
+      ]
+     ],
+     "hex": "82 84 8b 96 0c"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 1, до MCS 7",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "1"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-7"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 11, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "11"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "non-HT mixed"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "0b 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 17,
+     "summary": "OUI 00-11-22, тип 1",
+     "fields": [
+      [
+       "OUI",
+       "00-11-22"
+      ],
+      [
+       "Тип",
+       "1"
+      ],
+      [
+       "ASCII",
+       "demo-ap-name."
+      ],
+      [
+       "Hex",
+       "64 65 6d 6f 2d 61 70 2d 6e 61 6d 65 00"
+      ]
+     ],
+     "hex": "00 11 22 01 64 65 6d 6f 2d 61 70 2d 6e 61 6d 65 00"
+    }
+   ]
+  },
+  {
+   "bssid": "3c:37:86:aa:00:01",
+   "ssid": "Neighbor-2G",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -65,
+   "quality": 60,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "no",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0411",
+   "ht_prot": 0,
+   "ie_len": 90,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 11,
+     "summary": "Neighbor-2G",
+     "fields": [
+      [
+       "SSID",
+       "Neighbor-2G"
+      ]
+     ],
+     "hex": "4e 65 69 67 68 62 6f 72 2d 32 47"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "нет"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 00 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 6, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "6"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "3c:37:86:aa:00:02",
+   "ssid": "Neighbor-5G",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -68,
+   "quality": 60,
+   "security": "WPA2/WPA3-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK",
+    "SAE"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 6",
+   "gen_n": 6,
+   "streams": 2,
+   "phy": "HE",
+   "mcs": 11,
+   "nss": 2,
+   "rate": 1201.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK, SAE",
+    "w": "поддерживается"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0411",
+   "ht_prot": 0,
+   "ie_len": 139,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 11,
+     "summary": "Neighbor-5G",
+     "fields": [
+      [
+       "SSID",
+       "Neighbor-5G"
+      ]
+     ],
+     "hex": "4e 65 69 67 68 62 6f 72 2d 35 47"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "PSK, SAE; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK, SAE"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "да"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 02 00 0f ac 08 80 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 36, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "36"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "потоков 2, до MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, потоков 2"
+      ],
+      [
+       "Rx VHT-MCS по потокам",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Пространственных потоков",
+       "2"
+      ],
+      [
+       "Ширины сверх 80 МГц",
+       "нет (до 80 МГц)"
+      ],
+      [
+       "Short GI 80 МГц",
+       "да"
+      ],
+      [
+       "Short GI 160 МГц",
+       "нет"
+      ],
+      [
+       "SU beamformer",
+       "да"
+      ],
+      [
+       "MU beamformer",
+       "нет"
+      ]
+     ],
+     "hex": "b2 59 82 0f fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "ширина 80/160/80+80 МГц",
+     "fields": [
+      [
+       "Ширина",
+       "80/160/80+80 МГц"
+      ],
+      [
+       "Центр сегмента 0",
+       "42"
+      ],
+      [
+       "Центр сегмента 1",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (обязательные)",
+       "MCS 0-7, потоков 1"
+      ]
+     ],
+     "hex": "01 2a 00 fc ff"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Capabilities",
+     "len": 22,
+     "summary": "потоков 2, до MCS 11",
+     "fields": [
+      [
+       "Extension ID",
+       "35 (HE Capabilities)"
+      ],
+      [
+       "Rx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "Tx HE-MCS, до 80 МГц",
+       "MCS 0-11, потоков 2"
+      ],
+      [
+       "40 МГц в 2.4 ГГц",
+       "да"
+      ],
+      [
+       "40/80 МГц в 5/6 ГГц",
+       "да"
+      ],
+      [
+       "160 МГц",
+       "нет"
+      ],
+      [
+       "80+80 МГц",
+       "нет"
+      ]
+     ],
+     "hex": "23 00 00 00 00 00 00 06 00 00 00 00 00 00 00 00 00 00 fa ff fa ff"
+    }
+   ]
+  },
+  {
+   "bssid": "00:00:0c:bb:00:01",
+   "ssid": "Hotel-WiFi",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 3,
+   "center": 5.0,
+   "width": 40,
+   "rssi": -67,
+   "quality": 60,
+   "security": "Open",
+   "ciphers": [],
+   "akm": [],
+   "pmf": "",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "u": "платная публичная, интернет, ANQP",
+    "hs": "Passpoint"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0401",
+   "ht_prot": 0,
+   "ie_len": 97,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 10,
+     "summary": "Hotel-WiFi",
+     "fields": [
+      [
+       "SSID",
+       "Hotel-WiFi"
+      ]
+     ],
+     "hex": "48 6f 74 65 6c 2d 57 69 46 69"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 3, 40 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "3"
+      ],
+      [
+       "Вторичный канал",
+       "выше"
+      ],
+      [
+       "Ширина",
+       "40 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "03 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 4,
+     "summary": "1* 2* 5.5 11 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "1* 2* 5.5 11 Мбит/с"
+      ]
+     ],
+     "hex": "82 84 0b 16"
+    },
+    {
+     "id": 107,
+     "name": "Interworking (802.11u)",
+     "len": 1,
+     "summary": "платная публичная, интернет",
+     "fields": [
+      [
+       "Тип сети",
+       "платная публичная"
+      ],
+      [
+       "Доступ в интернет",
+       "да"
+      ],
+      [
+       "ASRA (нужно доп. действие)",
+       "нет"
+      ],
+      [
+       "Экстренные службы (ESR)",
+       "нет"
+      ],
+      [
+       "UESA",
+       "нет"
+      ]
+     ],
+     "hex": "12"
+    },
+    {
+     "id": 108,
+     "name": "Advertisement Protocol (802.11u)",
+     "len": 2,
+     "summary": "",
+     "fields": [
+      [
+       "Данные",
+       "7f 00"
+      ]
+     ],
+     "hex": "7f 00"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 5,
+     "summary": "OUI 50-6f-9a, тип 16",
+     "fields": [
+      [
+       "OUI",
+       "50-6f-9a"
+      ],
+      [
+       "Тип",
+       "16"
+      ],
+      [
+       "ASCII",
+       "."
+      ],
+      [
+       "Hex",
+       "10"
+      ]
+     ],
+     "hex": "50 6f 9a 10 10"
+    },
+    {
+     "id": 127,
+     "name": "Extended Capabilities",
+     "len": 8,
+     "summary": "BSS Transition: нет; ещё 2",
+     "fields": [
+      [
+       "Бит 31",
+       "Interworking (802.11u)"
+      ],
+      [
+       "Бит 32",
+       "QoS Map (802.11u)"
+      ],
+      [
+       "Длина поля",
+       "8 байт"
+      ]
+     ],
+     "hex": "00 00 00 80 01 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "00:00:0c:bb:00:02",
+   "ssid": "Hotel-WiFi",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 9,
+   "center": 9.0,
+   "width": 20,
+   "rssi": -74,
+   "quality": 60,
+   "security": "Open",
+   "ciphers": [],
+   "akm": [],
+   "pmf": "",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {},
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0401",
+   "ht_prot": 0,
+   "ie_len": 67,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 10,
+     "summary": "Hotel-WiFi",
+     "fields": [
+      [
+       "SSID",
+       "Hotel-WiFi"
+      ]
+     ],
+     "hex": "48 6f 74 65 6c 2d 57 69 46 69"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 9, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "9"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "09 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "02:cc:00:00:00:01",
+   "ssid": "<hidden>",
+   "hidden": true,
+   "vendor": "",
+   "random_mac": true,
+   "band": "2.4",
+   "channel": 11,
+   "center": 11.0,
+   "width": 20,
+   "rssi": -79,
+   "quality": 60,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "no",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 144.4,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0411",
+   "ht_prot": 0,
+   "ie_len": 79,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 0,
+     "summary": "<скрыт>",
+     "fields": [
+      [
+       "SSID",
+       "<скрыт>"
+      ]
+     ],
+     "hex": ""
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Групповой шифр",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "нет"
+      ],
+      [
+       "PMF required (MFPR)",
+       "нет"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 00 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 29,
+     "summary": "потоков 2, до MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x01EF"
+      ],
+      [
+       "Ширина 40 МГц",
+       "да"
+      ],
+      [
+       "Short GI 20 МГц",
+       "да"
+      ],
+      [
+       "Short GI 40 МГц",
+       "да"
+      ],
+      [
+       "Пространственных потоков (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "не указан"
+      ]
+     ],
+     "hex": "ef 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "основной 11, 20 МГц",
+     "fields": [
+      [
+       "Основной канал",
+       "11"
+      ],
+      [
+       "Вторичный канал",
+       "нет"
+      ],
+      [
+       "Ширина",
+       "20 МГц"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (обязательные)",
+       "нет"
+      ]
+     ],
+     "hex": "0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "02:cc:00:00:00:02",
+   "ssid": "Printer-Direct",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": true,
+   "band": "2.4",
+   "channel": 1,
+   "center": 1.0,
+   "width": 20,
+   "rssi": -64,
+   "quality": 60,
+   "security": "WPA1-Personal",
+   "ciphers": [
+    "TKIP"
+   ],
+   "akm": [],
+   "pmf": "",
+   "wps": false,
+   "gen": "legacy",
+   "gen_n": 0,
+   "streams": 0,
+   "phy": "legacy",
+   "mcs": null,
+   "nss": 1,
+   "rate": 11.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {},
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0411",
+   "ht_prot": 0,
+   "ie_len": 46,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 14,
+     "summary": "Printer-Direct",
+     "fields": [
+      [
+       "SSID",
+       "Printer-Direct"
+      ]
+     ],
+     "hex": "50 72 69 6e 74 65 72 2d 44 69 72 65 63 74"
+    },
+    {
+     "id": 221,
+     "name": "Vendor Specific",
+     "len": 22,
+     "summary": "WPA (WPA1)",
+     "fields": [
+      [
+       "OUI",
+       "00-50-F2 (Microsoft)"
+      ],
+      [
+       "Тип",
+       "1 (WPA (WPA1))"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "Шифры",
+       "TKIP"
+      ]
+     ],
+     "hex": "00 50 f2 01 01 00 00 50 f2 02 01 00 00 50 f2 02 01 00 00 50 f2 02"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 4,
+     "summary": "1* 2* 5.5 11 Мбит/с",
+     "fields": [
+      [
+       "Скорости (* = basic)",
+       "1* 2* 5.5 11 Мбит/с"
+      ]
+     ],
+     "hex": "82 84 0b 16"
+    }
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "severity": "critical",
+   "code": "RF_UTIL",
+   "title": "Высокая загрузка канала",
+   "detail": "CORP (00:e0:fc:10:03:01, канал 11, 2.4 ГГц): занято 80% эфира, станций: 31.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:03:01"
+   ],
+   "recommendation": "Цифра берётся из QBSS Load самой AP. Проверить число клиентов, смену канала/ширины, перенос клиентов на 5 ГГц."
+  },
+  {
+   "severity": "critical",
+   "code": "RF_UTIL",
+   "title": "Высокая загрузка канала",
+   "detail": "CORP (00:e0:fc:10:03:02, канал 100, 5 ГГц): занято 80% эфира, станций: 31.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:03:02"
+   ],
+   "recommendation": "Цифра берётся из QBSS Load самой AP. Проверить число клиентов, смену канала/ширины, перенос клиентов на 5 ГГц."
+  },
+  {
+   "severity": "critical",
+   "code": "SEC_WPA1_ONLY",
+   "title": "Только WPA1",
+   "detail": "Сеть «Printer-Direct» вещает только WPA1 (vendor IE), RSN отсутствует.",
+   "ssid": "Printer-Direct",
+   "bssids": [
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Включить WPA2 (CCMP) минимум."
+  },
+  {
+   "severity": "warning",
+   "code": "HYG_LEGACY_PHY",
+   "title": "BSS без HT (только 802.11a/b/g)",
+   "detail": "BSS: 1.",
+   "ssid": "",
+   "bssids": [
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Максимум 54 Мбит/с; проверить, что это не отключённый радиомодуль или старая AP."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_24_40MHZ",
+   "title": "2.4 ГГц: ширина канала 40 МГц",
+   "detail": "BSS с 40 МГц: 1.",
+   "ssid": "",
+   "bssids": [
+    "00:00:0c:bb:00:01"
+   ],
+   "recommendation": "В 2.4 ГГц 40 МГц занимает почти полдиапазона; оставить 20 МГц."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_24_NONSTD",
+   "title": "2.4 ГГц: канал не 1/6/11",
+   "detail": "Каналы: 3, 9.",
+   "ssid": "",
+   "bssids": [
+    "00:00:0c:bb:00:01",
+    "00:00:0c:bb:00:02"
+   ],
+   "recommendation": "Каналы 2.4 ГГц перекрываются; вне 1/6/11 AP мешает сразу двум соседним."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_24_OVERLAP",
+   "title": "2.4 ГГц: сильные BSS на перекрывающихся каналах",
+   "detail": "Пары каналов: 1/3, 3/6.",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:10:01:01",
+    "00:e0:fc:10:02:01",
+    "00:e0:fc:10:03:01",
+    "00:e0:fc:20:01:01",
+    "00:e0:fc:20:02:01",
+    "00:e0:fc:30:01:01",
+    "3c:37:86:aa:00:01",
+    "00:00:0c:bb:00:01",
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Перекрытие хуже, чем совпадение каналов: устройства не могут договориться через CSMA/CA и воспринимают друг друга как шум."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_COCHANNEL",
+   "title": "Много BSS на одном канале",
+   "detail": "2.4 ГГц, канал 1: слышно 4 BSS сильнее -80 дБм (SSID: CORP, CORP-Guest, Printer-Direct).",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:10:01:01",
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:20:01:01",
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Все они делят эфир (CSMA/CA). Рассмотреть другой канал, меньшую ширину или меньшую мощность."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_COCHANNEL",
+   "title": "Много BSS на одном канале",
+   "detail": "2.4 ГГц, канал 6: слышно 4 BSS сильнее -80 дБм (SSID: CORP, CORP-Guest, Neighbor-2G).",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:10:02:01",
+    "00:e0:fc:10:05:01",
+    "00:e0:fc:20:02:01",
+    "3c:37:86:aa:00:01"
+   ],
+   "recommendation": "Все они делят эфир (CSMA/CA). Рассмотреть другой канал, меньшую ширину или меньшую мощность."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_11K_PARTIAL",
+   "title": "802.11k включён не на всех BSS",
+   "detail": "SSID «CORP»: есть у 11, нет у 2 BSS.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:10:04:02"
+   ],
+   "recommendation": "Проверить, что AP-группы/профили одинаковы."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_11R_PARTIAL",
+   "title": "802.11r (FT) включён не на всех BSS",
+   "detail": "SSID «CORP»: есть у 11, нет у 2 BSS.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:10:04:02"
+   ],
+   "recommendation": "Проверить, что AP-группы/профили одинаковы."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_11V_PARTIAL",
+   "title": "802.11v включён не на всех BSS",
+   "detail": "SSID «CORP»: есть у 11, нет у 2 BSS.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:10:04:02"
+   ],
+   "recommendation": "Проверить, что AP-группы/профили одинаковы."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_SEC_MISMATCH",
+   "title": "Разная безопасность у BSS одного SSID",
+   "detail": "SSID «CORP»: WPA2-Enterprise; WPA2/3-Enterprise.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:01:01",
+    "00:e0:fc:10:01:02",
+    "00:e0:fc:10:02:01",
+    "00:e0:fc:10:02:02",
+    "00:e0:fc:10:03:01",
+    "00:e0:fc:10:03:02",
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:10:04:02",
+    "00:e0:fc:10:05:01",
+    "00:e0:fc:10:05:02",
+    "00:e0:fc:10:06:02",
+    "00:e0:fc:10:01:03",
+    "00:e0:fc:10:02:03"
+   ],
+   "recommendation": "Клиент, выбравший один BSS, может не подключиться к другому. Проверить профиль SSID на контроллере."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_SEC_MISMATCH",
+   "title": "Разная безопасность у BSS одного SSID",
+   "detail": "SSID «CORP-Guest»: Open; WPA3-Personal.",
+   "ssid": "CORP-Guest",
+   "bssids": [
+    "00:e0:fc:20:01:01",
+    "00:e0:fc:20:02:01"
+   ],
+   "recommendation": "Клиент, выбравший один BSS, может не подключиться к другому. Проверить профиль SSID на контроллере."
+  },
+  {
+   "severity": "warning",
+   "code": "SEC_OPEN",
+   "title": "Открытая сеть без шифрования",
+   "detail": "Сеть «CORP-Guest» не использует шифрование.",
+   "ssid": "CORP-Guest",
+   "bssids": [
+    "00:e0:fc:20:01:01"
+   ],
+   "recommendation": "Если сеть гостевая - рассмотреть OWE (Enhanced Open) или captive portal; для корпоративной - WPA2/WPA3-Enterprise."
+  },
+  {
+   "severity": "warning",
+   "code": "SEC_OPEN",
+   "title": "Открытая сеть без шифрования",
+   "detail": "Сеть «Hotel-WiFi» не использует шифрование.",
+   "ssid": "Hotel-WiFi",
+   "bssids": [
+    "00:00:0c:bb:00:01",
+    "00:00:0c:bb:00:02"
+   ],
+   "recommendation": "Если сеть гостевая - рассмотреть OWE (Enhanced Open) или captive portal; для корпоративной - WPA2/WPA3-Enterprise."
+  },
+  {
+   "severity": "warning",
+   "code": "SEC_TKIP",
+   "title": "Разрешён шифр TKIP",
+   "detail": "Сеть «CORP»: pairwise-шифры CCMP, TKIP.",
+   "ssid": "CORP",
+   "bssids": [
+    "00:e0:fc:10:01:01",
+    "00:e0:fc:10:01:02",
+    "00:e0:fc:10:02:01",
+    "00:e0:fc:10:02:02",
+    "00:e0:fc:10:03:01",
+    "00:e0:fc:10:03:02",
+    "00:e0:fc:10:04:01",
+    "00:e0:fc:10:04:02",
+    "00:e0:fc:10:05:01",
+    "00:e0:fc:10:05:02",
+    "00:e0:fc:10:06:02"
+   ],
+   "recommendation": "TKIP отключает высокие скорости 802.11n+ у многих клиентов и считается устаревшим; оставить только CCMP/GCMP."
+  },
+  {
+   "severity": "warning",
+   "code": "SEC_TKIP",
+   "title": "Разрешён шифр TKIP",
+   "detail": "Сеть «IoT-Sensors»: pairwise-шифры CCMP, TKIP.",
+   "ssid": "IoT-Sensors",
+   "bssids": [
+    "00:e0:fc:30:01:01"
+   ],
+   "recommendation": "TKIP отключает высокие скорости 802.11n+ у многих клиентов и считается устаревшим; оставить только CCMP/GCMP."
+  },
+  {
+   "severity": "warning",
+   "code": "SEC_WPA1_MIXED",
+   "title": "Включён режим совместимости с WPA1",
+   "detail": "Сеть «IoT-Sensors» объявляет и RSN, и WPA1 IE (WPA2-Personal+WPA1).",
+   "ssid": "IoT-Sensors",
+   "bssids": [
+    "00:e0:fc:30:01:01"
+   ],
+   "recommendation": "Отключить WPA1/TKIP, если нет устройств, которым он нужен."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_24_ONLY",
+   "title": "SSID слышен только в 2.4 ГГц",
+   "detail": "SSID «CORP-Guest».",
+   "ssid": "CORP-Guest",
+   "bssids": [
+    "00:e0:fc:20:01:01",
+    "00:e0:fc:20:02:01"
+   ],
+   "recommendation": "Если сеть должна быть и в 5 ГГц - проверить радио 5 ГГц и привязку SSID."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_24_ONLY",
+   "title": "SSID слышен только в 2.4 ГГц",
+   "detail": "SSID «Hotel-WiFi».",
+   "ssid": "Hotel-WiFi",
+   "bssids": [
+    "00:00:0c:bb:00:01",
+    "00:00:0c:bb:00:02"
+   ],
+   "recommendation": "Если сеть должна быть и в 5 ГГц - проверить радио 5 ГГц и привязку SSID."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_24_ONLY",
+   "title": "SSID слышен только в 2.4 ГГц",
+   "detail": "SSID «IoT-Sensors».",
+   "ssid": "IoT-Sensors",
+   "bssids": [
+    "00:e0:fc:30:01:01"
+   ],
+   "recommendation": "Если сеть должна быть и в 5 ГГц - проверить радио 5 ГГц и привязку SSID."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_24_ONLY",
+   "title": "SSID слышен только в 2.4 ГГц",
+   "detail": "SSID «Neighbor-2G».",
+   "ssid": "Neighbor-2G",
+   "bssids": [
+    "3c:37:86:aa:00:01"
+   ],
+   "recommendation": "Если сеть должна быть и в 5 ГГц - проверить радио 5 ГГц и привязку SSID."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_24_ONLY",
+   "title": "SSID слышен только в 2.4 ГГц",
+   "detail": "SSID «Printer-Direct».",
+   "ssid": "Printer-Direct",
+   "bssids": [
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Если сеть должна быть и в 5 ГГц - проверить радио 5 ГГц и привязку SSID."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_BASIC_RATES",
+   "title": "2.4 ГГц: 802.11b-скорости в basic rate set",
+   "detail": "BSS: 3.",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:30:01:01",
+    "00:00:0c:bb:00:01",
+    "02:cc:00:00:00:02"
+   ],
+   "recommendation": "Пока 1/2/5.5/11 Мбит/с обязательны, служебные кадры уходят на низкой скорости и занимают эфир. Отключить, если b-клиентов нет."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_HIDDEN",
+   "title": "Скрытые SSID",
+   "detail": "BSS со скрытым SSID: 1.",
+   "ssid": "",
+   "bssids": [
+    "02:cc:00:00:00:01"
+   ],
+   "recommendation": "Скрытие SSID не защита; клиенты при этом шлют probe с именем сети."
+  },
+  {
+   "severity": "info",
+   "code": "HYG_HT_PROT",
+   "title": "HT protection включён",
+   "detail": "BSS: 1 (mode [3]).",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:30:01:01"
+   ],
+   "recommendation": "AP видит legacy-клиентов или соседние non-HT сети; это снижает пропускную способность."
+  },
+  {
+   "severity": "info",
+   "code": "RF_DFS",
+   "title": "5 ГГц: используются DFS-каналы",
+   "detail": "Каналы: 52, 100, 132.",
+   "ssid": "",
+   "bssids": [
+    "00:e0:fc:10:02:02",
+    "00:e0:fc:10:03:02",
+    "00:e0:fc:10:06:02"
+   ],
+   "recommendation": "При обнаружении радара AP обязана уйти с канала; если есть жалобы на кратковременные пропадания - сверить с логами радара на контроллере."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11K_OFF",
+   "title": "802.11k не объявлен",
+   "detail": "SSID «CORP-Guest»: нужный IE не найден ни у одного из 2 BSS.",
+   "ssid": "CORP-Guest",
+   "bssids": [
+    "00:e0:fc:20:01:01",
+    "00:e0:fc:20:02:01"
+   ],
+   "recommendation": "Помогает клиентам выбирать лучшую AP при роуминге; включать, если контроллер это поддерживает."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11K_OFF",
+   "title": "802.11k не объявлен",
+   "detail": "SSID «Hotel-WiFi»: нужный IE не найден ни у одного из 2 BSS.",
+   "ssid": "Hotel-WiFi",
+   "bssids": [
+    "00:00:0c:bb:00:01",
+    "00:00:0c:bb:00:02"
+   ],
+   "recommendation": "Помогает клиентам выбирать лучшую AP при роуминге; включать, если контроллер это поддерживает."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11V_OFF",
+   "title": "802.11v не объявлен",
+   "detail": "SSID «CORP-Guest»: нужный IE не найден ни у одного из 2 BSS.",
+   "ssid": "CORP-Guest",
+   "bssids": [
+    "00:e0:fc:20:01:01",
+    "00:e0:fc:20:02:01"
+   ],
+   "recommendation": "Помогает клиентам выбирать лучшую AP при роуминге; включать, если контроллер это поддерживает."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11V_OFF",
+   "title": "802.11v не объявлен",
+   "detail": "SSID «Hotel-WiFi»: нужный IE не найден ни у одного из 2 BSS.",
+   "ssid": "Hotel-WiFi",
+   "bssids": [
+    "00:00:0c:bb:00:01",
+    "00:00:0c:bb:00:02"
+   ],
+   "recommendation": "Помогает клиентам выбирать лучшую AP при роуминге; включать, если контроллер это поддерживает."
+  },
+  {
+   "severity": "info",
+   "code": "SEC_TRANSITION",
+   "title": "WPA2/WPA3 transition mode",
+   "detail": "Сеть «Neighbor-5G» принимает и PSK, и SAE.",
+   "ssid": "Neighbor-5G",
+   "bssids": [
+    "3c:37:86:aa:00:02"
+   ],
+   "recommendation": "Это нормальный переходный режим; понижение до WPA2 возможно у клиентов, не поддерживающих SAE."
+  }
+ ],
+ "advice": {
+  "2.4": [
+   {
+    "channel": 6,
+    "dbm": -51.1,
+    "count": 6,
+    "radios": 6,
+    "util": 15.7,
+    "dfs": false,
+    "busy": false,
+    "best": true
+   },
+   {
+    "channel": 1,
+    "dbm": -47.3,
+    "count": 5,
+    "radios": 5,
+    "util": 23.5,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 11,
+    "dbm": -58.9,
+    "count": 5,
+    "radios": 5,
+    "util": 80.4,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   }
+  ],
+  "5": [
+   {
+    "channel": 149,
+    "dbm": -64.0,
+    "count": 1,
+    "radios": 1,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": true
+   },
+   {
+    "channel": 153,
+    "dbm": -64.0,
+    "count": 1,
+    "radios": 1,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 157,
+    "dbm": -64.0,
+    "count": 1,
+    "radios": 1,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 161,
+    "dbm": -64.0,
+    "count": 1,
+    "radios": 1,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 36,
+    "dbm": -44.0,
+    "count": 3,
+    "radios": 3,
+    "util": 23.5,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 40,
+    "dbm": -44.0,
+    "count": 3,
+    "radios": 3,
+    "util": 23.5,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 44,
+    "dbm": -44.0,
+    "count": 3,
+    "radios": 3,
+    "util": 23.5,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 48,
+    "dbm": -44.0,
+    "count": 3,
+    "radios": 3,
+    "util": 23.5,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   }
+  ]
+ },
+ "util": {
+  "channels": [
+   {
+    "band": "2.4",
+    "channel": 11,
+    "max": 80.4,
+    "avg": 80.4,
+    "level": "crit",
+    "label": "перегружен",
+    "reporting": 1,
+    "bss": 3,
+    "stations": 31,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:03:01",
+      "ssid": "CORP",
+      "util": 80.4,
+      "stations": 31
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 100,
+    "max": 80.4,
+    "avg": 80.4,
+    "level": "crit",
+    "label": "перегружен",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 31,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:03:02",
+      "ssid": "CORP",
+      "util": 80.4,
+      "stations": 31
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "2.4",
+    "channel": 1,
+    "max": 23.5,
+    "avg": 23.5,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 4,
+    "stations": 14,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:01:01",
+      "ssid": "CORP",
+      "util": 23.5,
+      "stations": 14
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 36,
+    "max": 23.5,
+    "avg": 23.5,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 2,
+    "stations": 14,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:01:02",
+      "ssid": "CORP",
+      "util": 23.5,
+      "stations": 14
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "2.4",
+    "channel": 6,
+    "max": 15.7,
+    "avg": 12.8,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 2,
+    "bss": 4,
+    "stations": 14,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:02:01",
+      "ssid": "CORP",
+      "util": 15.7,
+      "stations": 9
+     },
+     {
+      "bssid": "00:e0:fc:10:05:01",
+      "ssid": "CORP",
+      "util": 9.8,
+      "stations": 5
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 52,
+    "max": 15.7,
+    "avg": 15.7,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 9,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:02:02",
+      "ssid": "CORP",
+      "util": 15.7,
+      "stations": 9
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "6",
+    "channel": 37,
+    "max": 11.8,
+    "avg": 11.8,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 6,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:01:03",
+      "ssid": "CORP",
+      "util": 11.8,
+      "stations": 6
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 44,
+    "max": 9.8,
+    "avg": 9.8,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 5,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:05:02",
+      "ssid": "CORP",
+      "util": 9.8,
+      "stations": 5
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "6",
+    "channel": 69,
+    "max": 7.1,
+    "avg": 7.1,
+    "level": "low",
+    "label": "свободен",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 3,
+    "aps": [
+     {
+      "bssid": "00:e0:fc:10:02:03",
+      "ssid": "CORP",
+      "util": 7.1,
+      "stations": 3
+     }
+    ],
+    "series": []
+   }
+  ],
+  "no_data": [
+   {
+    "band": "2.4",
+    "channel": 3,
+    "bss": 1
+   },
+   {
+    "band": "2.4",
+    "channel": 9,
+    "bss": 1
+   },
+   {
+    "band": "5",
+    "channel": 132,
+    "bss": 1
+   },
+   {
+    "band": "5",
+    "channel": 149,
+    "bss": 1
+   }
+  ]
+ }
+}

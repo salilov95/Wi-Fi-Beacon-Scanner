@@ -7,6 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Development
+- `contract/`: expected output on fixed scans (network rows with the decoded IE tree, problems, channel quality and
+  utilisation, Russian and English), its JSON Schema and three fixtures, one of them a real anonymised scan.
+  `tests/test_contract.py` compares the program with it. This is the reference for the Rust + Tauri version.
+- `tools/anonymize_snapshot.py`: anonymises a scan before it goes into the public repository.
+- The program itself is unchanged.
+
 ## [1.1.0] - 2026-10-14
 
 ### Added

@@ -1,0 +1,3481 @@
+{
+ "contract": 1,
+ "fixture": "synthetic-edge",
+ "lang": "en",
+ "bss": [
+  {
+   "bssid": "0c:45:ba:00:00:10",
+   "ssid": "Corp",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 50.0,
+   "width": 160,
+   "rssi": -50,
+   "quality": 80,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 1733.3,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "802.1X",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 113,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "Corp",
+     "fields": [
+      [
+       "SSID",
+       "Corp"
+      ]
+     ],
+     "hex": "43 6f 72 70"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "802.1X; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 01 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 160 MHz",
+     "fields": [
+      [
+       "Width",
+       "160 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "50"
+      ],
+      [
+       "Segment 1 center",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "02 32 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:00:11",
+   "ssid": "Guest",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 160,
+   "rssi": -51,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 1733.3,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 114,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 5,
+     "summary": "Guest",
+     "fields": [
+      [
+       "SSID",
+       "Guest"
+      ]
+     ],
+     "hex": "47 75 65 73 74"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 80+80 MHz",
+     "fields": [
+      [
+       "Width",
+       "80+80 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "42"
+      ],
+      [
+       "Segment 1 center",
+       "58"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "03 2a 3a 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:00:12",
+   "ssid": "Voice",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -52,
+   "quality": 80,
+   "security": "WPA3-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "SAE-EXT-KEY"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 866.7,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "SAE-EXT-KEY",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 114,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 5,
+     "summary": "Voice",
+     "fields": [
+      [
+       "SSID",
+       "Voice"
+      ]
+     ],
+     "hex": "56 6f 69 63 65"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "SAE-EXT-KEY; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "SAE-EXT-KEY"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 18 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 80/160/80+80 MHz",
+     "fields": [
+      [
+       "Width",
+       "80/160/80+80 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "42"
+      ],
+      [
+       "Segment 1 center",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "01 2a 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:00:13",
+   "ssid": "Mixed",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -50,
+   "quality": 80,
+   "security": "WPA2/WPA3-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK",
+    "SAE-EXT-KEY"
+   ],
+   "pmf": "capable",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 866.7,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK, SAE-EXT-KEY",
+    "w": "supported"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 118,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 5,
+     "summary": "Mixed",
+     "fields": [
+      [
+       "SSID",
+       "Mixed"
+      ]
+     ],
+     "hex": "4d 69 78 65 64"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 24,
+     "summary": "PSK, SAE-EXT-KEY; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK, SAE-EXT-KEY"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "no"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 02 00 00 0f ac 02 00 0f ac 18 80 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 80/160/80+80 MHz",
+     "fields": [
+      [
+       "Width",
+       "80/160/80+80 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "42"
+      ],
+      [
+       "Segment 1 center",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "01 2a 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:00:14",
+   "ssid": "Ent384",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -53,
+   "quality": 80,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X-SHA384"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 866.7,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "802.1X-SHA384",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 115,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 6,
+     "summary": "Ent384",
+     "fields": [
+      [
+       "SSID",
+       "Ent384"
+      ]
+     ],
+     "hex": "45 6e 74 33 38 34"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "802.1X-SHA384; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X-SHA384"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 17 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 80/160/80+80 MHz",
+     "fields": [
+      [
+       "Width",
+       "80/160/80+80 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "42"
+      ],
+      [
+       "Segment 1 center",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "01 2a 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:00:15",
+   "ssid": "Fils",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 42.0,
+   "width": 80,
+   "rssi": -54,
+   "quality": 80,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X",
+    "FILS-SHA256",
+    "FT-FILS-SHA256"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 5",
+   "gen_n": 5,
+   "streams": 2,
+   "phy": "VHT",
+   "mcs": 9,
+   "nss": 2,
+   "rate": 866.7,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "802.1X, FILS-SHA256, FT-FILS-SHA256",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 121,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "Fils",
+     "fields": [
+      [
+       "SSID",
+       "Fils"
+      ]
+     ],
+     "hex": "46 69 6c 73"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 28,
+     "summary": "802.1X, FILS-SHA256, FT-FILS-SHA256; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X, FILS-SHA256, FT-FILS-SHA256"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 03 00 00 0f ac 01 00 0f ac 0e 00 0f ac 10 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 191,
+     "name": "VHT Capabilities",
+     "len": 12,
+     "summary": "2 streams, up to MCS 9",
+     "fields": [
+      [
+       "Rx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Tx VHT-MCS",
+       "MCS 0-9, 2 streams"
+      ],
+      [
+       "Rx VHT-MCS per stream",
+       "1:MCS 0-9 / 2:MCS 0-9"
+      ],
+      [
+       "Spatial streams",
+       "2"
+      ],
+      [
+       "Widths above 80 MHz",
+       "none (up to 80 MHz)"
+      ],
+      [
+       "Short GI 80 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 160 MHz",
+       "yes"
+      ],
+      [
+       "SU beamformer",
+       "no"
+      ],
+      [
+       "MU beamformer",
+       "no"
+      ]
+     ],
+     "hex": "60 00 00 00 fa ff 00 00 fa ff 00 00"
+    },
+    {
+     "id": 192,
+     "name": "VHT Operation",
+     "len": 5,
+     "summary": "width 80/160/80+80 MHz",
+     "fields": [
+      [
+       "Width",
+       "80/160/80+80 MHz"
+      ],
+      [
+       "Segment 0 center",
+       "42"
+      ],
+      [
+       "Segment 1 center",
+       "0"
+      ],
+      [
+       "Basic VHT-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ]
+     ],
+     "hex": "01 2a 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "a0:b1:c2:00:00:50",
+   "ssid": "Neighbor",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 40,
+   "center": 42.0,
+   "width": 40,
+   "rssi": -60,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 78.4,
+   "stations": 5,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 103,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 8,
+     "summary": "Neighbor",
+     "fields": [
+      [
+       "SSID",
+       "Neighbor"
+      ]
+     ],
+     "hex": "4e 65 69 67 68 62 6f 72"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 5, load 78.4%",
+     "fields": [
+      [
+       "Stations",
+       "5"
+      ],
+      [
+       "Channel load",
+       "78.4%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "05 00 c8 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "a0:b1:c2:00:00:90",
+   "ssid": "Neighbor2",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 36,
+   "center": 38.0,
+   "width": 40,
+   "rssi": -62,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 58.8,
+   "stations": 3,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 104,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 9,
+     "summary": "Neighbor2",
+     "fields": [
+      [
+       "SSID",
+       "Neighbor2"
+      ]
+     ],
+     "hex": "4e 65 69 67 68 62 6f 72 32"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 3, load 58.8%",
+     "fields": [
+      [
+       "Stations",
+       "3"
+      ],
+      [
+       "Channel load",
+       "58.8%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "03 00 96 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:01:20",
+   "ssid": "Corp",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "6",
+   "channel": 2,
+   "center": 2.0,
+   "width": 20,
+   "rssi": -58,
+   "quality": 80,
+   "security": "WPA3-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "SAE"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 6E",
+   "gen_n": 6,
+   "streams": 0,
+   "phy": "legacy",
+   "mcs": null,
+   "nss": 1,
+   "rate": 54.0,
+   "bss_color": 5,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "SAE",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 49,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "Corp",
+     "fields": [
+      [
+       "SSID",
+       "Corp"
+      ]
+     ],
+     "hex": "43 6f 72 70"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "SAE; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "SAE"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 08 c0 00"
+    },
+    {
+     "id": 255,
+     "name": "Extension: HE Operation",
+     "len": 7,
+     "summary": "BSS Color 5",
+     "fields": [
+      [
+       "Extension ID",
+       "36 (HE Operation)"
+      ],
+      [
+       "BSS Color",
+       "5"
+      ],
+      [
+       "Basic HE-MCS and NSS (mandatory)",
+       "MCS 0-7, 8 streams"
+      ],
+      [
+       "TWT required",
+       "no"
+      ],
+      [
+       "ER SU disabled",
+       "no"
+      ]
+     ],
+     "hex": "24 00 00 02 05 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:02:30",
+   "ssid": "Corp",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -65,
+   "quality": 80,
+   "security": "WPA2/3-Enterprise",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "802.1X"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 1,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 1,
+   "rate": 72.2,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "802.1X",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 92,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 4,
+     "summary": "Corp",
+     "fields": [
+      [
+       "SSID",
+       "Corp"
+      ]
+     ],
+     "hex": "43 6f 72 70"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "802.1X; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "802.1X"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 01 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "1 streams, up to MCS 7",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "1"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-7"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 6, 20 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "6"
+      ],
+      [
+       "Secondary channel",
+       "no"
+      ],
+      [
+       "Width",
+       "20 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:02:31",
+   "ssid": "Guest",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "2.4",
+   "channel": 6,
+   "center": 6.0,
+   "width": 20,
+   "rssi": -65,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 1,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 1,
+   "rate": 72.2,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": null,
+   "stations": null,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 93,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 5,
+     "summary": "Guest",
+     "fields": [
+      [
+       "SSID",
+       "Guest"
+      ]
+     ],
+     "hex": "47 75 65 73 74"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "1 streams, up to MCS 7",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "1"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-7"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 6, 20 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "6"
+      ],
+      [
+       "Secondary channel",
+       "no"
+      ],
+      [
+       "Width",
+       "20 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:03:40",
+   "ssid": "S0",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 149,
+   "center": 151.0,
+   "width": 40,
+   "rssi": -55,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 74.5,
+   "stations": 4,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 97,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 2,
+     "summary": "S0",
+     "fields": [
+      [
+       "SSID",
+       "S0"
+      ]
+     ],
+     "hex": "53 30"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 4, load 74.5%",
+     "fields": [
+      [
+       "Stations",
+       "4"
+      ],
+      [
+       "Channel load",
+       "74.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "04 00 be 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:03:41",
+   "ssid": "S1",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 149,
+   "center": 151.0,
+   "width": 40,
+   "rssi": -55,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 74.5,
+   "stations": 4,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 97,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 2,
+     "summary": "S1",
+     "fields": [
+      [
+       "SSID",
+       "S1"
+      ]
+     ],
+     "hex": "53 31"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 4, load 74.5%",
+     "fields": [
+      [
+       "Stations",
+       "4"
+      ],
+      [
+       "Channel load",
+       "74.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "04 00 be 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:03:42",
+   "ssid": "S2",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 149,
+   "center": 151.0,
+   "width": 40,
+   "rssi": -55,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 74.5,
+   "stations": 4,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 97,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 2,
+     "summary": "S2",
+     "fields": [
+      [
+       "SSID",
+       "S2"
+      ]
+     ],
+     "hex": "53 32"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 4, load 74.5%",
+     "fields": [
+      [
+       "Stations",
+       "4"
+      ],
+      [
+       "Channel load",
+       "74.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "04 00 be 00 00"
+    }
+   ]
+  },
+  {
+   "bssid": "0c:45:ba:00:03:43",
+   "ssid": "S3",
+   "hidden": false,
+   "vendor": "",
+   "random_mac": false,
+   "band": "5",
+   "channel": 149,
+   "center": 151.0,
+   "width": 40,
+   "rssi": -55,
+   "quality": 80,
+   "security": "WPA2-Personal",
+   "ciphers": [
+    "CCMP"
+   ],
+   "akm": [
+    "PSK"
+   ],
+   "pmf": "required",
+   "wps": false,
+   "gen": "Wi-Fi 4",
+   "gen_n": 4,
+   "streams": 2,
+   "phy": "HT",
+   "mcs": 7,
+   "nss": 2,
+   "rate": 300.0,
+   "bss_color": null,
+   "k": false,
+   "nr": false,
+   "r": false,
+   "v": false,
+   "std": {
+    "i": "PSK",
+    "w": "required"
+   },
+   "mdid": null,
+   "util": 74.5,
+   "stations": 4,
+   "country": "",
+   "beacon": 100,
+   "dtim": null,
+   "cap": "0x0011",
+   "ht_prot": 0,
+   "ie_len": 97,
+   "ie_tree": [
+    {
+     "id": 0,
+     "name": "SSID",
+     "len": 2,
+     "summary": "S3",
+     "fields": [
+      [
+       "SSID",
+       "S3"
+      ]
+     ],
+     "hex": "53 33"
+    },
+    {
+     "id": 1,
+     "name": "Supported Rates",
+     "len": 10,
+     "summary": "6* 9 12* 18 24* 36 48 54 Mbit/s; required: HT PHY, SAE H2E only",
+     "fields": [
+      [
+       "Rates (* = basic)",
+       "6* 9 12* 18 24* 36 48 54 Mbit/s"
+      ],
+      [
+       "BSS membership selectors",
+       "HT PHY, SAE H2E only"
+      ]
+     ],
+     "hex": "8c 12 98 24 b0 48 60 6c ff fb"
+    },
+    {
+     "id": 48,
+     "name": "RSN",
+     "len": 20,
+     "summary": "PSK; CCMP",
+     "fields": [
+      [
+       "Group cipher",
+       "CCMP"
+      ],
+      [
+       "Pairwise",
+       "CCMP"
+      ],
+      [
+       "AKM",
+       "PSK"
+      ],
+      [
+       "PMF capable (MFPC)",
+       "yes"
+      ],
+      [
+       "PMF required (MFPR)",
+       "yes"
+      ]
+     ],
+     "hex": "01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f ac 02 c0 00"
+    },
+    {
+     "id": 45,
+     "name": "HT Capabilities",
+     "len": 26,
+     "summary": "2 streams, up to MCS 15",
+     "fields": [
+      [
+       "HT Capability Info",
+       "0x016E"
+      ],
+      [
+       "40 MHz width",
+       "yes"
+      ],
+      [
+       "Short GI 20 MHz",
+       "yes"
+      ],
+      [
+       "Short GI 40 MHz",
+       "yes"
+      ],
+      [
+       "Spatial streams (Rx)",
+       "2"
+      ],
+      [
+       "Rx MCS (bitmask)",
+       "MCS 0-15"
+      ],
+      [
+       "Tx MCS Set",
+       "not specified"
+      ]
+     ],
+     "hex": "6e 01 17 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 61,
+     "name": "HT Operation",
+     "len": 22,
+     "summary": "primary 36, 40 MHz",
+     "fields": [
+      [
+       "Primary channel",
+       "36"
+      ],
+      [
+       "Secondary channel",
+       "above"
+      ],
+      [
+       "Width",
+       "40 MHz"
+      ],
+      [
+       "HT protection",
+       "none"
+      ],
+      [
+       "Basic MCS Set (mandatory)",
+       "no"
+      ]
+     ],
+     "hex": "24 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+    },
+    {
+     "id": 11,
+     "name": "QBSS Load",
+     "len": 5,
+     "summary": "stations 4, load 74.5%",
+     "fields": [
+      [
+       "Stations",
+       "4"
+      ],
+      [
+       "Channel load",
+       "74.5%"
+      ],
+      [
+       "Admission capacity",
+       "0"
+      ]
+     ],
+     "hex": "04 00 be 00 00"
+    }
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "severity": "critical",
+   "code": "RF_UTIL",
+   "title": "High channel load",
+   "detail": "Neighbor (a0:b1:c2:00:00:50, channel 40, 5 GHz): 78% of airtime busy, stations: 5.",
+   "ssid": "Neighbor",
+   "bssids": [
+    "a0:b1:c2:00:00:50"
+   ],
+   "recommendation": "The figure comes from the AP's own QBSS Load. Check the client count, a channel/width change, moving clients to 5 GHz."
+  },
+  {
+   "severity": "critical",
+   "code": "RF_UTIL",
+   "title": "High channel load",
+   "detail": "S0, S1, S2, S3 (one radio, BSSs: 4, channel 149, 5 GHz): 74% of airtime busy, stations per BSS: 4, 4, 4, 4.",
+   "ssid": "S0, S1, S2, S3",
+   "bssids": [
+    "0c:45:ba:00:03:40",
+    "0c:45:ba:00:03:41",
+    "0c:45:ba:00:03:42",
+    "0c:45:ba:00:03:43"
+   ],
+   "recommendation": "The figure comes from the AP's own QBSS Load. Check the client count, a channel/width change, moving clients to 5 GHz."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_COCHANNEL",
+   "title": "Many BSSs on one channel",
+   "detail": "5 GHz, channel 36: 4 radios (BSSs: 7) heard stronger than -80 dBm (SSIDs: Corp, Ent384, Fils, Guest, Mixed, Neighbor2).",
+   "ssid": "",
+   "bssids": [
+    "0c:45:ba:00:00:10",
+    "0c:45:ba:00:00:11",
+    "0c:45:ba:00:00:12",
+    "0c:45:ba:00:00:13",
+    "0c:45:ba:00:00:14",
+    "0c:45:ba:00:00:15",
+    "a0:b1:c2:00:00:90"
+   ],
+   "recommendation": "They all share the airtime (CSMA/CA). Consider another channel, a narrower width or lower power."
+  },
+  {
+   "severity": "warning",
+   "code": "RF_UTIL",
+   "title": "High channel load",
+   "detail": "Neighbor2 (a0:b1:c2:00:00:90, channel 36, 5 GHz): 59% of airtime busy, stations: 3.",
+   "ssid": "Neighbor2",
+   "bssids": [
+    "a0:b1:c2:00:00:90"
+   ],
+   "recommendation": "The figure comes from the AP's own QBSS Load. Check the client count, a channel/width change, moving clients to 5 GHz."
+  },
+  {
+   "severity": "warning",
+   "code": "ROAM_SEC_MISMATCH",
+   "title": "Different security across BSSs of one SSID",
+   "detail": "SSID «Corp»: WPA2/3-Enterprise; WPA3-Personal.",
+   "ssid": "Corp",
+   "bssids": [
+    "0c:45:ba:00:00:10",
+    "0c:45:ba:00:01:20",
+    "0c:45:ba:00:02:30"
+   ],
+   "recommendation": "A client that chose one BSS may fail to connect to another. Check the SSID profile on the controller."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11K_OFF",
+   "title": "802.11k not advertised",
+   "detail": "SSID \"Corp\": the IE was not found on any of 3 BSSs.",
+   "ssid": "Corp",
+   "bssids": [
+    "0c:45:ba:00:00:10",
+    "0c:45:ba:00:01:20",
+    "0c:45:ba:00:02:30"
+   ],
+   "recommendation": "Helps clients pick the best AP when roaming; enable it if the controller supports it."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11K_OFF",
+   "title": "802.11k not advertised",
+   "detail": "SSID \"Guest\": the IE was not found on any of 2 BSSs.",
+   "ssid": "Guest",
+   "bssids": [
+    "0c:45:ba:00:00:11",
+    "0c:45:ba:00:02:31"
+   ],
+   "recommendation": "Helps clients pick the best AP when roaming; enable it if the controller supports it."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11R_OFF",
+   "title": "802.11r not advertised",
+   "detail": "SSID \"Corp\" (Enterprise, 3 BSSs): Mobility Domain IE not found.",
+   "ssid": "Corp",
+   "bssids": [
+    "0c:45:ba:00:00:10",
+    "0c:45:ba:00:01:20",
+    "0c:45:ba:00:02:30"
+   ],
+   "recommendation": "Without FT every roam is a full 802.1X authentication unless PMK caching/OKC works. Enable FT after checking that the clients support it."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11V_OFF",
+   "title": "802.11v not advertised",
+   "detail": "SSID \"Corp\": the IE was not found on any of 3 BSSs.",
+   "ssid": "Corp",
+   "bssids": [
+    "0c:45:ba:00:00:10",
+    "0c:45:ba:00:01:20",
+    "0c:45:ba:00:02:30"
+   ],
+   "recommendation": "Helps clients pick the best AP when roaming; enable it if the controller supports it."
+  },
+  {
+   "severity": "info",
+   "code": "ROAM_11V_OFF",
+   "title": "802.11v not advertised",
+   "detail": "SSID \"Guest\": the IE was not found on any of 2 BSSs.",
+   "ssid": "Guest",
+   "bssids": [
+    "0c:45:ba:00:00:11",
+    "0c:45:ba:00:02:31"
+   ],
+   "recommendation": "Helps clients pick the best AP when roaming; enable it if the controller supports it."
+  },
+  {
+   "severity": "info",
+   "code": "SEC_TRANSITION",
+   "title": "WPA2/WPA3 transition mode",
+   "detail": "Network \"Mixed\" accepts both PSK and SAE.",
+   "ssid": "Mixed",
+   "bssids": [
+    "0c:45:ba:00:00:13"
+   ],
+   "recommendation": "This is the normal transition mode; clients without SAE support may fall back to WPA2."
+  }
+ ],
+ "advice": {
+  "2.4": [
+   {
+    "channel": 1,
+    "dbm": -120.0,
+    "count": 0,
+    "radios": 0,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": true
+   },
+   {
+    "channel": 11,
+    "dbm": -120.0,
+    "count": 0,
+    "radios": 0,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 6,
+    "dbm": -65.0,
+    "count": 2,
+    "radios": 1,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   }
+  ],
+  "5": [
+   {
+    "channel": 157,
+    "dbm": -120.0,
+    "count": 0,
+    "radios": 0,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": true
+   },
+   {
+    "channel": 161,
+    "dbm": -120.0,
+    "count": 0,
+    "radios": 0,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 48,
+    "dbm": -45.5,
+    "count": 6,
+    "radios": 3,
+    "util": 0.0,
+    "dfs": false,
+    "busy": false,
+    "best": false
+   },
+   {
+    "channel": 149,
+    "dbm": -55.0,
+    "count": 4,
+    "radios": 1,
+    "util": 74.5,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   },
+   {
+    "channel": 153,
+    "dbm": -55.0,
+    "count": 4,
+    "radios": 1,
+    "util": 74.5,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   },
+   {
+    "channel": 36,
+    "dbm": -45.4,
+    "count": 7,
+    "radios": 4,
+    "util": 58.8,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   },
+   {
+    "channel": 44,
+    "dbm": -45.4,
+    "count": 7,
+    "radios": 4,
+    "util": 78.4,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   },
+   {
+    "channel": 40,
+    "dbm": -45.3,
+    "count": 8,
+    "radios": 5,
+    "util": 78.4,
+    "dfs": false,
+    "busy": true,
+    "best": false
+   }
+  ]
+ },
+ "util": {
+  "channels": [
+   {
+    "band": "5",
+    "channel": 40,
+    "max": 78.4,
+    "avg": 78.4,
+    "level": "crit",
+    "label": "overloaded",
+    "reporting": 1,
+    "bss": 1,
+    "stations": 5,
+    "aps": [
+     {
+      "bssid": "a0:b1:c2:00:00:50",
+      "ssid": "Neighbor",
+      "util": 78.4,
+      "stations": 5
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 149,
+    "max": 74.5,
+    "avg": 74.5,
+    "level": "crit",
+    "label": "overloaded",
+    "reporting": 4,
+    "bss": 4,
+    "stations": 16,
+    "aps": [
+     {
+      "bssid": "0c:45:ba:00:03:40",
+      "ssid": "S0",
+      "util": 74.5,
+      "stations": 4
+     },
+     {
+      "bssid": "0c:45:ba:00:03:41",
+      "ssid": "S1",
+      "util": 74.5,
+      "stations": 4
+     },
+     {
+      "bssid": "0c:45:ba:00:03:42",
+      "ssid": "S2",
+      "util": 74.5,
+      "stations": 4
+     },
+     {
+      "bssid": "0c:45:ba:00:03:43",
+      "ssid": "S3",
+      "util": 74.5,
+      "stations": 4
+     }
+    ],
+    "series": []
+   },
+   {
+    "band": "5",
+    "channel": 36,
+    "max": 58.8,
+    "avg": 58.8,
+    "level": "high",
+    "label": "high",
+    "reporting": 1,
+    "bss": 7,
+    "stations": 3,
+    "aps": [
+     {
+      "bssid": "a0:b1:c2:00:00:90",
+      "ssid": "Neighbor2",
+      "util": 58.8,
+      "stations": 3
+     }
+    ],
+    "series": []
+   }
+  ],
+  "no_data": [
+   {
+    "band": "2.4",
+    "channel": 6,
+    "bss": 2
+   },
+   {
+    "band": "6",
+    "channel": 2,
+    "bss": 1
+   }
+  ]
+ }
+}
