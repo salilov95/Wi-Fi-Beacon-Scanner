@@ -11,6 +11,7 @@ same result. It also protects 1.x itself — any change in parsing or rules show
 | `fixtures/*.json` | Input: scan snapshots (the same format as *Export → JSON*) |
 | `golden/<fixture>.<lang>.json` | Expected output for each snapshot, in Russian and English |
 | `schema/golden.schema.json` | Format of the expected output (JSON Schema 2020-12) |
+| `i18n/en.json` | English translation catalogue shared by both versions (exported by `tools/export_i18n.py`) |
 
 The expected output contains, for every snapshot:
 
@@ -26,6 +27,7 @@ The expected output contains, for every snapshot:
 | `real-home-01` | a real scan (MediaTek MT7921, Windows 11), anonymised |
 | `demo-office` | the demo mode (`DemoBackend`) |
 | `synthetic-edge` | hand-built edge cases: deprecated VHT widths, AKM 23/24/25, FILS, 6 GHz channel 2, one radio with several SSIDs |
+| `synthetic-coverage` | built by `tools/make_contract_fixtures.py` to walk through the IE decoder and rule branches (ties, Tx MCS Set, TPC, 6 GHz flags, 802.11u, vendor IEs...) |
 
 Real scans are anonymised before they are committed: the repository is public, and a scan contains neighbours'
 network names, BSSIDs and, in WPS, router models and serial numbers.

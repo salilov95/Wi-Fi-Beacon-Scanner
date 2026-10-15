@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   security, MCS and PHY rate and builds the network table row; 37 row fields match 1.x on every golden file
   (`rust/crates/wbs-core/tests/contract.rs`). Separate workflow `.github/workflows/rust.yml`
   (Windows and Linux: rustfmt, clippy, tests); 1.x build and releases are not affected.
+- `wbs-core` now also builds the IE tree for the Beacon tab, 802.11 amendment notes, problems, channel quality and
+  utilisation in Russian and English; the whole golden document matches 1.x. Shared translation catalogue
+  `contract/i18n/en.json` (`tools/export_i18n.py`), coverage fixture `synthetic-coverage`
+  (`tools/make_contract_fixtures.py`).
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14

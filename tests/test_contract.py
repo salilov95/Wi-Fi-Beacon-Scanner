@@ -44,6 +44,14 @@ class GoldenTests(unittest.TestCase):
         self.assertFalse(any("а" <= ch.lower() <= "я" for ch in text))
 
 
+class CatalogTests(unittest.TestCase):
+    def test_exported_catalog_is_current(self):
+        """contract/i18n/en.json (его читает версия на Rust) совпадает с i18n_en.py."""
+        import export_i18n
+        with open(export_i18n.PATH, encoding="utf-8") as f:
+            self.assertEqual(f.read(), export_i18n.render(), "python tools/export_i18n.py")
+
+
 class SchemaAndDiffTests(unittest.TestCase):
     """Проверяем сами проверки: схема и сравнение должны находить порчу."""
 
