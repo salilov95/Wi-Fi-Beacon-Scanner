@@ -96,7 +96,7 @@ fn compute(name: &str, lang: Lang, snap: &Snapshot) -> Value {
                         .collect(),
                 ),
             ),
-            ("util".into(), channel_utilization(&snap.bss)),
+            ("util".into(), channel_utilization(&snap.bss, None)),
         ])
     })
 }

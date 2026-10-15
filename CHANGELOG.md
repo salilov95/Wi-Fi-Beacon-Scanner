@@ -20,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   utilisation in Russian and English; the whole golden document matches 1.x. Shared translation catalogue
   `contract/i18n/en.json` (`tools/export_i18n.py`), coverage fixture `synthetic-coverage`
   (`tools/make_contract_fixtures.py`).
+- 2.0.0-alpha.1 (Rust + Tauri 2, `rust/app`): its own window with the same UI, scanning through wlanapi, table,
+  channels, utilisation, signal over time, problems, Beacon tab, before/after comparison, CSV/JSON export.
+  `/api/state` and exports match 1.x (`tools/compare_state.py`, run in CI). Installs next to 1.x. Not ported yet:
+  connection journal, Windows event log, survey, HTML/PDF/Excel reports.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14

@@ -1,0 +1,27 @@
+# Окно Wi-Fi Beacon Scanner 2.x на Tauri 2. Логика и API - в ../crates/wbs-core, здесь только оболочка.
+# Отдельный workspace: собирается в CI (Windows), где есть crates.io.
+[workspace]
+
+[package]
+name = "wbs-app"
+version = "2.0.0-alpha.1"
+description = "Wi-Fi Beacon Scanner 2"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"
+authors = ["salilov95"]
+publish = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# custom-protocol: окно никогда не ходит на devUrl, всё отдаёт наш протокол wbs
+tauri = { version = "2", features = ["custom-protocol"] }
+wbs-core = { path = "../crates/wbs-core" }
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = true
