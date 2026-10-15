@@ -1,0 +1,57 @@
+# Версия 2.x на Rust (папка rust/): формат, clippy, тесты и сверка с эталонами contract/golden.
+# Запускается только когда меняются rust/, contract/ или этот файл - сборку и релизы 1.x (ci.yml, release.yml)
+# не трогает. Итог каждого шага пишется аннотацией (::notice / ::error), чтобы его было видно без логов.
+name: Rust
+
+on:
+  push:
+    branches: [main]
+    paths: ["rust/**", "contract/**", ".github/workflows/rust.yml"]
+  pull_request:
+    paths: ["rust/**", "contract/**", ".github/workflows/rust.yml"]
+
+permissions:
+  contents: read
+
+env:
+  RUSTUP_TOOLCHAIN: "1.97.0"   # точная версия Rust; в rust/rust-toolchain.toml - канал stable
+  CARGO_TERM_COLOR: never
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v5
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal -c rustfmt,clippy
+          echo "::notice title=rust ${{ matrix.os }}::$(rustc --version)"
+      - name: fmt, clippy, tests
+        run: |
+          fail=0
+          step() {
+            local name="$1"; shift
+            if "$@" > "/tmp/$name.log" 2>&1; then
+              echo "::notice title=$name ${{ matrix.os }}::ok"
+            else
+              fail=1
+              echo "::error title=$name ${{ matrix.os }}::$(tail -c 3500 "/tmp/$name.log" | tr '\n' '|' | sed 's/%/%25/g')"
+            fi
+            cat "/tmp/$name.log"
+          }
+          step fmt cargo fmt --all --check
+          step clippy cargo clippy --all-targets -- -D warnings
+          step tests cargo test -- --nocapture
+          if [ -f /tmp/tests.log ]; then
+            summary=$(grep -E "^test result|проверено строк" /tmp/tests.log | tr '\n' '|')
+            echo "::notice title=tests summary ${{ matrix.os }}::$summary"
+          fi
+          exit $fail

@@ -1,0 +1,14 @@
+# Wi-Fi Beacon Scanner 2.x (Rust + Tauri 2). Python-версия 1.x - в корне репозитория, её этот каталог не трогает.
+[workspace]
+resolver = "2"
+members = ["crates/wbs-core"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/salilov95/Wi-Fi-Beacon-Scanner"
+authors = ["salilov95"]
+
+[profile.release]
+lto = true
+codegen-units = 1

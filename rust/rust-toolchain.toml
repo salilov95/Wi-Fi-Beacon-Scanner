@@ -1,0 +1,7 @@
+# Канал и компоненты Rust для проекта. Точная версия закреплена в CI (.github/workflows/rust.yml,
+# RUSTUP_TOOLCHAIN): если вписать её сюда, rustup без сети пытается скачать «другой» тулчейн,
+# даже когда эта версия уже стоит как stable.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
