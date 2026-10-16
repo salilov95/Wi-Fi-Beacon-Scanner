@@ -41,11 +41,13 @@ pub fn sanitize(d: &Value) -> Value {
             put(key, s.into());
         }
     }
-    if let Some(x) = num(d.get("connWin")).filter(|x| [60.0, 300.0, 900.0, 1800.0].contains(x)) {
-        put("connWin", Value::Int(x as i64));
+    // `d.get(k) in (60, 300, ...)`: 300.0 тоже подходит и остаётся числом с точкой, как прислали
+    if num(d.get("connWin")).is_some_and(|x| [60.0, 300.0, 900.0, 1800.0].contains(&x)) {
+        put("connWin", d.get("connWin").cloned().unwrap_or(Value::Null));
     }
     if let Some(x) = num(d.get("svOpacity")).filter(|x| (0.1..=0.9).contains(x)) {
-        put("svOpacity", ((x * 100.0).round() / 100.0).into());
+        // `round(x, 2)` в Python - по точному значению double с половиной к чётному; `{:.2}` округляет так же
+        put("svOpacity", format!("{x:.2}").parse::<f64>().unwrap_or(x).into());
     }
     if let Some(s) = one_of(d.get("sigMode"), &["lines", "heat"]) {
         put("sigMode", s.into());
@@ -56,8 +58,8 @@ pub fn sanitize(d: &Value) -> Value {
     if let Some(s) = one_of(d.get("lang"), &["ru", "en"]) {
         put("lang", s.into());
     }
-    if let Some(x) = num(d.get("interval")).filter(|x| [5.0, 10.0, 30.0, 60.0].contains(x)) {
-        put("interval", Value::Int(x as i64));
+    if num(d.get("interval")).is_some_and(|x| [5.0, 10.0, 30.0, 60.0].contains(&x)) {
+        put("interval", d.get("interval").cloned().unwrap_or(Value::Null));
     }
     for k in ["group", "heatAll", "auto"] {
         if let Some(Value::Bool(b)) = d.get(k) {
@@ -124,7 +126,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             sanitize(&v).to_json(),
-            r#"{"density":"compact","connWin":300,"svOpacity":0.46,"lang":"en","auto":true,"panelH":350,"colW":{"rssi":80},"cols":["ssid"],"focus":["Office"]}"#
+            r#"{"density":"compact","connWin":300.0,"svOpacity":0.46,"lang":"en","auto":true,"panelH":350,"colW":{"rssi":80},"cols":["ssid"],"focus":["Office"]}"#
         );
         assert_eq!(sanitize(&Value::Arr(vec![])).to_json(), "{}");
     }

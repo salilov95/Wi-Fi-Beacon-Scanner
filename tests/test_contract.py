@@ -29,6 +29,13 @@ class GoldenTests(unittest.TestCase):
             for lang in golden.LANGS:
                 self.assertTrue(os.path.exists(golden.golden_path(name, lang)), (name, lang))
 
+    def test_demo_base_is_current(self):
+        # 2.x в --demo крутит contract/fixtures/demo-base.json: он должен быть ровно build_demo_snapshot() из 1.x
+        import make_contract_fixtures
+        with open(make_contract_fixtures.DEMO_BASE, encoding="utf-8") as f:
+            self.assertEqual(json.load(f), make_contract_fixtures.demo_base(),
+                             "демо 1.x изменилось: python tools/make_contract_fixtures.py и python tools/golden.py update")
+
     def test_real_fixture_present(self):
         self.assertIn("real-home-01", golden.fixtures())     # хотя бы один снапшот с реального адаптера
 

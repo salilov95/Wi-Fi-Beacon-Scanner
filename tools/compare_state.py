@@ -182,6 +182,7 @@ def main() -> int:
         rs.close()
     problems += compare_reports(sys.argv[1])
     problems += compare_survey(sys.argv[1])
+    problems += compare_prefs(sys.argv[1])
     print("итого расхождений: %d" % problems)
     return 1 if problems else 0
 
@@ -345,6 +346,43 @@ def _wait_rs(rs) -> None:
 def _norm(obj) -> str:
     """Без времени точек (у версий оно разное) и в одном формате JSON."""
     return _DT.sub("T", _T.sub(r'"\1": 0', json.dumps(obj, ensure_ascii=False, sort_keys=False)))
+
+
+PREFS_CASES = [
+    {"theme": "dark", "density": "compact", "connWin": 300.0, "interval": 10, "svOpacity": 0.675, "panelH": 350.7,
+     "v": 3, "auto": True, "group": 1, "heatAll": False, "tab": "survey", "expScope": "focus"},
+    {"svOpacity": 0.125, "connWin": True, "interval": 5.0, "v": 5.0, "panelH": True, "sigMode": "heat",
+     "sigColor": "bss", "theme": "auto"},
+    {"svOpacity": 0.95, "connWin": 61, "interval": 60, "panelH": 4000, "v": 100, "density": "normal"},
+    {"svOpacity": 0.1, "panelH": 99.9, "v": 101, "colW": {"rssi": 80.9, "BAD": 90, "ssid": 5, "chan": 2000,
+                                                         "x" * 25: 50, "a_b": True},
+     "cols": ["ssid", "x-y", 3, "", "rssi"], "focus": [" x ", "", "y" * 100, 5], "theme": "nope"},
+    {"colW": {"c%d" % i: 100 for i in range(50)}, "cols": ["c"] * 50},
+    [1, 2], "x", None, {},
+    {"lang": "en", "theme": "paper"},
+    {"density": "compact"},
+    {"lang": "ru"},
+]
+
+
+def compare_prefs(exe: str) -> int:
+    """Настройки вида: что 1.x оставляет из присланного (типы чисел, округление, ограничения)."""
+    rs = Rust(exe)
+    try:
+        set_lang("ru")
+        st = AppState(DemoBackend(), None)
+        bad = 0
+        for i, case in enumerate(PREFS_CASES):
+            want = json.dumps(st.set_prefs(json.loads(json.dumps(case))), ensure_ascii=False)
+            got = json.dumps(rs.get("/api/prefs", json.dumps(case)), ensure_ascii=False)
+            if want != got:
+                bad += 1
+                print("    настройки, случай %d:\n    1.x: %s\n    2.x: %s" % (i, want, got))
+        print("настройки: проверок %d, расхождений %d" % (len(PREFS_CASES), bad))
+        return bad
+    finally:
+        set_lang("ru")
+        rs.close()
 
 
 def compare_survey(exe: str) -> int:

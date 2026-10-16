@@ -45,13 +45,21 @@ struct Args {
 
 fn parse_args() -> Args {
     let mut a = Args::default();
-    let argv: Vec<String> = std::env::args().skip(1).collect();
+    // `--ssid=CORP` - как `--ssid CORP` (argparse в 1.x понимает обе записи)
+    let argv: Vec<String> = std::env::args()
+        .skip(1)
+        .flat_map(|s| match s.split_once('=') {
+            Some((k, v)) if k.starts_with("--") => vec![k.to_string(), v.to_string()],
+            _ => vec![s],
+        })
+        .collect();
     let mut i = 0;
     while i < argv.len() {
         let next = argv.get(i + 1).filter(|v| !v.starts_with("--")).cloned();
         match argv[i].as_str() {
             "--demo" => {
-                a.demo = Some(next.clone().map(PathBuf::from));
+                // `--demo=` - пустой путь, как и `--demo` без файла: демо-скан из программы
+                a.demo = Some(next.clone().filter(|v| !v.is_empty()).map(PathBuf::from));
                 i += next.is_some() as usize;
             }
             "--ssid" | "--manuf" | "--lang" if next.is_some() => {

@@ -34,6 +34,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - 2.0.0-alpha.4: the floor-plan survey (plan, points, project files, survey table in reports), the demo mode
   (`--demo [scan.json]`: varying scans, the 1.x demo journal and Windows event log) and the command-line options of the
   1.x exe (`--ssid`, `--manuf`, `--lang`). Links to GitHub open in the default browser. Log rotation as in 1.x.
+- 2.0.0-alpha.5, fixes found by the parity audit: the "Clear journal" button works (`/api/conn/clear` was missing; a test
+  now checks that every API address the window calls has a route); the demo mode shows the full 1.x demo office
+  (`contract/fixtures/demo-base.json`, checked against `build_demo_snapshot()`); view settings keep numbers as sent and
+  round the plan opacity like 1.x (`compare_state.py` compares them); `--ssid=CORP` works like `--ssid CORP`.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14

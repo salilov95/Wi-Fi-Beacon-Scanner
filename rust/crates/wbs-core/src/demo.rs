@@ -1,6 +1,7 @@
 //! Демо-режим: посмотреть программу без Wi-Fi. Перенос `DemoBackend`, `DemoConnMonitor`, `demo_winlog` из 1.x.
 //!
-//! «Офис с соседями» - тот же снапшот, что строит `demo.py` (`contract/fixtures/demo-office.json`). Каждый скан
+//! «Офис с соседями» - ровно `build_demo_snapshot()` из `demo.py` (`contract/fixtures/demo-base.json`, его
+//! актуальность проверяет `tests/test_contract.py`; demo-office.json - уже «покачанный» скан, не основа). Каждый скан
 //! слегка меняет RSSI и иногда «теряет» слабый BSS; на обходе сигнал падает с расстоянием до условного места AP.
 //! Журнал подключения: сначала 5 минут истории (тот же сценарий, что у 1.x - `contract/journal/scenarios/demo.json`,
 //! сдвинутый к «сейчас»), потом раз в секунду живые замеры и роуминг раз в 90 секунд. Причины помечены «демо».
@@ -19,7 +20,7 @@ use crate::mcs::{phy_rate, Phy};
 use crate::model::{Bss, Snapshot};
 use crate::winlog::{group_of, level_ru};
 
-const DEMO_SNAPSHOT: &str = include_str!("../../../../contract/fixtures/demo-office.json");
+const DEMO_SNAPSHOT: &str = include_str!("../../../../contract/fixtures/demo-base.json");
 const DEMO_JOURNAL: &str = include_str!("../../../../contract/journal/scenarios/demo.json");
 /// Сценарий записан с «сейчас» = T0 + 300 (`tools/journal_contract.py`).
 const DEMO_JOURNAL_NOW: f64 = 1_792_000_000.0 + 300.0;
@@ -523,7 +524,10 @@ mod tests {
         assert_eq!(demo_rate(-85.0, 1), demo_rate(-85.0, 0));
         let r = Rng::new(1);
         assert!((0..1000).all(|_| (-3..=3).contains(&r.randint(-3, 3))));
-        assert!(demo_snapshot().bss.len() > 10);
+        // основа - build_demo_snapshot() целиком, а не один «покачанный» скан (в нём нет слабой 10:06:01)
+        let base = demo_snapshot();
+        assert_eq!(base.bss.len(), 23);
+        assert!(base.bss.iter().any(|b| b.bssid == "00:e0:fc:10:06:01"));
         assert_eq!(tr_demo("x"), "x");
     }
 }

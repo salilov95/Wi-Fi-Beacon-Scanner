@@ -1185,6 +1185,10 @@ impl App {
                     Err(e) => Reply::err(400, e),
                 }
             }
+            "/api/conn/clear" => {
+                self.lock().conn.clear();
+                Reply::ok()
+            }
             "/api/baseline" => {
                 let truthy = |k: &str| !matches!(b.get(k), None | Some(Value::Null) | Some(Value::Bool(false)));
                 let mut st = self.lock();

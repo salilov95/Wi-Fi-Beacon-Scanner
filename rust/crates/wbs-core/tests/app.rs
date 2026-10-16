@@ -49,6 +49,50 @@ fn wait_scan(a: &Arc<App>) -> Value {
     }
 }
 
+/// Каждый адрес `/api/...`, который зовёт окно 1.x (app.js), должен иметь маршрут хотя бы для GET или POST.
+/// «not found» - ответ на неизвестный маршрут; так нашёлся пропущенный `/api/conn/clear`.
+#[test]
+fn every_ui_route_exists() {
+    let a = app();
+    let js = String::from_utf8(a.handle("GET", "/app.js", b"").body).unwrap();
+    let mut paths: Vec<String> = js
+        .match_indices("/api/")
+        .map(|(i, _)| {
+            js[i..]
+                .chars()
+                .take_while(|c| c.is_ascii_lowercase() || *c == '/' || *c == '_')
+                .collect::<String>()
+        })
+        .map(|p| {
+            if p == "/api/export/" {
+                "/api/export/csv".to_string()
+            } else {
+                p
+            }
+        })
+        .collect();
+    paths.sort();
+    paths.dedup();
+    assert!(paths.len() >= 20, "{paths:?}");
+    assert!(paths.iter().any(|p| p == "/api/conn/clear"));
+    for p in &paths {
+        let found = ["GET", "POST"].iter().any(|m| {
+            let (_, v) = call(&a, m, p, "{}");
+            v.get("error").and_then(Value::as_str) != Some("not found")
+        });
+        assert!(found, "окно зовёт {p}, а маршрута нет");
+    }
+}
+
+#[test]
+fn conn_clear() {
+    let a = app();
+    assert_eq!(
+        call(&a, "POST", "/api/conn/clear", "{}"),
+        (200, parse(r#"{"ok":true}"#).unwrap())
+    );
+}
+
 #[test]
 fn static_files_and_lang() {
     let a = app();

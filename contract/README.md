@@ -26,7 +26,8 @@ The expected output contains, for every snapshot:
 | Fixture | Source |
 |---|---|
 | `real-home-01` | a real scan (MediaTek MT7921, Windows 11), anonymised |
-| `demo-office` | the demo mode (`DemoBackend`) |
+| `demo-office` | one scan of the demo mode (`DemoBackend`: RSSI already varied, a weak BSS dropped) |
+| `demo-base` | the demo office itself, `build_demo_snapshot()`; 2.x `--demo` varies it. `tools/make_contract_fixtures.py` writes it |
 | `synthetic-edge` | hand-built edge cases: deprecated VHT widths, AKM 23/24/25, FILS, 6 GHz channel 2, one radio with several SSIDs |
 | `synthetic-coverage` | built by `tools/make_contract_fixtures.py` to walk through the IE decoder and rule branches (ties, Tx MCS Set, TPC, 6 GHz flags, 802.11u, vendor IEs...) |
 
