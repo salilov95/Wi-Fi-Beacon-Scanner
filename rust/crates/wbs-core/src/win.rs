@@ -563,3 +563,49 @@ pub fn https_get(host: &str, path: &str) -> Result<String, String> {
     }
     String::from_utf8(body).map_err(|e| e.to_string())
 }
+
+// ---------------------------------------------------------------- реестр: App Paths (где Windows находит msedge.exe)
+
+#[cfg_attr(windows, link(name = "advapi32", kind = "raw-dylib"))]
+extern "system" {
+    fn RegGetValueW(
+        hkey: HANDLE,
+        subkey: *const u16,
+        value: *const u16,
+        flags: u32,
+        kind: *mut u32,
+        data: *mut c_void,
+        size: *mut u32,
+    ) -> i32;
+}
+
+/// Путь из `HKLM/HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\<exe>`, если файл есть.
+pub fn app_path(exe: &str) -> Option<std::path::PathBuf> {
+    let key = wide(&format!(r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\{exe}"));
+    for hive in [0x8000_0002usize, 0x8000_0001usize] {
+        let mut buf = [0u16; 1024];
+        let mut size = (buf.len() * 2) as u32;
+        // 0x2 = RRF_RT_REG_SZ; значение по умолчанию - имя null
+        let rc = unsafe {
+            RegGetValueW(
+                hive as HANDLE,
+                key.as_ptr(),
+                std::ptr::null(),
+                0x2,
+                std::ptr::null_mut(),
+                buf.as_mut_ptr() as *mut c_void,
+                &mut size,
+            )
+        };
+        if rc != 0 {
+            continue;
+        }
+        let n = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+        let p = String::from_utf16_lossy(&buf[..n]).trim().trim_matches('"').to_string();
+        let p = std::path::PathBuf::from(p);
+        if p.is_file() {
+            return Some(p);
+        }
+    }
+    None
+}

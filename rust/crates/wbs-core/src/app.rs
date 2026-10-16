@@ -793,25 +793,29 @@ impl App {
                 data.extend(render_sessions_csv(&ss, self.cfg.tz_offset_min).into_bytes());
                 return Reply::file(data, "text/csv; charset=utf-8", "wifi-sessions.csv");
             }
-            "html" | "pdf" | "xlsx" => {
-                return Reply::err(
-                    501,
-                    not_ported("Отчёты HTML, PDF и Excel", "HTML, PDF and Excel reports"),
-                )
-            }
-            "csv" | "json" | "history" => {}
+            "csv" | "json" | "history" | "html" | "pdf" | "xlsx" => {}
             _ => return Reply::err(404, tr("неизвестный формат")),
         }
-        let (snap, history) = {
+        // снимок состояния под замком: дальше отчёт строится без блокировки окна
+        let (snap, findings, focus, history, journal) = {
             let st = self.lock();
             match &st.snapshot {
                 None => return Reply::err(409, tr("ещё нет данных: сначала выполни скан")),
-                Some(s) => ((**s).clone(), st.history.clone()),
+                Some(s) => (
+                    (**s).clone(),
+                    st.findings.clone(),
+                    st.focus.clone(),
+                    st.history.clone(),
+                    st.conn.clone(),
+                ),
             }
         };
-        let focus = self.lock().focus.clone();
-        let keep: Vec<crate::model::Bss> = match scope {
-            "all" => snap.bss.clone(),
+        // какие сети в выгрузку (`export_view` в 1.x)
+        let (keep, note): (Vec<crate::model::Bss>, String) = match scope {
+            "all" => (
+                snap.bss.clone(),
+                trf("все сети (%d BSS)", &[Arg::I(snap.bss.len() as i64)]),
+            ),
             "focus" => {
                 if focus.is_empty() {
                     return Reply::err(
@@ -819,7 +823,8 @@ impl App {
                         tr("не заданы «Мои SSID»: впиши их в поле вверху или выбери «Все сети»"),
                     );
                 }
-                snap.bss.iter().filter(|b| focus.contains(&b.ssid())).cloned().collect()
+                let keep: Vec<_> = snap.bss.iter().filter(|b| focus.contains(&b.ssid())).cloned().collect();
+                (keep, trf("только мои SSID: %s", &[Arg::S(focus.join(", "))]))
             }
             "list" => {
                 let list = match bssids {
@@ -828,7 +833,8 @@ impl App {
                 };
                 let wanted: std::collections::HashSet<String> =
                     list.iter().filter_map(Value::as_str).map(str::to_lowercase).collect();
-                snap.bss.iter().filter(|b| wanted.contains(&b.bssid)).cloned().collect()
+                let keep: Vec<_> = snap.bss.iter().filter(|b| wanted.contains(&b.bssid)).cloned().collect();
+                (keep, tr("сети, видимые в таблице с текущими фильтрами"))
             }
             other => return Reply::err(400, trf("неизвестный scope: %r", &[Arg::S(other.into())])),
         };
@@ -841,12 +847,65 @@ impl App {
             _ => "",
         };
         let ids: std::collections::HashSet<&str> = keep.iter().map(|b| b.bssid.as_str()).collect();
+        let ssids: std::collections::HashSet<String> = keep.iter().map(|b| b.ssid_display()).collect();
         let hist: History = history.into_iter().filter(|(k, _)| ids.contains(k.as_str())).collect();
+        // проблемы считаются по всему эфиру, в отчёт - те, что касаются выбранных сетей
+        let (findings, note) = if scope == "all" {
+            (findings, note)
+        } else {
+            let n = keep.len();
+            let f: Vec<_> = findings
+                .into_iter()
+                .filter(|f| {
+                    f.bssids.iter().any(|b| ids.contains(b.as_str())) || (!f.ssid.is_empty() && ssids.contains(&f.ssid))
+                })
+                .collect();
+            (f, format!("{note} ({n} BSS)"))
+        };
         let sub = Snapshot {
             taken_at: snap.taken_at.clone(),
             interface: snap.interface.clone(),
             bss: keep,
         };
+        if matches!(fmt, "html" | "pdf" | "xlsx") {
+            // загрузка каналов - по выбранным сетям; журнал - целиком (он про ноутбук)
+            let util = channel_utilization(&sub.bss, None);
+            let input = crate::report::ReportInput {
+                snap: &sub,
+                findings: &findings,
+                focus: &focus,
+                note: &note,
+                util: Some(&util),
+                journal: Some(&journal),
+                history: Some(&hist),
+                offset_min: self.cfg.tz_offset_min,
+            };
+            return match fmt {
+                "html" => Reply::file(
+                    crate::report::render_html(&input).into_bytes(),
+                    "text/html; charset=utf-8",
+                    &format!("wifi-report{suffix}.html"),
+                ),
+                "xlsx" => match crate::report::build_xlsx_report(&input) {
+                    Ok(data) => Reply::file(
+                        data,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        &format!("wifi-report{suffix}.xlsx"),
+                    ),
+                    Err(e) => Reply::err(500, e),
+                },
+                _ => {
+                    let html = crate::report::render_html(&input);
+                    match crate::pdf::html_to_pdf(&html, std::time::Duration::from_secs(60)) {
+                        Ok(data) => Reply::file(data, "application/pdf", &format!("wifi-report{suffix}.pdf")),
+                        Err(e) => {
+                            self.log("WARNING", &format!("PDF не создан: {e}"));
+                            Reply::json(500, &obj(vec![("error", e.into()), ("fallback", "html".into())]))
+                        }
+                    }
+                }
+            };
+        }
         let mut bom = vec![0xEF, 0xBB, 0xBF]; // utf-8-sig: Excel сразу открывает кириллицу
         match fmt {
             "csv" => {

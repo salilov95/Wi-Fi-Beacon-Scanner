@@ -68,7 +68,23 @@ jobs:
             summary=$(grep -E "^test result|проверено строк" /tmp/tests.log | tr '\n' '|')
             echo "::notice title=tests summary ${{ matrix.os }}::$summary"
           fi
-          # API 2.x против 1.x (Python): /api/state, выгрузки CSV и JSON
+          # Windows: печать PDF через Edge, журнал Windows (wevtapi) и проверка обновлений (WinHTTP) на devserver
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            step devserver cargo build --example devserver
+            WBS_BACKEND=windows target/debug/examples/devserver.exe ../contract/fixtures/demo-office.json 8799 2>/tmp/devserver.log &
+            sleep 3
+            curl -s -X POST localhost:8799/api/load --data-binary @../contract/fixtures/real-home-01.json > /dev/null
+            code=$(curl -s -o /tmp/r.pdf -w "%{http_code}" -X POST localhost:8799/api/export/pdf -d '{"scope":"all"}')
+            if [ "$code" = 200 ] && head -c 5 /tmp/r.pdf | grep -q "%PDF"; then
+              echo "::notice title=pdf windows::Edge напечатал PDF, $(wc -c < /tmp/r.pdf) байт"
+            else
+              fail=1; echo "::error title=pdf windows::HTTP $code: $(head -c 600 /tmp/r.pdf | tr '\n' ' ')"
+            fi
+            echo "::notice title=winlog windows::$(curl -s 'localhost:8799/api/winlog?hours=48' | head -c 600)"
+            echo "::notice title=update windows::$(curl -s localhost:8799/api/update | head -c 600)"
+            curl -s -X POST localhost:8799/api/quit -d '{}' > /dev/null || true
+          fi
+          # API 2.x против 1.x (Python): /api/state, выгрузки CSV и JSON, отчёты HTML и Excel
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             step devserver cargo build --example devserver
             step compare_state python3 ../tools/compare_state.py target/debug/examples/devserver
@@ -176,9 +192,9 @@ jobs:
           cat > notes.md <<EOF
           **Альфа-версия 2.x на Rust + Tauri 2 - для проверки.** Рабочая версия - 1.x, она ставится и работает рядом, эта сборка её не трогает.
 
-          Что есть: скан через Windows Native Wifi API, таблица сетей, каналы, обзор, загрузка каналов, сигнал во времени, проблемы, Beacon (дерево IE), сравнение «до/после», «Мои SSID», журнал подключения и сессии (802.1X, IP/DHCP), журнал Windows, проверка обновлений, выгрузка CSV/JSON. Результаты совпадают с 1.x на эталонах (contract/).
+          Что есть: скан через Windows Native Wifi API, таблица сетей, каналы, обзор, загрузка каналов, сигнал во времени, проблемы, Beacon (дерево IE), сравнение «до/после», «Мои SSID», журнал подключения и сессии (802.1X, IP/DHCP), журнал Windows, проверка обновлений, отчёты HTML/PDF/Excel, выгрузка CSV/JSON. Результаты совпадают с 1.x на эталонах (contract/).
 
-          Чего пока нет (есть в 1.x): обход с планом этажа, отчёты HTML/PDF/Excel, демо-режим.
+          Чего пока нет (есть в 1.x): обход с планом этажа, демо-режим.
 
           - \`WiFiBeaconScanner2-Setup-$VERSION.exe\` - установщик (для текущего пользователя, без прав администратора);
           - \`WiFiBeaconScanner2.exe\` - переносная версия (нужен WebView2, в Windows 11 он есть).

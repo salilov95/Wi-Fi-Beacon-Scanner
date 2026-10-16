@@ -29,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   Also the Windows event log (WLAN-AutoConfig, wevtapi) and the update check (WinHTTP).
   Contract `contract/journal` (`tools/journal_contract.py`): event scenarios, Windows event XML and the 1.x result
   in both languages.
+- 2.0.0-alpha.3: HTML, PDF (Edge headless, as in 1.x) and Excel reports in 2.x, with the connection journal and
+  sessions. `tools/compare_state.py` now compares the HTML byte for byte and the Excel workbook part by part with 1.x.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14

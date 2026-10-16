@@ -27,6 +27,8 @@
   оценка MCS по скорости, выгрузка CSV) по уведомлениям WLAN и опросу, как в 1.x. Контракт `contract/journal`
   (`tools/journal_contract.py`): сценарии событий, XML событий Windows и результат 1.x на двух языках.
   Ещё журнал Windows (WLAN-AutoConfig, wevtapi) и проверка обновлений (WinHTTP).
+- 2.0.0-alpha.3: отчёты HTML, PDF (Edge без окна, как в 1.x) и Excel в 2.x, с журналом подключения и сессиями.
+  `tools/compare_state.py` теперь сверяет с 1.x HTML байт в байт и книгу Excel по частям.
 - Сама программа не изменилась.
 
 ## [1.1.0] - 2026-10-14

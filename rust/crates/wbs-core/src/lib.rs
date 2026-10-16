@@ -25,6 +25,8 @@
 //! | `update` | проверка новой версии на GitHub | `update.py` |
 //! | `winlog` | журнал Windows WLAN-AutoConfig: разбор XML события | `winlog.py` |
 //! | `xml` | минимальный разбор XML без крейтов | - |
+//! | `pdf` | печать HTML-отчёта в PDF через Edge headless | `pdf.py` |
+//! | `xlsx`, `zip` | запись .xlsx (zip без сжатия) | `xlsx.py` |
 //! | `app` | состояние программы и `/api/*` для окна | `web/state.py`, `web/server.py` |
 //! | `win` | скан через wlanapi.dll и мелочи ОС (только Windows) | `scanner_win.py` |
 //! | `win_log` | чтение журнала Windows через wevtapi (только Windows) | `winlog_win.py` |
@@ -43,6 +45,7 @@ pub mod mcs;
 pub mod model;
 pub mod onex;
 pub mod oui;
+pub mod pdf;
 pub mod prefs;
 pub mod report;
 pub mod row;
@@ -56,4 +59,6 @@ pub mod win_conn;
 #[cfg(any(windows, wbs_check_win))]
 pub mod win_log;
 pub mod winlog;
+pub mod xlsx;
 pub mod xml;
+pub mod zip;

@@ -111,7 +111,10 @@ fn scan_history_and_exports() {
     assert_eq!(snap.bss.len(), 22);
     assert_eq!(call(&a, "POST", "/api/export/focus", r#"{"scope":"focus"}"#).0, 404);
     assert_eq!(call(&a, "POST", "/api/export/csv", r#"{"scope":"focus"}"#).0, 400);
-    assert_eq!(call(&a, "POST", "/api/export/pdf", r#"{"scope":"all"}"#).0, 501);
+    let r = a.handle("POST", "/api/export/html", br#"{"scope":"all"}"#);
+    assert!(String::from_utf8(r.body).unwrap().starts_with("<!doctype html>"));
+    let r = a.handle("POST", "/api/export/xlsx", br#"{"scope":"all"}"#);
+    assert_eq!((r.status, &r.body[..2]), (200, &b"PK"[..]));
     // база для сравнения - текущий снапшот: diff нет, is_current
     assert_eq!(call(&a, "POST", "/api/baseline", r#"{"current":true}"#).0, 200);
     let (_, s) = call(&a, "GET", "/api/state", "");
