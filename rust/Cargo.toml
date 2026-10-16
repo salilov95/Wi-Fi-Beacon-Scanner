@@ -2,6 +2,8 @@
 [workspace]
 resolver = "2"
 members = ["crates/wbs-core"]
+# Окно на Tauri - отдельный workspace: ему нужен crates.io, а ядро собирается и тестируется без сети.
+exclude = ["app"]
 
 [workspace.package]
 edition = "2021"

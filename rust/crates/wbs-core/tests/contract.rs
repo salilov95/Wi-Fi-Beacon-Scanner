@@ -5,68 +5,17 @@
 //! свободность каналов (`advice`) и загрузку (`util`) - на русском и английском - и сравнивает его с
 //! эталоном целиком. Числа - с допуском 1e-6, как в `tools/golden.py`.
 
+mod common;
+
 use std::fs;
-use std::path::PathBuf;
+
+use common::{contract_dir, differences, fixtures};
 
 use wbs_core::i18n::{with_lang, Lang};
 use wbs_core::json::{self, Value};
 use wbs_core::model::Snapshot;
 use wbs_core::row::bss_row;
 use wbs_core::rules::{analyze, channel_advice, channel_utilization, Thresholds};
-
-const FLOAT_TOL: f64 = 1e-6;
-
-fn contract_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../contract")
-}
-
-fn fixtures() -> Vec<String> {
-    let mut names: Vec<String> = fs::read_dir(contract_dir().join("fixtures"))
-        .expect("нет каталога contract/fixtures")
-        .filter_map(|e| e.ok())
-        .map(|e| e.file_name().to_string_lossy().into_owned())
-        .filter(|n| n.ends_with(".json"))
-        .map(|n| n.trim_end_matches(".json").to_string())
-        .collect();
-    names.sort();
-    names
-}
-
-/// Отличия `got` от `want` (`want` - эталон). Пусто - совпадает.
-fn differences(want: &Value, got: &Value, path: &str, out: &mut Vec<String>) {
-    use Value::*;
-    match (want, got) {
-        (Int(_) | Num(_), Int(_) | Num(_)) => {
-            let (a, b) = (want.as_f64().unwrap(), got.as_f64().unwrap());
-            if (a - b).abs() > FLOAT_TOL {
-                out.push(format!("{path}: {a} -> {b}"));
-            }
-        }
-        (Arr(a), Arr(b)) => {
-            if a.len() != b.len() {
-                out.push(format!("{path}: длина {} -> {}", a.len(), b.len()));
-            }
-            for (i, (x, y)) in a.iter().zip(b).enumerate() {
-                differences(x, y, &format!("{path}[{i}]"), out);
-            }
-        }
-        (Obj(a), Obj(b)) => {
-            for (k, x) in a {
-                match got.get(k) {
-                    Some(y) => differences(x, y, &format!("{path}/{k}"), out),
-                    None => out.push(format!("{path}/{k}: пропало")),
-                }
-            }
-            for (k, _) in b {
-                if want.get(k).is_none() {
-                    out.push(format!("{path}/{k}: лишнее поле"));
-                }
-            }
-        }
-        _ if want == got => {}
-        _ => out.push(format!("{path}: {} -> {}", want.to_json(), got.to_json())),
-    }
-}
 
 /// Документ эталона, собранный ядром на Rust (тот же формат, что `golden.compute` в Python).
 fn compute(name: &str, lang: Lang, snap: &Snapshot) -> Value {
@@ -96,7 +45,7 @@ fn compute(name: &str, lang: Lang, snap: &Snapshot) -> Value {
                         .collect(),
                 ),
             ),
-            ("util".into(), channel_utilization(&snap.bss)),
+            ("util".into(), channel_utilization(&snap.bss, None)),
         ])
     })
 }

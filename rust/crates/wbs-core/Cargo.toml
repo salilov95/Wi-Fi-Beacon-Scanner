@@ -1,13 +1,17 @@
 [package]
 name = "wbs-core"
-version = "0.1.0"
-description = "Wi-Fi Beacon Scanner: разбор beacon (IE), модель BSS, MCS - без ОС и без внешних крейтов"
+version = "2.0.0-alpha.5"
+description = "Wi-Fi Beacon Scanner: разбор beacon (IE), правила, состояние программы и её API - без внешних крейтов"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
 publish = false
 
-# Зависимостей нет намеренно: ядро собирается и тестируется без сети и без crates.io,
-# а всё, что ходит в ОС (wlanapi, окно), живёт в отдельных крейтах.
+# Зависимостей нет намеренно: ядро собирается и тестируется без сети и без crates.io.
+# Скан на Windows (модуль win) вызывает wlanapi.dll напрямую через raw-dylib.
 [dependencies]
+
+[lints.rust]
+# Проверить модуль win на Linux без Windows: RUSTFLAGS="--cfg wbs_check_win" cargo clippy
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(wbs_check_win)"] }

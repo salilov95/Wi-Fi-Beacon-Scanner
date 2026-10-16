@@ -1,6 +1,6 @@
 """Синтетические снапшоты контракта, которые покрывают ветки разбора IE и правил.
 
-    python tools/make_contract_fixtures.py     - перезаписать contract/fixtures/synthetic-coverage.json
+    python tools/make_contract_fixtures.py     - перезаписать contract/fixtures/synthetic-coverage.json и demo-base.json
 
 Зачем: эталоны из реального скана и демо не проходят по многим веткам (поле Tx MCS Set = 3,
 TPC с отрицательной мощностью, 6 ГГц с флагами HE Operation, ничьи по RSSI внутри SSID и т. п.).
@@ -23,6 +23,17 @@ from wifi_beacon_scanner.synth import (  # noqa: E402
 )
 
 PATH = os.path.join(ROOT, "contract", "fixtures", "synthetic-coverage.json")
+# Основа демо-режима (build_demo_snapshot) без случайных изменений: 2.x крутит в --demo ровно её.
+# demo-office.json - другое: один уже «покачанный» демо-скан.
+DEMO_BASE = os.path.join(ROOT, "contract", "fixtures", "demo-base.json")
+DEMO_BASE_TIME = "2026-10-15T12:00:00+03:00"
+
+
+def demo_base() -> dict:
+    from wifi_beacon_scanner.demo import build_demo_snapshot
+    snap = build_demo_snapshot()
+    snap.taken_at = DEMO_BASE_TIME
+    return json.loads(snap.to_json())
 
 
 def ht_cap(streams: int, tx: int, highest: int = 0, short: bool = False) -> bytes:
@@ -104,11 +115,11 @@ def build():
 
 
 def main() -> int:
-    data = json.loads(build().to_json())
-    with open(PATH, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
-        f.write("\n")
-    print("записан %s: BSS %d" % (os.path.relpath(PATH, ROOT), len(data["bss"])))
+    for path, data in ((PATH, json.loads(build().to_json())), (DEMO_BASE, demo_base())):
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(data, f, ensure_ascii=False, indent=1)
+            f.write("\n")
+        print("записан %s: BSS %d" % (os.path.relpath(path, ROOT), len(data["bss"])))
     return 0
 
 

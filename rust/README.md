@@ -11,9 +11,13 @@ touch it, has its own workflow (`.github/workflows/rust.yml`), and 2.x builds ar
 
 | Crate | What | Status |
 |---|---|---|
-| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS, IE tree for the Beacon tab, 802.11 amendments, problems, channel quality and utilisation, translations | matches 1.x on every golden file in full (4 scans × 2 languages) |
+| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS, IE tree for the Beacon tab, 802.11 amendments, problems, channel quality and utilisation, translations; the connection journal and sessions, the Windows event log, the update check; HTML, PDF and Excel reports; the survey; the demo mode; program state and its `/api/*` (history, before/after comparison, settings, CSV/JSON export); scanning through wlanapi.dll (Windows) | matches 1.x on every golden file in full (4 scans × 2 languages); `/api/state` and exports match the Python version (`tools/compare_state.py`) |
+| `app` | Tauri 2 window: the same UI as 1.x served through its own `wbs` protocol (no port, no local server); NSIS installer | 2.0.0-alpha.5, built in CI on Windows |
 
-Not ported yet: the Tauri window, wlanapi scanning, history and charts, the connection journal, reports, the survey.
+Everything the 1.1 exe has is ported: the window and all tabs, reports, the survey, the demo mode (`--demo`), the
+`--ssid`, `--manuf` and `--lang` options. The `python -m wifi_beacon_scanner interfaces|scan|analyze` command line stays in 1.x.
+2.x installs next to 1.x: its own identifier, install folder,
+settings (`%APPDATA%\WiFiBeaconScanner2`) and log; 1.x settings are read once while 2.x has none of its own.
 
 ## How it is checked
 
@@ -28,3 +32,16 @@ version's expected output (`contract/golden`) — `crates/wbs-core/tests/contrac
 
 Requires Rust (`rustup`, stable channel; CI pins 1.97.0). `wbs-core` has no external dependencies and builds
 without access to crates.io.
+
+The UI with the Rust API, without Tauri, in any browser (data from a scan file):
+
+    cargo run --example devserver -- ../contract/fixtures/demo-office.json 8765
+    python ../tools/compare_state.py target/debug/examples/devserver     # compare with 1.x
+
+The `win` module (wlanapi) builds only on Windows; to check it on Linux:
+`RUSTFLAGS="--cfg wbs_check_win" cargo clippy`.
+
+The window (`app`) is a separate workspace that needs crates.io; CI builds it (`.github/workflows/rust.yml`, job `app`):
+
+    cd app
+    npx @tauri-apps/cli@2 build        # exe and NSIS installer in target/release

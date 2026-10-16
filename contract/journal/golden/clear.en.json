@@ -1,0 +1,311 @@
+{
+ "lang": "en",
+ "conn": {
+  "status": "not started",
+  "current": {
+   "t": 1792000511.0,
+   "state": "disconnected",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  "samples": [
+   [
+    1792000061.0,
+    null,
+    ""
+   ],
+   [
+    1792000510.0,
+    -50,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000511.0,
+    null,
+    ""
+   ]
+  ],
+  "events": [
+   {
+    "t": 1792000510.0,
+    "kind": "connected",
+    "severity": "info",
+    "text": "Connected to CORP after 449 s without connection",
+    "ssid": "CORP",
+    "bssid_from": "",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": null,
+    "rssi_to": -50,
+    "duration_s": 449.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000511.0,
+    "kind": "disconnected",
+    "severity": "critical",
+    "text": "Connection lost (disconnected)",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "",
+    "rssi_from": -50,
+    "rssi_to": null,
+    "duration_s": 1.0,
+    "reason_code": null,
+    "reason": ""
+   }
+  ],
+  "stats": {
+   "roams": 0,
+   "disconnects": 1,
+   "pingpong": 0,
+   "sticky": 0,
+   "attempt_fail": 0,
+   "ssid_change": 0,
+   "down_s": 449.0,
+   "since": 1792000061.0,
+   "until": 1792000511.0,
+   "dwell": [
+    {
+     "bssid": "00:e0:fc:10:02:02",
+     "s": 1.0
+    }
+   ]
+  },
+  "raw": []
+ },
+ "conn_small": {
+  "status": "not started",
+  "current": {
+   "t": 1792000511.0,
+   "state": "disconnected",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  "samples": [
+   [
+    1792000061.0,
+    null,
+    ""
+   ],
+   [
+    1792000510.0,
+    -50,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000511.0,
+    null,
+    ""
+   ]
+  ],
+  "events": [
+   {
+    "t": 1792000510.0,
+    "kind": "connected",
+    "severity": "info",
+    "text": "Connected to CORP after 449 s without connection",
+    "ssid": "CORP",
+    "bssid_from": "",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": null,
+    "rssi_to": -50,
+    "duration_s": 449.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000511.0,
+    "kind": "disconnected",
+    "severity": "critical",
+    "text": "Connection lost (disconnected)",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "",
+    "rssi_from": -50,
+    "rssi_to": null,
+    "duration_s": 1.0,
+    "reason_code": null,
+    "reason": ""
+   }
+  ],
+  "stats": {
+   "roams": 0,
+   "disconnects": 1,
+   "pingpong": 0,
+   "sticky": 0,
+   "attempt_fail": 0,
+   "ssid_change": 0,
+   "down_s": 449.0,
+   "since": 1792000061.0,
+   "until": 1792000511.0,
+   "dwell": [
+    {
+     "bssid": "00:e0:fc:10:02:02",
+     "s": 1.0
+    }
+   ]
+  },
+  "raw": []
+ },
+ "sessions": {
+  "sessions": [
+   {
+    "id": 1,
+    "kind": "connect",
+    "t_start": 1792000512.0,
+    "ssid": "CORP",
+    "bssid": "b",
+    "bssid_from": "",
+    "result": "in_progress",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000512.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000512.5,
+      "stage": "connected",
+      "detail": ""
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000512.5,
+    "t_end": null,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 500,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   }
+  ],
+  "summary": {
+   "connects": 1,
+   "connects_ok": 0,
+   "connects_fail": 0,
+   "roams": 0,
+   "roams_fail": 0,
+   "connect_ms_med": null,
+   "roam_ms_med": null,
+   "auth_ms_med": null,
+   "ip_ms_med": null,
+   "onex_ok": 0,
+   "onex_fail": 0
+  }
+ },
+ "sessions_small": {
+  "sessions": [
+   {
+    "id": 1,
+    "kind": "connect",
+    "t_start": 1792000512.0,
+    "ssid": "CORP",
+    "bssid": "b",
+    "bssid_from": "",
+    "result": "in_progress",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000512.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000512.5,
+      "stage": "connected",
+      "detail": ""
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000512.5,
+    "t_end": null,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 500,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   }
+  ],
+  "summary": {
+   "connects": 1,
+   "connects_ok": 0,
+   "connects_fail": 0,
+   "roams": 0,
+   "roams_fail": 0,
+   "connect_ms_med": null,
+   "roam_ms_med": null,
+   "auth_ms_med": null,
+   "ip_ms_med": null,
+   "onex_ok": 0,
+   "onex_fail": 0
+  }
+ },
+ "journal_csv": "time;event;ssid;bssid_from;bssid_to;rssi_from;rssi_to;duration_s;reason_code;reason;text\r\n2026-10-14T17:55:10;connection;CORP;;00:e0:fc:10:02:02;;-50;449.0;;;Connected to CORP after 449 s without connection\r\n2026-10-14T17:55:11;disconnect;CORP;00:e0:fc:10:02:02;;-50;;1.0;;;Connection lost (disconnected)\r\n",
+ "sessions_csv": "Time;Type;Result;SSID;From;To;Association, ms;Authentication, ms;Total, ms;IP after, ms;IPv4;DHCP server;IP/DHCP;EAP;802.1X credentials;802.1X;Reason;Reason code;EAP error\r\n2026-10-14 17:55:12;connection;in progress;CORP;;b;;;500;;;;;;;;;;\r\n"
+}

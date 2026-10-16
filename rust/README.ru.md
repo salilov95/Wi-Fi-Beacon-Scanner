@@ -10,9 +10,13 @@ workflow (`.github/workflows/rust.yml`), а версии 2.x выходят то
 
 | Крейт | Что | Состояние |
 |---|---|---|
-| `crates/wbs-core` | разбор beacon (IE), модель BSS, защита, MCS, дерево IE для вкладки Beacon, дополнения 802.11, проблемы, свободность и загрузка каналов, переводы | совпадает с 1.x на всех эталонах целиком (4 снапшота × 2 языка) |
+| `crates/wbs-core` | разбор beacon (IE), модель BSS, защита, MCS, дерево IE для вкладки Beacon, дополнения 802.11, проблемы, свободность и загрузка каналов, переводы; журнал подключения и сессии, журнал Windows, проверка обновлений; отчёты HTML, PDF, Excel; обход; демо-режим; состояние программы и её `/api/*` (история, сравнение «до/после», настройки, выгрузка CSV/JSON); скан через wlanapi.dll (Windows) | совпадает с 1.x на всех эталонах целиком (4 снапшота × 2 языка), `/api/state` и выгрузки - с Python-версией (`tools/compare_state.py`) |
+| `app` | окно на Tauri 2: тот же интерфейс, что у 1.x, через свой протокол `wbs` (без порта и локального сервера); установщик NSIS | 2.0.0-alpha.5, собирается в CI на Windows |
 
-Ещё не перенесено: окно Tauri, скан через wlanapi, история и графики, журнал подключения, отчёты, обход.
+Перенесено всё, что есть у exe 1.1: окно и все вкладки, отчёты, обход, демо-режим (`--demo`), параметры `--ssid`,
+`--manuf`, `--lang`. Командная строка `python -m wifi_beacon_scanner interfaces|scan|analyze` остаётся только в 1.x.
+2.x ставится рядом с 1.x: свои идентификатор, папка установки,
+настройки (`%APPDATA%\WiFiBeaconScanner2`) и журнал; настройки 1.x читаются один раз, пока своих нет.
 
 ## Как проверяется
 
@@ -27,3 +31,16 @@ workflow (`.github/workflows/rust.yml`), а версии 2.x выходят то
 
 Нужен Rust (`rustup`, канал stable; в CI закреплена версия 1.97.0). У `wbs-core` нет внешних зависимостей:
 он собирается без доступа к crates.io.
+
+Интерфейс с API на Rust без Tauri, в любом браузере (данные - из снапшота):
+
+    cargo run --example devserver -- ../contract/fixtures/demo-office.json 8765
+    python ../tools/compare_state.py target/debug/examples/devserver     # сверка с 1.x
+
+Модуль `win` (wlanapi) собирается только на Windows; проверить его на Linux:
+`RUSTFLAGS="--cfg wbs_check_win" cargo clippy`.
+
+Окно (`app`) - отдельный workspace, ему нужен crates.io; собирается в CI (`.github/workflows/rust.yml`, job `app`):
+
+    cd app
+    npx @tauri-apps/cli@2 build        # exe и установщик NSIS в target/release

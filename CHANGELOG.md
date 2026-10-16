@@ -20,6 +20,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   utilisation in Russian and English; the whole golden document matches 1.x. Shared translation catalogue
   `contract/i18n/en.json` (`tools/export_i18n.py`), coverage fixture `synthetic-coverage`
   (`tools/make_contract_fixtures.py`).
+- 2.0.0-alpha.1 (Rust + Tauri 2, `rust/app`): its own window with the same UI, scanning through wlanapi, table,
+  channels, utilisation, signal over time, problems, Beacon tab, before/after comparison, CSV/JSON export.
+  `/api/state` and exports match 1.x (`tools/compare_state.py`, run in CI). Installs next to 1.x. Not ported yet:
+  connection journal, Windows event log, survey, HTML/PDF/Excel reports.
+- 2.0.0-alpha.2: the connection journal and sessions in 2.x (roams, drops, ping-pong, sticky client, 802.1X stages,
+  IPv4/DHCP, MCS estimate from the link rate, CSV export) through WLAN notifications and polling, as in 1.x.
+  Also the Windows event log (WLAN-AutoConfig, wevtapi) and the update check (WinHTTP).
+  Contract `contract/journal` (`tools/journal_contract.py`): event scenarios, Windows event XML and the 1.x result
+  in both languages.
+- 2.0.0-alpha.3: HTML, PDF (Edge headless, as in 1.x) and Excel reports in 2.x, with the connection journal and
+  sessions. `tools/compare_state.py` now compares the HTML byte for byte and the Excel workbook part by part with 1.x.
+- 2.0.0-alpha.4: the floor-plan survey (plan, points, project files, survey table in reports), the demo mode
+  (`--demo [scan.json]`: varying scans, the 1.x demo journal and Windows event log) and the command-line options of the
+  1.x exe (`--ssid`, `--manuf`, `--lang`). Links to GitHub open in the default browser. Log rotation as in 1.x.
+- 2.0.0-alpha.5, fixes found by the parity audit: the "Clear journal" button works (`/api/conn/clear` was missing; a test
+  now checks that every API address the window calls has a route); the demo mode shows the full 1.x demo office
+  (`contract/fixtures/demo-base.json`, checked against `build_demo_snapshot()`); view settings keep numbers as sent and
+  round the plan opacity like 1.x (`compare_state.py` compares them); `--ssid=CORP` works like `--ssid CORP`.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14
