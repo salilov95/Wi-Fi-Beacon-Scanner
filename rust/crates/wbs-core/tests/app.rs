@@ -215,9 +215,13 @@ fn scan_errors_and_misc_routes() {
     assert_eq!(call(&a, "POST", "/api/open", r#"{"target":"x"}"#).0, 400);
     let (st, v) = call(&a, "POST", "/api/open", r#"{"target":"logs"}"#);
     assert_eq!((st, v.get("ok")), (200, Some(&Value::Bool(false))));
+    // журнал Windows: у источника без него - понятная ошибка и пустой список (как в 1.x)
     let (_, w) = call(&a, "GET", "/api/winlog?hours=24", "");
-    assert!(w.get("error").and_then(Value::as_str).unwrap().contains("not ported"));
+    assert_eq!(w.get("events").unwrap().to_json(), "[]");
+    assert!(!w.get("error").and_then(Value::as_str).unwrap().is_empty());
+    assert_eq!(w.get("hours"), None);
     let (_, u) = call(&a, "GET", "/api/update", "");
+    assert!(u.get("error").and_then(Value::as_str).unwrap().contains("GitHub"));
     assert_eq!(
         u.get("current").and_then(Value::as_str),
         Some(env!("CARGO_PKG_VERSION"))

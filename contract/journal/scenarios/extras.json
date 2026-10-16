@@ -396,5 +396,51 @@
    "2.4",
    1
   ]
+ ],
+ "winlog": [
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>8001</EventID><Level>4</Level><TimeCreated SystemTime='2026-10-15T08:01:02.1234567Z'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data Name='InterfaceGuid'>{6A0F}</Data><Data Name='ConnectionMode'>Auto</Data><Data Name='ProfileName'>CORP &amp; Co</Data><Data Name='SSID'>CORP</Data><Data Name='BSSType'>Infrastructure</Data><Data Name='PHYType'>802.11ax</Data><Data Name='AuthenticationAlgorithm'>WPA2-Enterprise</Data></EventData></Event>",
+   "  Служба автонастройки WLAN успешно подключилась к беспроводной сети.\r\n\r\nИмя сети: CORP  "
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID Qualifiers=''>8003</EventID><Level>4</Level><TimeCreated SystemTime='2026-10-15T08:05:00.5Z'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data Name='SSID'>Кафе &#x41;&#66;</Data><Data Name='Reason'>Точка доступа &lt;разорвала&gt;</Data><Data Name='ReasonCode'>0x00038004</Data></EventData></Event>",
+   ""
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>8002</EventID><Level>2</Level><TimeCreated SystemTime='2026-10-15T08:06:00Z'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data Name='SSID'>Hotel</Data><Data Name='FailureReason'>Сеть недоступна</Data><Data Name='PeerMac'>00:11:22:33:44:55</Data></EventData></Event>",
+   "fail"
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>11005</EventID><Level>3</Level><TimeCreated SystemTime='2026-10-15T08:07:00'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data>a</Data><Data>  b  </Data><Data Name=''>c</Data><Data Name='SSID'/><Data Name='SSID'>второй</Data><Data Name='BSSID'>aa:bb</Data></EventData></Event>",
+   "x"
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>12013</EventID><TimeCreated SystemTime='bad'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><UserData><X>1</X></UserData></Event>",
+   ""
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID> 12011 </EventID><Level>5</Level><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data Name='EAPType'><![CDATA[13 <tls>]]></Data></EventData></Event>",
+   ""
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>9999</EventID><Level>7</Level><TimeCreated SystemTime='2026-02-30T00:00:00Z'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData/></Event>",
+   ""
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/><EventID>11000</EventID><Level>0</Level><TimeCreated SystemTime='2026-10-15T08:07:00.Z'/><Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System><EventData><Data Name='SSID'>\r\nline1\r\nline2\r\n</Data></EventData></Event>",
+   ""
+  ],
+  [
+   "<Event><System><EventID>abc</EventID></System></Event>",
+   ""
+  ],
+  [
+   "<Event><System>",
+   ""
+  ],
+  [
+   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><EventID>8000</EventID></System></Event>",
+   ""
+  ]
  ]
 }

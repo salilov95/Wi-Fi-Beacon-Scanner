@@ -211,6 +211,44 @@ def onex_cases():
     }
 
 
+EV = "http://schemas.microsoft.com/win/2004/08/events/event"
+
+
+def winlog_cases():
+    """XML событий WLAN-AutoConfig (как отдаёт EvtRender) и текст события; разбор - parse_event_xml."""
+    def ev(eid, level, time_attr, data, extra=""):
+        tc = "<TimeCreated %s/>" % time_attr if time_attr is not None else ""
+        return ("<Event xmlns='%s'><System><Provider Name='Microsoft-Windows-WLAN-AutoConfig'/>%s%s%s"
+                "<Channel>Microsoft-Windows-WLAN-AutoConfig/Operational</Channel></System>%s%s</Event>"
+                % (EV, eid, level, tc, data, extra))
+    ok = ("<EventData><Data Name='InterfaceGuid'>{6A0F}</Data><Data Name='ConnectionMode'>Auto</Data>"
+          "<Data Name='ProfileName'>CORP &amp; Co</Data><Data Name='SSID'>CORP</Data>"
+          "<Data Name='BSSType'>Infrastructure</Data><Data Name='PHYType'>802.11ax</Data>"
+          "<Data Name='AuthenticationAlgorithm'>WPA2-Enterprise</Data></EventData>")
+    return [
+        [ev("<EventID>8001</EventID>", "<Level>4</Level>", "SystemTime='2026-10-15T08:01:02.1234567Z'", ok),
+         "  Служба автонастройки WLAN успешно подключилась к беспроводной сети.\r\n\r\nИмя сети: CORP  "],
+        [ev("<EventID Qualifiers=''>8003</EventID>", "<Level>4</Level>", "SystemTime='2026-10-15T08:05:00.5Z'",
+            "<EventData><Data Name='SSID'>Кафе &#x41;&#66;</Data><Data Name='Reason'>Точка доступа &lt;разорвала&gt;"
+            "</Data><Data Name='ReasonCode'>0x00038004</Data></EventData>"), ""],
+        [ev("<EventID>8002</EventID>", "<Level>2</Level>", "SystemTime='2026-10-15T08:06:00Z'",
+            "<EventData><Data Name='SSID'>Hotel</Data><Data Name='FailureReason'>Сеть недоступна</Data>"
+            "<Data Name='PeerMac'>00:11:22:33:44:55</Data></EventData>"), "fail"],
+        [ev("<EventID>11005</EventID>", "<Level>3</Level>", "SystemTime='2026-10-15T08:07:00'",
+            "<EventData><Data>a</Data><Data>  b  </Data><Data Name=''>c</Data><Data Name='SSID'/>"
+            "<Data Name='SSID'>второй</Data><Data Name='BSSID'>aa:bb</Data></EventData>"), "x"],
+        [ev("<EventID>12013</EventID>", "", "SystemTime='bad'", "<UserData><X>1</X></UserData>"), ""],
+        [ev("<EventID> 12011 </EventID>", "<Level>5</Level>", None, "<EventData><Data Name='EAPType'>"
+            "<![CDATA[13 <tls>]]></Data></EventData>"), ""],
+        [ev("<EventID>9999</EventID>", "<Level>7</Level>", "SystemTime='2026-02-30T00:00:00Z'", "<EventData/>"), ""],
+        [ev("<EventID>11000</EventID>", "<Level>0</Level>", "SystemTime='2026-10-15T08:07:00.Z'",
+            "<EventData><Data Name='SSID'>\r\nline1\r\nline2\r\n</Data></EventData>"), ""],
+        ["<Event><System><EventID>abc</EventID></System></Event>", ""],
+        ["<Event><System>", ""],
+        ["<Event xmlns='%s'><System><EventID>8000</EventID></System></Event>" % EV, ""],
+    ]
+
+
 def mcs_cases():
     from wifi_beacon_scanner.mcs import phy_rate
     grid = []
@@ -277,7 +315,16 @@ def extras(lang):
         "onex_restart": [onex.parse_restart(bytes.fromhex(h)) for h in oc["restart"]],
         "mcs": [[dict(c, text=mcs_text(c)) for c in rate_to_mcs(r, phy, w, band, max_nss=n, likely_nss=min(n, 2))]
                 for r, phy, w, band, n in mcs_cases()],
+        "winlog": [_winlog(x, m) for x, m in winlog_cases()],
     }
+
+
+def _winlog(xml, message):
+    from wifi_beacon_scanner.winlog import parse_event_xml
+    try:
+        return parse_event_xml(xml, message)
+    except Exception:  # noqa: BLE001 - в 1.x такое событие пропускается
+        return {"error": True}
 
 
 def scenarios():
@@ -298,7 +345,7 @@ def main(argv) -> int:
             with open(os.path.join(SCEN, name + ".json"), "w", encoding="utf-8", newline="\n") as f:
                 f.write(dump({"scenario": name, "ops": ops}))
         with open(os.path.join(SCEN, "extras.json"), "w", encoding="utf-8", newline="\n") as f:
-            f.write(dump({"onex": onex_cases(), "mcs": mcs_cases()}))
+            f.write(dump({"onex": onex_cases(), "mcs": mcs_cases(), "winlog": winlog_cases()}))
     for fn in sorted(os.listdir(SCEN)):
         name = fn[:-5]
         with open(os.path.join(SCEN, fn), encoding="utf-8") as f:

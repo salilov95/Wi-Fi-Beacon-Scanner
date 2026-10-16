@@ -105,6 +105,10 @@ fn build_core() -> Arc<App> {
         open: Some(wbs_core::win::open_target),
         #[cfg(not(windows))]
         open: None,
+        #[cfg(windows)]
+        https_get: Some(wbs_core::win::https_get),
+        #[cfg(not(windows))]
+        https_get: None,
         test_mode: false,
     };
     let vendors = cfg.oui.as_ref().map_or(0, |d| d.len());

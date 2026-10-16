@@ -986,5 +986,156 @@
     "text": "legacy 11 Mbit/s"
    }
   ]
+ ],
+ "winlog": [
+  {
+   "t": 1792051262.123456,
+   "id": 8001,
+   "level": 4,
+   "level_ru": "информация",
+   "group": "подключение",
+   "message": "Служба автонастройки WLAN успешно подключилась к беспроводной сети.\r\n\r\nИмя сети: CORP",
+   "ssid": "CORP",
+   "bssid": "",
+   "reason": "",
+   "data": {
+    "InterfaceGuid": "{6A0F}",
+    "ConnectionMode": "Auto",
+    "ProfileName": "CORP & Co",
+    "SSID": "CORP",
+    "BSSType": "Infrastructure",
+    "PHYType": "802.11ax",
+    "AuthenticationAlgorithm": "WPA2-Enterprise"
+   }
+  },
+  {
+   "t": 1792051500.5,
+   "id": 8003,
+   "level": 4,
+   "level_ru": "информация",
+   "group": "подключение",
+   "message": "",
+   "ssid": "Кафе AB",
+   "bssid": "",
+   "reason": "Точка доступа <разорвала>",
+   "data": {
+    "SSID": "Кафе AB",
+    "Reason": "Точка доступа <разорвала>",
+    "ReasonCode": "0x00038004"
+   }
+  },
+  {
+   "t": 1792051560.0,
+   "id": 8002,
+   "level": 2,
+   "level_ru": "ошибка",
+   "group": "подключение",
+   "message": "fail",
+   "ssid": "Hotel",
+   "bssid": "00:11:22:33:44:55",
+   "reason": "Сеть недоступна",
+   "data": {
+    "SSID": "Hotel",
+    "FailureReason": "Сеть недоступна",
+    "PeerMac": "00:11:22:33:44:55"
+   }
+  },
+  {
+   "t": 1792051620.0,
+   "id": 11005,
+   "level": 3,
+   "level_ru": "предупреждение",
+   "group": "безопасность / 4-way",
+   "message": "x",
+   "ssid": "второй",
+   "bssid": "aa:bb",
+   "reason": "",
+   "data": {
+    "Data0": "a",
+    "Data1": "b",
+    "Data2": "c",
+    "SSID": "второй",
+    "BSSID": "aa:bb"
+   }
+  },
+  {
+   "t": null,
+   "id": 12013,
+   "level": 0,
+   "level_ru": "информация",
+   "group": "802.1X",
+   "message": "",
+   "ssid": "",
+   "bssid": "",
+   "reason": "",
+   "data": {}
+  },
+  {
+   "t": null,
+   "id": 12011,
+   "level": 5,
+   "level_ru": "подробно",
+   "group": "802.1X",
+   "message": "",
+   "ssid": "",
+   "bssid": "",
+   "reason": "",
+   "data": {
+    "EAPType": "13 <tls>"
+   }
+  },
+  {
+   "t": null,
+   "id": 9999,
+   "level": 7,
+   "level_ru": "7",
+   "group": "прочее",
+   "message": "",
+   "ssid": "",
+   "bssid": "",
+   "reason": "",
+   "data": {}
+  },
+  {
+   "t": null,
+   "id": 11000,
+   "level": 0,
+   "level_ru": "информация",
+   "group": "ассоциация",
+   "message": "",
+   "ssid": "line1\nline2",
+   "bssid": "",
+   "reason": "",
+   "data": {
+    "SSID": "line1\nline2"
+   }
+  },
+  {
+   "t": null,
+   "id": 0,
+   "level": 0,
+   "level_ru": "информация",
+   "group": "прочее",
+   "message": "",
+   "ssid": "",
+   "bssid": "",
+   "reason": "",
+   "data": {}
+  },
+  {
+   "error": true
+  },
+  {
+   "t": null,
+   "id": 8000,
+   "level": 0,
+   "level_ru": "информация",
+   "group": "подключение",
+   "message": "",
+   "ssid": "",
+   "bssid": "",
+   "reason": "",
+   "data": {}
+  }
  ]
 }

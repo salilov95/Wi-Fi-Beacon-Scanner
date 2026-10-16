@@ -98,6 +98,10 @@ pub trait Backend: Send + Sync {
     ) -> Result<Option<Box<dyn MonitorHandle>>, String> {
         Ok(None)
     }
+    /// События журнала WLAN-AutoConfig/Operational за последние `hours` часов, новые первыми.
+    fn read_winlog(&self, _hours: f64) -> Result<Vec<Value>, String> {
+        Err(tr("журнал Windows недоступен для этого источника данных"))
+    }
 }
 
 /// Куда монитор подключения пишет: журнал под замком состояния и на языке программы.
@@ -130,6 +134,9 @@ impl Backend for FixtureBackend {
 
 // ---------------------------------------------------------------- настройки запуска
 
+/// GET по HTTPS: (хост, путь) -> тело ответа.
+pub type HttpsGetFn = fn(&str, &str) -> Result<String, String>;
+
 /// Открыть на компьютере URI или папку.
 pub type OpenFn = fn(&str) -> Result<(), String>;
 
@@ -151,6 +158,8 @@ pub struct Config {
     pub oui: Option<OuiDb>,
     /// Открыть на компьютере параметры Windows или папку (`/api/open`).
     pub open: Option<OpenFn>,
+    /// GET по HTTPS (хост, путь) -> тело: проверка обновлений. Нет - кнопка сообщит об ошибке.
+    pub https_get: Option<HttpsGetFn>,
     /// Тесты: не писать журнал в stderr.
     pub test_mode: bool,
 }
@@ -169,6 +178,7 @@ impl Default for Config {
             tz_offset_min: 0,
             oui: None,
             open: None,
+            https_get: None,
             test_mode: false,
         }
     }
@@ -869,7 +879,9 @@ impl App {
     fn route(self: &Arc<Self>, method: &str, url: &str, body: &[u8]) -> Reply {
         let (path, query) = url.split_once('?').unwrap_or((url, ""));
         if method == "GET" {
-            let _ = query; // /api/winlog?hours=... - журнал Windows ещё не перенесён
+            if path == "/api/winlog" {
+                return self.winlog(query);
+            }
             return self.get(path);
         }
         if method != "POST" {
@@ -896,6 +908,32 @@ impl App {
             }
         };
         self.post(path, &b)
+    }
+
+    /// `/api/winlog?hours=N`: журнал Windows за N часов (1...336, по умолчанию 24).
+    fn winlog(&self, query: &str) -> Reply {
+        let h = query
+            .split('&')
+            .find_map(|kv| kv.strip_prefix("hours="))
+            .map_or(Ok(24.0), |v| v.trim().parse::<f64>())
+            .unwrap_or(24.0);
+        // max(1, min(336, h)) в Python: NaN даёт 336
+        let hours = if h.is_nan() {
+            24.0 * 14.0
+        } else {
+            h.clamp(1.0, 24.0 * 14.0)
+        };
+        match self.backend.read_winlog(hours) {
+            Ok(events) => Reply::json(
+                200,
+                &obj(vec![
+                    ("events", Value::Arr(events)),
+                    ("error", "".into()),
+                    ("hours", hours.into()),
+                ]),
+            ),
+            Err(e) => Reply::json(200, &obj(vec![("events", Value::Arr(vec![])), ("error", e.into())])),
+        }
     }
 
     fn get(&self, path: &str) -> Reply {
@@ -929,29 +967,21 @@ impl App {
                 }
                 Reply::json(200, &self.state())
             }
-            "/api/winlog" => Reply::json(
-                200,
-                &obj(vec![
-                    ("events", Value::Arr(vec![])),
-                    ("error", not_ported("Журнал Windows", "Windows event log").into()),
-                ]),
-            ),
             "/api/prefs" => {
                 let st = self.lock();
                 Reply::json(200, &with_key(&st.prefs, "lang", st.lang.code().into()))
             }
             "/api/about" => Reply::json(200, &self.about()),
-            "/api/update" => Reply::json(
-                200,
-                &obj(vec![
-                    ("current", self.cfg.version.as_str().into()),
-                    ("latest", Value::Null),
-                    ("newer", false.into()),
-                    ("url", format!("{REPO}/releases").into()),
-                    ("published", Value::Null),
-                    ("error", not_ported("Проверка обновлений", "Update check").into()),
-                ]),
-            ),
+            "/api/update" => {
+                let fetched = match self.cfg.https_get {
+                    Some(get) => get(crate::update::API_HOST, crate::update::API_PATH),
+                    None => Err(pick(
+                        "HTTPS недоступен в этой сборке",
+                        "HTTPS is not available in this build",
+                    )),
+                };
+                Reply::json(200, &crate::update::check(&self.cfg.version, fetched))
+            }
             "/api/survey/plan" => Reply::err(404, tr("план не загружен")),
             "/api/survey/points" => Reply::json(
                 200,

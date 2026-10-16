@@ -298,6 +298,10 @@ impl Backend for WindowsBackend {
         crate::win_conn::start(sink, interface_index).map(Some)
     }
 
+    fn read_winlog(&self, hours: f64) -> Result<Vec<crate::json::Value>, String> {
+        crate::win_log::read_events(hours, 2000)
+    }
+
     fn interfaces(&self) -> Result<Vec<String>, String> {
         Ok(Session::open()?.interfaces()?.into_iter().map(|(d, _)| d).collect())
     }
@@ -418,4 +422,144 @@ pub fn open_target(uri: &str) -> Result<(), String> {
         .spawn()
         .map(|_| ())
         .map_err(|e| e.to_string())
+}
+
+// ---------------------------------------------------------------- HTTPS (проверка обновлений)
+
+#[cfg_attr(windows, link(name = "winhttp", kind = "raw-dylib"))]
+extern "system" {
+    fn WinHttpOpen(agent: *const u16, access: u32, proxy: *const u16, bypass: *const u16, flags: u32) -> HANDLE;
+    fn WinHttpSetTimeouts(h: HANDLE, resolve: i32, connect: i32, send: i32, receive: i32) -> i32;
+    fn WinHttpConnect(session: HANDLE, server: *const u16, port: u16, reserved: u32) -> HANDLE;
+    fn WinHttpOpenRequest(
+        connect: HANDLE,
+        verb: *const u16,
+        object: *const u16,
+        version: *const u16,
+        referrer: *const u16,
+        accept: *const *const u16,
+        flags: u32,
+    ) -> HANDLE;
+    fn WinHttpSendRequest(
+        req: HANDLE,
+        headers: *const u16,
+        headers_len: u32,
+        optional: *mut c_void,
+        optional_len: u32,
+        total_len: u32,
+        context: usize,
+    ) -> i32;
+    fn WinHttpReceiveResponse(req: HANDLE, reserved: *mut c_void) -> i32;
+    fn WinHttpQueryHeaders(
+        req: HANDLE,
+        level: u32,
+        name: *const u16,
+        buffer: *mut c_void,
+        len: *mut u32,
+        index: *mut u32,
+    ) -> i32;
+    fn WinHttpReadData(req: HANDLE, buffer: *mut c_void, to_read: u32, read: *mut u32) -> i32;
+    fn WinHttpCloseHandle(h: HANDLE) -> i32;
+}
+
+#[cfg_attr(windows, link(name = "kernel32", kind = "raw-dylib"))]
+extern "system" {
+    #[link_name = "GetLastError"]
+    fn get_last_error() -> u32;
+}
+
+/// Закрывается сама.
+struct Http(HANDLE);
+
+impl Drop for Http {
+    fn drop(&mut self) {
+        if !self.0.is_null() {
+            unsafe { WinHttpCloseHandle(self.0) };
+        }
+    }
+}
+
+fn wide(s: &str) -> Vec<u16> {
+    s.encode_utf16().chain(std::iter::once(0)).collect()
+}
+
+fn http_err(what: &str) -> String {
+    let code = unsafe { get_last_error() };
+    let text = format_error(code);
+    if text.is_empty() {
+        format!("{what}: WinHTTP {code}")
+    } else {
+        format!("{what}: {text} ({code})")
+    }
+}
+
+/// GET по HTTPS через WinHTTP: системный прокси, таймауты 6 с (как urllib в 1.x). Тело ответа или ошибка.
+pub fn https_get(host: &str, path: &str) -> Result<String, String> {
+    let agent = wide("WiFiBeaconScanner");
+    // 4 = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY (Windows 8.1+), 0 - прокси из настроек WinHTTP
+    let mut s = Http(unsafe { WinHttpOpen(agent.as_ptr(), 4, std::ptr::null(), std::ptr::null(), 0) });
+    if s.0.is_null() {
+        s = Http(unsafe { WinHttpOpen(agent.as_ptr(), 0, std::ptr::null(), std::ptr::null(), 0) });
+    }
+    if s.0.is_null() {
+        return Err(http_err("WinHttpOpen"));
+    }
+    unsafe { WinHttpSetTimeouts(s.0, 6000, 6000, 6000, 6000) };
+    let h = wide(host);
+    let c = Http(unsafe { WinHttpConnect(s.0, h.as_ptr(), 443, 0) });
+    if c.0.is_null() {
+        return Err(http_err("WinHttpConnect"));
+    }
+    let (verb, obj) = (wide("GET"), wide(path));
+    // 0x00800000 = WINHTTP_FLAG_SECURE
+    let r = Http(unsafe {
+        WinHttpOpenRequest(
+            c.0,
+            verb.as_ptr(),
+            obj.as_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            std::ptr::null(),
+            0x0080_0000,
+        )
+    });
+    if r.0.is_null() {
+        return Err(http_err("WinHttpOpenRequest"));
+    }
+    let headers = wide("Accept: application/vnd.github+json\r\n");
+    let ok = unsafe { WinHttpSendRequest(r.0, headers.as_ptr(), u32::MAX, std::ptr::null_mut(), 0, 0, 0) };
+    if ok == 0 || unsafe { WinHttpReceiveResponse(r.0, std::ptr::null_mut()) } == 0 {
+        return Err(http_err("HTTPS"));
+    }
+    let (mut status, mut len) = (0u32, 4u32);
+    // 19 = WINHTTP_QUERY_STATUS_CODE, 0x20000000 = WINHTTP_QUERY_FLAG_NUMBER
+    unsafe {
+        WinHttpQueryHeaders(
+            r.0,
+            19 | 0x2000_0000,
+            std::ptr::null(),
+            &mut status as *mut u32 as *mut c_void,
+            &mut len,
+            std::ptr::null_mut(),
+        )
+    };
+    let mut body = vec![];
+    let mut buf = [0u8; 8192];
+    loop {
+        let mut n = 0u32;
+        if unsafe { WinHttpReadData(r.0, buf.as_mut_ptr() as *mut c_void, buf.len() as u32, &mut n) } == 0 {
+            return Err(http_err("WinHttpReadData"));
+        }
+        if n == 0 {
+            break;
+        }
+        body.extend_from_slice(&buf[..n as usize]);
+        if body.len() > 4 << 20 {
+            return Err("ответ больше 4 МБ".into());
+        }
+    }
+    if !(200..300).contains(&status) {
+        return Err(format!("HTTP Error {status}"));
+    }
+    String::from_utf8(body).map_err(|e| e.to_string())
 }

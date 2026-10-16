@@ -22,8 +22,12 @@
 //! | `conn` | журнал подключения: роуминги, обрывы, пинг-понг, залипание | `conn.py` |
 //! | `session` | сессии подключения: стадии, 802.1X, IP/DHCP | `session.py` |
 //! | `onex` | разбор уведомлений 802.1X | `onex.py` |
+//! | `update` | проверка новой версии на GitHub | `update.py` |
+//! | `winlog` | журнал Windows WLAN-AutoConfig: разбор XML события | `winlog.py` |
+//! | `xml` | минимальный разбор XML без крейтов | - |
 //! | `app` | состояние программы и `/api/*` для окна | `web/state.py`, `web/server.py` |
 //! | `win` | скан через wlanapi.dll и мелочи ОС (только Windows) | `scanner_win.py` |
+//! | `win_log` | чтение журнала Windows через wevtapi (только Windows) | `winlog_win.py` |
 //! | `win_conn` | монитор подключения: опрос, уведомления ACM/MSM/802.1X, IP/DHCP (только Windows) | `conn_win.py`, `ip_win.py` |
 
 pub mod amend;
@@ -44,7 +48,12 @@ pub mod report;
 pub mod row;
 pub mod rules;
 pub mod session;
+pub mod update;
 #[cfg(any(windows, wbs_check_win))]
 pub mod win;
 #[cfg(any(windows, wbs_check_win))]
 pub mod win_conn;
+#[cfg(any(windows, wbs_check_win))]
+pub mod win_log;
+pub mod winlog;
+pub mod xml;

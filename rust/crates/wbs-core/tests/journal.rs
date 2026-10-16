@@ -1,6 +1,7 @@
 //! Журнал подключения и сессии против 1.x: сценарии `contract/journal/scenarios` прогоняются через
 //! `conn`/`session`, результат сравнивается с эталонами `contract/journal/golden` (их считает
-//! `tools/journal_contract.py` на Python-версии): события, сводка, сессии, CSV, разбор 802.1X, оценка MCS.
+//! `tools/journal_contract.py` на Python-версии): события, сводка, сессии, CSV, разбор 802.1X, оценка MCS,
+//! разбор событий журнала Windows.
 
 mod common;
 
@@ -13,6 +14,7 @@ use wbs_core::json::{self, Value};
 use wbs_core::mcs::rate_to_mcs;
 use wbs_core::onex::{parse_restart, parse_result_update};
 use wbs_core::report::{render_journal_csv, render_sessions_csv};
+use wbs_core::winlog::parse_event_xml;
 
 fn run(ops: &[Value]) -> ConnTracker {
     let mut trk = ConnTracker::new();
@@ -58,6 +60,7 @@ fn extras(src: &Value, lang: Lang) -> Value {
                 .collect()
         };
         let mcs = src.get("mcs").and_then(Value::as_array).unwrap();
+        let winlog = src.get("winlog").and_then(Value::as_array).unwrap();
         Value::Obj(vec![
             ("lang".into(), lang.code().into()),
             (
@@ -98,6 +101,19 @@ fn extras(src: &Value, lang: Lang) -> Value {
                                 n.min(2),
                             );
                             Value::Arr(found.iter().map(|g| g.to_value()).collect())
+                        })
+                        .collect(),
+                ),
+            ),
+            (
+                "winlog".into(),
+                Value::Arr(
+                    winlog
+                        .iter()
+                        .map(|c| {
+                            let a = c.as_array().unwrap();
+                            parse_event_xml(a[0].as_str().unwrap(), a[1].as_str().unwrap())
+                                .unwrap_or_else(|_| Value::Obj(vec![("error".into(), true.into())]))
                         })
                         .collect(),
                 ),

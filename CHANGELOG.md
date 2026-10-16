@@ -26,7 +26,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   connection journal, Windows event log, survey, HTML/PDF/Excel reports.
 - 2.0.0-alpha.2: the connection journal and sessions in 2.x (roams, drops, ping-pong, sticky client, 802.1X stages,
   IPv4/DHCP, MCS estimate from the link rate, CSV export) through WLAN notifications and polling, as in 1.x.
-  Contract `contract/journal` (`tools/journal_contract.py`): event scenarios and the 1.x result in both languages.
+  Also the Windows event log (WLAN-AutoConfig, wevtapi) and the update check (WinHTTP).
+  Contract `contract/journal` (`tools/journal_contract.py`): event scenarios, Windows event XML and the 1.x result
+  in both languages.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14
