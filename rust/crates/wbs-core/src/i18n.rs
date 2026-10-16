@@ -120,15 +120,27 @@ pub fn py_float(x: f64) -> String {
     }
 }
 
-/// `%g` в Python для значений программы (скорости вида k/2, проценты): без лишних нулей.
+/// `%g` в Python: 6 значащих цифр, без лишних нулей; экспонента при порядке < -4 или >= 6.
 pub fn py_g(x: f64) -> String {
-    if x.fract() == 0.0 && x.abs() < 1e15 {
-        format!("{x:.0}")
-    } else {
-        let s = format!("{x:.6}");
-        let s = s.trim_end_matches('0');
-        s.trim_end_matches('.').to_string()
+    if x == 0.0 || !x.is_finite() {
+        return if x == 0.0 { "0".into() } else { format!("{x}") };
     }
+    // порядок после округления до 6 значащих цифр
+    let e = format!("{x:.5e}");
+    let exp: i32 = e.split_once('e').and_then(|(_, p)| p.parse().ok()).unwrap_or(0);
+    let trim = |s: String| -> String {
+        if s.contains('.') {
+            s.trim_end_matches('0').trim_end_matches('.').to_string()
+        } else {
+            s
+        }
+    };
+    if !(-4..6).contains(&exp) {
+        let (m, _) = e.split_once('e').unwrap_or((&e, ""));
+        let sign = if exp < 0 { '-' } else { '+' };
+        return format!("{}e{sign}{:02}", trim(m.to_string()), exp.abs());
+    }
+    trim(format!("{x:.*}", (5 - exp) as usize))
 }
 
 /// Подстановка в стиле `шаблон % (аргументы)` Python: %s, %d, %g, %r, %.Nf, %X/%x с шириной и нулями, %%.
@@ -239,5 +251,29 @@ mod tests {
         assert_eq!(get_lang(), Lang::Ru);
         assert_eq!(tr("обязательна"), "обязательна");
         assert!(catalog().len() > 400);
+    }
+}
+
+#[cfg(test)]
+mod g_tests {
+    use super::py_g;
+
+    #[test]
+    fn g_like_python() {
+        for (x, want) in [
+            (1201.0, "1201"),
+            (2401.9, "2401.9"),
+            (12345.67, "12345.7"),
+            (0.8, "0.8"),
+            (5.5, "5.5"),
+            (1234567.0, "1.23457e+06"),
+            (0.0001, "0.0001"),
+            (0.00001234, "1.234e-05"),
+            (-3.0, "-3"),
+            (999999.5, "1e+06"),
+            (60.0, "60"),
+        ] {
+            assert_eq!(py_g(x), want, "{x}");
+        }
     }
 }

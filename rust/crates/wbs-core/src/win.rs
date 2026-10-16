@@ -19,15 +19,15 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::{Duration, Instant};
 
-use crate::app::{log_line, Backend, ScanError};
+use crate::app::{log_line, Backend, ConnSink, MonitorHandle, ScanError};
 use crate::clock::{iso_with_offset, now_unix};
 use crate::i18n::{tr, trf, Arg, Lang};
 use crate::model::{Bss, Snapshot};
 
-type HANDLE = *mut c_void;
+pub(crate) type HANDLE = *mut c_void;
 
-const ERROR_SUCCESS: u32 = 0;
-const ERROR_ACCESS_DENIED: u32 = 5;
+pub(crate) const ERROR_SUCCESS: u32 = 0;
+pub(crate) const ERROR_ACCESS_DENIED: u32 = 5;
 const DOT11_BSS_TYPE_ANY: u32 = 3;
 /// Сколько ещё ждать, если после WlanScan список пуст (адаптер только проснулся).
 const EMPTY_EXTRA_WAIT: Duration = Duration::from_secs(6);
@@ -35,11 +35,11 @@ const EMPTY_EXTRA_WAIT: Duration = Duration::from_secs(6);
 #[allow(dead_code)]
 #[repr(C)]
 #[derive(Clone, Copy)]
-struct GUID {
-    data1: u32,
-    data2: u16,
-    data3: u16,
-    data4: [u8; 8],
+pub(crate) struct GUID {
+    pub(crate) data1: u32,
+    pub(crate) data2: u16,
+    pub(crate) data3: u16,
+    pub(crate) data4: [u8; 8],
 }
 
 #[allow(dead_code)]
@@ -52,9 +52,9 @@ struct WlanInterfaceInfo {
 
 #[allow(dead_code)]
 #[repr(C)]
-struct Dot11Ssid {
-    len: u32,
-    ssid: [u8; 32],
+pub(crate) struct Dot11Ssid {
+    pub(crate) len: u32,
+    pub(crate) ssid: [u8; 32],
 }
 
 #[allow(dead_code)]
@@ -119,7 +119,7 @@ struct OsVersionInfoW {
 #[cfg_attr(windows, link(name = "wlanapi", kind = "raw-dylib"))]
 extern "system" {
     fn WlanOpenHandle(version: u32, reserved: *mut c_void, negotiated: *mut u32, handle: *mut HANDLE) -> u32;
-    fn WlanCloseHandle(handle: HANDLE, reserved: *mut c_void) -> u32;
+    pub(crate) fn WlanCloseHandle(handle: HANDLE, reserved: *mut c_void) -> u32;
     fn WlanEnumInterfaces(handle: HANDLE, reserved: *mut c_void, list: *mut *mut c_void) -> u32;
     fn WlanScan(
         handle: HANDLE,
@@ -137,12 +137,12 @@ extern "system" {
         reserved: *mut c_void,
         list: *mut *mut c_void,
     ) -> u32;
-    fn WlanFreeMemory(memory: *mut c_void);
+    pub(crate) fn WlanFreeMemory(memory: *mut c_void);
 }
 
 #[cfg_attr(windows, link(name = "kernel32", kind = "raw-dylib"))]
 extern "system" {
-    fn FormatMessageW(
+    pub(crate) fn FormatMessageW(
         flags: u32,
         source: *const c_void,
         message_id: u32,
@@ -178,7 +178,7 @@ pub fn format_error(code: u32) -> String {
     String::from_utf16_lossy(&buf[..n as usize]).trim().to_string()
 }
 
-fn check(code: u32, what: &str) -> Result<(), String> {
+pub(crate) fn check(code: u32, what: &str) -> Result<(), String> {
     if code == ERROR_SUCCESS {
         return Ok(());
     }
@@ -189,10 +189,10 @@ fn check(code: u32, what: &str) -> Result<(), String> {
 }
 
 /// Сессия WLAN: закрывается сама.
-struct Session(HANDLE);
+pub(crate) struct Session(pub(crate) HANDLE);
 
 impl Session {
-    fn open() -> Result<Session, String> {
+    pub(crate) fn open() -> Result<Session, String> {
         let mut ver = 0u32;
         let mut h: HANDLE = std::ptr::null_mut();
         check(
@@ -202,7 +202,7 @@ impl Session {
         Ok(Session(h))
     }
 
-    fn interfaces(&self) -> Result<Vec<(String, GUID)>, String> {
+    pub(crate) fn interfaces(&self) -> Result<Vec<(String, GUID)>, String> {
         let mut p: *mut c_void = std::ptr::null_mut();
         check(
             unsafe { WlanEnumInterfaces(self.0, std::ptr::null_mut(), &mut p) },
@@ -231,7 +231,7 @@ impl Drop for Session {
     }
 }
 
-fn mac(b: &[u8; 6]) -> String {
+pub(crate) fn mac(b: &[u8; 6]) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect::<Vec<_>>().join(":")
 }
 
@@ -288,6 +288,14 @@ impl WindowsBackend {
 impl Backend for WindowsBackend {
     fn name(&self) -> &str {
         "windows"
+    }
+
+    fn start_conn_monitor(
+        &self,
+        sink: std::sync::Arc<dyn ConnSink>,
+        interface_index: usize,
+    ) -> Result<Option<Box<dyn MonitorHandle>>, String> {
+        crate::win_conn::start(sink, interface_index).map(Some)
     }
 
     fn interfaces(&self) -> Result<Vec<String>, String> {

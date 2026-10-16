@@ -1,0 +1,990 @@
+{
+ "lang": "en",
+ "onex_result": [
+  {
+   "status": null,
+   "reason": 0,
+   "error": 0,
+   "backend": null,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  },
+  {
+   "status": 3,
+   "reason": 0,
+   "error": 0,
+   "backend": null,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  },
+  {
+   "status": 3,
+   "reason": 0,
+   "error": 0,
+   "backend": null,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  },
+  {
+   "status": 4,
+   "reason": 327685,
+   "error": 0,
+   "backend": 1,
+   "eap_type": 13,
+   "identity": 2,
+   "eap_reason": 327681,
+   "eap_win_error": 2148081683
+  },
+  {
+   "status": 4,
+   "reason": 327685,
+   "error": 0,
+   "backend": 1,
+   "eap_type": 13,
+   "identity": null,
+   "eap_reason": 327681,
+   "eap_win_error": 2148081683
+  },
+  {
+   "status": 4,
+   "reason": 0,
+   "error": 0,
+   "backend": 0,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  },
+  {
+   "status": 4,
+   "reason": 0,
+   "error": 5,
+   "backend": 0,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  },
+  {
+   "status": 1,
+   "reason": 0,
+   "error": 0,
+   "backend": 0,
+   "eap_type": null,
+   "identity": null,
+   "eap_reason": null,
+   "eap_win_error": null
+  }
+ ],
+ "onex_restart": [
+  {
+   "reason": null,
+   "reason_ru": ""
+  },
+  {
+   "reason": 1,
+   "reason_ru": "requested by Windows (MSM)"
+  },
+  {
+   "reason": 7,
+   "reason_ru": "retry with other credentials"
+  },
+  {
+   "reason": 42,
+   "reason_ru": "42"
+  }
+ ],
+ "mcs": [
+  [
+   {
+    "phy": "HE",
+    "mcs": 0,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "BPSK 1/2",
+    "rate": 72.1,
+    "text": "HE MCS 0 (BPSK 1/2), 2 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 1,
+    "nss": 1,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "QPSK 1/2",
+    "rate": 72.1,
+    "text": "HE MCS 1 (QPSK 1/2), 1 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 72.2,
+    "text": "HT MCS 7 (64-QAM 5/6), 1 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 1,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "QPSK 1/2",
+    "rate": 144.1,
+    "text": "HE MCS 1 (QPSK 1/2), 2 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 3,
+    "nss": 1,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "16-QAM 1/2",
+    "rate": 144.1,
+    "text": "HE MCS 3 (16-QAM 1/2), 1 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 143.4,
+    "text": "HE MCS 11 (1024-QAM 5/6), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 2,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "QPSK 3/4",
+    "rate": 216.2,
+    "text": "HE MCS 2 (QPSK 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 4,
+    "nss": 1,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "16-QAM 3/4",
+    "rate": 216.2,
+    "text": "HE MCS 4 (16-QAM 3/4), 1 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 9,
+    "nss": 2,
+    "width": 20,
+    "gi": 1.6,
+    "mod": "256-QAM 5/6",
+    "rate": 216.7,
+    "text": "HE MCS 9 (256-QAM 5/6), 2 streams, 20 MHz, GI 1.6 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 3,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "16-QAM 1/2",
+    "rate": 288.2,
+    "text": "HE MCS 3 (16-QAM 1/2), 2 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 5,
+    "nss": 1,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "64-QAM 2/3",
+    "rate": 288.2,
+    "text": "HE MCS 5 (64-QAM 2/3), 1 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 4,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "16-QAM 3/4",
+    "rate": 432.4,
+    "text": "HE MCS 4 (16-QAM 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 8,
+    "nss": 1,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "256-QAM 3/4",
+    "rate": 432.4,
+    "text": "HE MCS 8 (256-QAM 3/4), 1 streams, 80 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 9,
+    "nss": 2,
+    "width": 40,
+    "gi": 1.6,
+    "mod": "256-QAM 5/6",
+    "rate": 433.3,
+    "text": "HE MCS 9 (256-QAM 5/6), 2 streams, 40 MHz, GI 1.6 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 5,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "64-QAM 2/3",
+    "rate": 576.5,
+    "text": "HE MCS 5 (64-QAM 2/3), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 6,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "64-QAM 3/4",
+    "rate": 648.5,
+    "text": "HE MCS 6 (64-QAM 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 7,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "64-QAM 5/6",
+    "rate": 720.6,
+    "text": "HE MCS 7 (64-QAM 5/6), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 8,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "256-QAM 3/4",
+    "rate": 864.7,
+    "text": "HE MCS 8 (256-QAM 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 9,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "256-QAM 5/6",
+    "rate": 960.8,
+    "text": "HE MCS 9 (256-QAM 5/6), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 10,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "1024-QAM 3/4",
+    "rate": 1080.9,
+    "text": "HE MCS 10 (1024-QAM 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 1201.0,
+    "text": "HE MCS 11 (1024-QAM 5/6), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 0,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "BPSK 1/2",
+    "rate": 15.0,
+    "text": "VHT MCS 0 (BPSK 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "VHT",
+    "mcs": 1,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "QPSK 1/2",
+    "rate": 14.4,
+    "text": "VHT MCS 1 (QPSK 1/2), 1 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 0,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "BPSK 1/2",
+    "rate": 15.0,
+    "text": "HT MCS 0 (BPSK 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 1,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "QPSK 1/2",
+    "rate": 30.0,
+    "text": "VHT MCS 1 (QPSK 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 1,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "QPSK 1/2",
+    "rate": 30.0,
+    "text": "HT MCS 1 (QPSK 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 2,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "QPSK 3/4",
+    "rate": 45.0,
+    "text": "VHT MCS 2 (QPSK 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 2,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "QPSK 3/4",
+    "rate": 45.0,
+    "text": "HT MCS 2 (QPSK 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 3,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "16-QAM 1/2",
+    "rate": 60.0,
+    "text": "VHT MCS 3 (16-QAM 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 3,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "16-QAM 1/2",
+    "rate": 60.0,
+    "text": "HT MCS 3 (16-QAM 1/2), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 4,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "16-QAM 3/4",
+    "rate": 90.0,
+    "text": "VHT MCS 4 (16-QAM 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 4,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "16-QAM 3/4",
+    "rate": 90.0,
+    "text": "HT MCS 4 (16-QAM 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 5,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 2/3",
+    "rate": 120.0,
+    "text": "VHT MCS 5 (64-QAM 2/3), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 5,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 2/3",
+    "rate": 120.0,
+    "text": "HT MCS 5 (64-QAM 2/3), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 6,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 3/4",
+    "rate": 135.0,
+    "text": "VHT MCS 6 (64-QAM 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "VHT",
+    "mcs": 7,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.8,
+    "mod": "64-QAM 5/6",
+    "rate": 135.0,
+    "text": "VHT MCS 7 (64-QAM 5/6), 1 streams, 40 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 6,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 3/4",
+    "rate": 135.0,
+    "text": "HT MCS 6 (64-QAM 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 7,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 150.0,
+    "text": "VHT MCS 7 (64-QAM 5/6), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 150.0,
+    "text": "HT MCS 7 (64-QAM 5/6), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 8,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "256-QAM 3/4",
+    "rate": 180.0,
+    "text": "VHT MCS 8 (256-QAM 3/4), 1 streams, 40 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "VHT",
+    "mcs": 9,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.8,
+    "mod": "256-QAM 5/6",
+    "rate": 180.0,
+    "text": "VHT MCS 9 (256-QAM 5/6), 1 streams, 40 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 9,
+    "nss": 1,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "256-QAM 5/6",
+    "rate": 200.0,
+    "text": "VHT MCS 9 (256-QAM 5/6), 1 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 0,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "BPSK 1/2",
+    "rate": 14.4,
+    "text": "HT MCS 0 (BPSK 1/2), 2 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 1,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "QPSK 1/2",
+    "rate": 14.4,
+    "text": "HT MCS 1 (QPSK 1/2), 1 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 1,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "QPSK 1/2",
+    "rate": 28.9,
+    "text": "HT MCS 1 (QPSK 1/2), 2 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 3,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "16-QAM 1/2",
+    "rate": 28.9,
+    "text": "HT MCS 3 (16-QAM 1/2), 1 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 2,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "QPSK 3/4",
+    "rate": 43.3,
+    "text": "HT MCS 2 (QPSK 3/4), 2 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 4,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "16-QAM 3/4",
+    "rate": 43.3,
+    "text": "HT MCS 4 (16-QAM 3/4), 1 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 3,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "16-QAM 1/2",
+    "rate": 57.8,
+    "text": "HT MCS 3 (16-QAM 1/2), 2 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 5,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 2/3",
+    "rate": 57.8,
+    "text": "HT MCS 5 (64-QAM 2/3), 1 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 4,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "16-QAM 3/4",
+    "rate": 86.7,
+    "text": "HT MCS 4 (16-QAM 3/4), 2 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 5,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 2/3",
+    "rate": 115.6,
+    "text": "HT MCS 5 (64-QAM 2/3), 2 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 6,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 3/4",
+    "rate": 130.0,
+    "text": "HT MCS 6 (64-QAM 3/4), 2 streams, 20 MHz, GI 0.4 µs"
+   },
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "64-QAM 5/6",
+    "rate": 130.0,
+    "text": "HT MCS 7 (64-QAM 5/6), 2 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 144.4,
+    "text": "HT MCS 7 (64-QAM 5/6), 2 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 0,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "BPSK 1/2",
+    "rate": 8.6,
+    "text": "HE MCS 0 (BPSK 1/2), 1 streams, 20 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 0,
+    "nss": 1,
+    "width": 20,
+    "gi": 1.6,
+    "mod": "BPSK 1/2",
+    "rate": 8.1,
+    "text": "HE MCS 0 (BPSK 1/2), 1 streams, 20 MHz, GI 1.6 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 1,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "QPSK 1/2",
+    "rate": 17.2,
+    "text": "HE MCS 1 (QPSK 1/2), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 2,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "QPSK 3/4",
+    "rate": 25.8,
+    "text": "HE MCS 2 (QPSK 3/4), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 3,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "16-QAM 1/2",
+    "rate": 34.4,
+    "text": "HE MCS 3 (16-QAM 1/2), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 4,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "16-QAM 3/4",
+    "rate": 51.6,
+    "text": "HE MCS 4 (16-QAM 3/4), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 5,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "64-QAM 2/3",
+    "rate": 68.8,
+    "text": "HE MCS 5 (64-QAM 2/3), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 6,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "64-QAM 3/4",
+    "rate": 77.4,
+    "text": "HE MCS 6 (64-QAM 3/4), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 7,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "64-QAM 5/6",
+    "rate": 86.0,
+    "text": "HE MCS 7 (64-QAM 5/6), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 8,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "256-QAM 3/4",
+    "rate": 103.2,
+    "text": "HE MCS 8 (256-QAM 3/4), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 9,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "256-QAM 5/6",
+    "rate": 114.7,
+    "text": "HE MCS 9 (256-QAM 5/6), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 10,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "1024-QAM 3/4",
+    "rate": 129.0,
+    "text": "HE MCS 10 (1024-QAM 3/4), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 143.4,
+    "text": "HE MCS 11 (1024-QAM 5/6), 1 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 1201.0,
+    "text": "HE MCS 11 (1024-QAM 5/6), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 8,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.8,
+    "mod": "256-QAM 3/4",
+    "rate": 864.7,
+    "text": "HE MCS 8 (256-QAM 3/4), 2 streams, 80 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "VHT",
+    "mcs": 9,
+    "nss": 2,
+    "width": 80,
+    "gi": 0.4,
+    "mod": "256-QAM 5/6",
+    "rate": 866.7,
+    "text": "VHT MCS 9 (256-QAM 5/6), 2 streams, 80 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 2,
+    "width": 20,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 144.4,
+    "text": "HT MCS 7 (64-QAM 5/6), 2 streams, 20 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "legacy",
+    "mcs": null,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "",
+    "rate": 54.0,
+    "text": "legacy 54 Mbit/s"
+   }
+  ],
+  [],
+  [],
+  [],
+  [
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 2,
+    "width": 160,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 2402.0,
+    "text": "HE MCS 11 (1024-QAM 5/6), 2 streams, 160 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HT",
+    "mcs": 7,
+    "nss": 2,
+    "width": 40,
+    "gi": 0.4,
+    "mod": "64-QAM 5/6",
+    "rate": 300.0,
+    "text": "HT MCS 7 (64-QAM 5/6), 2 streams, 40 MHz, GI 0.4 µs"
+   }
+  ],
+  [
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 2,
+    "width": 40,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 573.5,
+    "text": "HE MCS 11 (1024-QAM 5/6), 2 streams, 40 MHz, GI 0.8 µs"
+   },
+   {
+    "phy": "HE",
+    "mcs": 11,
+    "nss": 4,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "1024-QAM 5/6",
+    "rate": 573.5,
+    "text": "HE MCS 11 (1024-QAM 5/6), 4 streams, 20 MHz, GI 0.8 µs"
+   }
+  ],
+  [
+   {
+    "phy": "legacy",
+    "mcs": null,
+    "nss": 1,
+    "width": 20,
+    "gi": 0.8,
+    "mod": "",
+    "rate": 11.0,
+    "text": "legacy 11 Mbit/s"
+   }
+  ]
+ ]
+}

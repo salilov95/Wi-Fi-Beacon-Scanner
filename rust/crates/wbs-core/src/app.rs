@@ -12,14 +12,16 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use crate::clock::{iso_with_offset, now_unix};
+use crate::conn::{ConnTracker, ScanSeen};
 use crate::diff::diff_snapshots;
 use crate::i18n::{tr, trf, with_lang, Arg, Lang};
 use crate::ie::round1;
 use crate::json::{self, Value};
+use crate::mcs::{capability, rate_to_mcs};
 use crate::model::Snapshot;
 use crate::oui::OuiDb;
 use crate::prefs::{clean_focus, sanitize, THEMES};
-use crate::report::{render_csv, render_history_csv, snapshot_json};
+use crate::report::{render_csv, render_history_csv, render_journal_csv, render_sessions_csv, snapshot_json};
 use crate::row::bss_row;
 use crate::rules::{analyze, channel_advice, channel_utilization, Finding, History, Thresholds};
 
@@ -88,6 +90,25 @@ pub trait Backend: Send + Sync {
     fn name(&self) -> &str;
     fn interfaces(&self) -> Result<Vec<String>, String>;
     fn scan(&self, interface_index: usize, wait_s: f64) -> Result<Snapshot, ScanError>;
+    /// Фоновый монитор подключения (журнал); `None` - источник его не поддерживает.
+    fn start_conn_monitor(
+        &self,
+        _sink: Arc<dyn ConnSink>,
+        _interface_index: usize,
+    ) -> Result<Option<Box<dyn MonitorHandle>>, String> {
+        Ok(None)
+    }
+}
+
+/// Куда монитор подключения пишет: журнал под замком состояния и на языке программы.
+pub trait ConnSink: Send + Sync {
+    fn with_conn(&self, f: &mut dyn FnMut(&mut ConnTracker));
+    fn lang(&self) -> Lang;
+}
+
+/// Остановить фоновый монитор.
+pub trait MonitorHandle: Send {
+    fn stop(&self);
 }
 
 /// Снапшот из файла: каждый «скан» возвращает его же со свежим временем (разработка и тесты).
@@ -242,6 +263,7 @@ struct Inner {
     interfaces_error: Option<String>,
     baseline: Option<Arc<Snapshot>>,
     scan_args: (usize, f64),
+    conn: ConnTracker,
 }
 
 pub struct App {
@@ -249,6 +271,7 @@ pub struct App {
     backend: Box<dyn Backend>,
     inner: Mutex<Inner>,
     log_lock: Mutex<()>,
+    monitor: Mutex<Option<Box<dyn MonitorHandle>>>,
     /// Окно уже спрашивало состояние (в журнал - один раз: так видно, что окно и протокол работают).
     connected: std::sync::atomic::AtomicBool,
 }
@@ -288,9 +311,12 @@ impl App {
                 interfaces_error: None,
                 baseline: None,
                 scan_args: (0, 4.0),
+                // текст «не запущен» - на языке программы при запуске, как в 1.x
+                conn: with_lang(lang, ConnTracker::new),
             }),
             log_lock: Mutex::new(()),
             connected: std::sync::atomic::AtomicBool::new(false),
+            monitor: Mutex::new(None),
         });
         // текст ошибки адаптера - на языке программы, как и всё остальное
         with_lang(lang, || app.refresh_interfaces());
@@ -392,6 +418,20 @@ impl App {
                         snap.taken_at = iso_with_offset(now_unix(), self.cfg.tz_offset_min);
                     }
                     self.apply(&mut st, snap, Some(now_unix()));
+                    let seen: Vec<(String, String, i32)> = st
+                        .snapshot
+                        .as_ref()
+                        .map(|s| s.bss.iter().map(|b| (b.bssid.clone(), b.ssid(), b.rssi)).collect())
+                        .unwrap_or_default();
+                    let seen: Vec<ScanSeen> = seen
+                        .iter()
+                        .map(|(b, s, r)| ScanSeen {
+                            bssid: b,
+                            ssid: s,
+                            rssi: *r,
+                        })
+                        .collect();
+                    st.conn.check_scan(now_unix(), &seen);
                 }
                 Err(e) => {
                     let msg = if e.kind == "location" { tr(LOCATION_HINT) } else { e.msg };
@@ -627,12 +667,70 @@ impl App {
                     obj(vec![("channels", Value::Arr(vec![])), ("no_data", Value::Arr(vec![]))])
                 },
             ),
-            ("conn", conn_stub()),
-            ("sessions", sessions_stub()),
+            ("conn", self.conn_value(&st, bss)),
+            ("sessions", st.conn.sessions.to_value(200)),
             ("survey", survey_stub()),
             ("history", history),
             ("now", round1(now_unix()).into()),
         ])
+    }
+
+    /// Журнал для окна (`_conn_dict` в 1.x): к текущему подключению - вендор и оценка MCS по скорости.
+    fn conn_value(&self, st: &Inner, bss: &[crate::model::Bss]) -> Value {
+        let mut d = st.conn.to_value(1800, 500);
+        let Some(cur) = st.conn.current().filter(|c| !c.bssid.is_empty()) else {
+            return d;
+        };
+        let mut extra: Vec<(String, Value)> = vec![];
+        if let Some(db) = &self.cfg.oui {
+            extra.push(("vendor".into(), db.lookup(&cur.bssid).unwrap_or("").into()));
+        }
+        let (rx, tx) = match bss.iter().find(|b| b.bssid == cur.bssid) {
+            None => (vec![], vec![]),
+            Some(b) => {
+                let cap = capability(&b.info);
+                let phy = if ["HT", "VHT", "HE"].contains(&cap.phy) {
+                    cap.phy
+                } else {
+                    "HT"
+                };
+                let nss = if cap.nss == 0 { 1 } else { cap.nss };
+                let guess = |r: Option<f64>| -> Vec<Value> {
+                    rate_to_mcs(r, phy, cap.width, b.band(), 3, nss, nss.min(2))
+                        .iter()
+                        .map(|g| g.to_value())
+                        .collect()
+                };
+                (guess(cur.rx_mbps), guess(cur.tx_mbps))
+            }
+        };
+        extra.push(("rx_mcs".into(), Value::Arr(rx)));
+        extra.push(("tx_mcs".into(), Value::Arr(tx)));
+        if let Value::Obj(kv) = &mut d {
+            if let Some((_, Value::Obj(c))) = kv.iter_mut().find(|(k, _)| k == "current") {
+                c.extend(extra);
+            }
+        }
+        d
+    }
+
+    /// Журнал подключения: запускает монитор источника данных (`start_monitors` в 1.x).
+    pub fn start_monitors(self: &Arc<Self>) {
+        let sink: Arc<dyn ConnSink> = Arc::clone(self) as Arc<dyn ConnSink>;
+        let res = self.backend.start_conn_monitor(sink, 0);
+        let lang = self.lang();
+        let mut st = self.lock();
+        with_lang(lang, || match res {
+            Ok(Some(h)) => *self.monitor.lock().unwrap_or_else(|e| e.into_inner()) = Some(h),
+            Ok(None) => st.conn.status = tr("журнал подключения недоступен для этого источника данных"),
+            Err(e) => st.conn.status = trf("журнал подключения не запустился: %s", &[Arg::S(e)]),
+        });
+    }
+
+    pub fn stop_monitors(&self) {
+        if let Some(h) = self.monitor.lock().unwrap_or_else(|e| e.into_inner()).take() {
+            h.stop();
+        }
     }
 
     fn about(&self) -> Value {
@@ -671,7 +769,20 @@ impl App {
 
     fn export(&self, fmt: &str, scope: &str, bssids: Option<&Value>) -> Reply {
         match fmt {
-            "journal" | "sessions" => return Reply::err(501, not_ported("Журнал подключения", "Connection journal")),
+            "journal" => {
+                let st = self.lock();
+                let ev: Vec<_> = st.conn.events.iter().collect();
+                let mut data = vec![0xEF, 0xBB, 0xBF];
+                data.extend(render_journal_csv(&ev, self.cfg.tz_offset_min).into_bytes());
+                return Reply::file(data, "text/csv; charset=utf-8", "wifi-journal.csv");
+            }
+            "sessions" => {
+                let st = self.lock();
+                let ss: Vec<_> = st.conn.sessions.sessions.iter().collect();
+                let mut data = vec![0xEF, 0xBB, 0xBF];
+                data.extend(render_sessions_csv(&ss, self.cfg.tz_offset_min).into_bytes());
+                return Reply::file(data, "text/csv; charset=utf-8", "wifi-sessions.csv");
+            }
             "html" | "pdf" | "xlsx" => {
                 return Reply::err(
                     501,
@@ -907,7 +1018,11 @@ impl App {
             "/api/survey/plan" | "/api/survey/point" | "/api/survey/project" => {
                 Reply::err(501, not_ported("Обход с планом этажа", "Floor-plan survey"))
             }
-            "/api/survey/delete" | "/api/survey/clear" | "/api/conn/clear" => Reply::ok(),
+            "/api/conn/clear" => {
+                self.with_conn(&mut |c| c.clear());
+                Reply::ok()
+            }
+            "/api/survey/delete" | "/api/survey/clear" => Reply::ok(),
             "/api/baseline" => {
                 let truthy = |k: &str| !matches!(b.get(k), None | Some(Value::Null) | Some(Value::Bool(false)));
                 let mut st = self.lock();
@@ -974,6 +1089,17 @@ pub fn log_line(path: Option<&std::path::Path>, tz_offset_min: i32, level: &str,
     }
 }
 
+impl ConnSink for App {
+    fn with_conn(&self, f: &mut dyn FnMut(&mut ConnTracker)) {
+        let mut st = self.lock();
+        let lang = st.lang;
+        with_lang(lang, || f(&mut st.conn));
+    }
+    fn lang(&self) -> Lang {
+        App::lang(self)
+    }
+}
+
 fn load_prefs(cfg: &Config) -> Value {
     let own = cfg.prefs_path.as_ref().filter(|p| p.exists());
     let path = own.or(cfg.legacy_prefs_path.as_ref().filter(|p| p.exists()));
@@ -981,44 +1107,6 @@ fn load_prefs(cfg: &Config) -> Value {
         .and_then(|t| json::parse(t.trim_start_matches('\u{feff}')).ok())
         .map(|v| sanitize(&v))
         .unwrap_or(Value::Obj(vec![]))
-}
-
-fn conn_stub() -> Value {
-    obj(vec![
-        ("status", not_ported("Журнал подключения", "Connection journal").into()),
-        ("current", Value::Null),
-        ("samples", Value::Arr(vec![])),
-        ("events", Value::Arr(vec![])),
-        (
-            "stats",
-            obj(vec![
-                ("roams", 0.into()),
-                ("disconnects", 0.into()),
-                ("pingpong", 0.into()),
-                ("sticky", 0.into()),
-                ("attempt_fail", 0.into()),
-                ("ssid_change", 0.into()),
-                ("down_s", 0.0.into()),
-                ("since", Value::Null),
-                ("until", Value::Null),
-                ("dwell", Value::Arr(vec![])),
-            ]),
-        ),
-        ("raw", Value::Arr(vec![])),
-    ])
-}
-
-fn sessions_stub() -> Value {
-    let mut summary = vec![];
-    for k in ["connects", "connects_ok", "connects_fail", "roams", "roams_fail"] {
-        summary.push((k, Value::Int(0)));
-    }
-    for k in ["connect_ms_med", "roam_ms_med", "auth_ms_med", "ip_ms_med"] {
-        summary.push((k, Value::Null));
-    }
-    summary.push(("onex_ok", 0.into()));
-    summary.push(("onex_fail", 0.into()));
-    obj(vec![("sessions", Value::Arr(vec![])), ("summary", obj(summary))])
 }
 
 fn survey_stub() -> Value {

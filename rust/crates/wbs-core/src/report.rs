@@ -172,3 +172,139 @@ pub fn snapshot_json(s: &Snapshot) -> String {
     ])
     .to_json()
 }
+
+// ---------------------------------------------------------------- журнал подключения и сессии
+
+pub fn journal_kind_ru(kind: &str) -> Option<&'static str> {
+    Some(match kind {
+        "connected" => "подключение",
+        "disconnected" => "обрыв",
+        "roam" => "роуминг",
+        "ssid_change" => "смена сети",
+        "pingpong" => "пинг-понг",
+        "sticky" => "залипание",
+        "attempt_fail" => "неудачное подключение",
+        "disconnect_reason" => "отключение (по данным Windows)",
+        _ => return None,
+    })
+}
+
+fn tr_or(key: Option<&'static str>, raw: &str) -> String {
+    match key {
+        Some(k) => crate::i18n::tr(k),
+        None => crate::i18n::tr(raw),
+    }
+}
+
+/// CSV журнала подключения (`render_journal_csv`).
+pub fn render_journal_csv(events: &[&crate::conn::ConnEvent], offset_min: i32) -> String {
+    let mut out = line(&[
+        "time",
+        "event",
+        "ssid",
+        "bssid_from",
+        "bssid_to",
+        "rssi_from",
+        "rssi_to",
+        "duration_s",
+        "reason_code",
+        "reason",
+        "text",
+    ]);
+    for e in events {
+        out.push_str(&line(&[
+            iso_naive(e.t, offset_min),
+            tr_or(journal_kind_ru(&e.kind), &e.kind),
+            e.ssid.clone(),
+            e.bssid_from.clone(),
+            e.bssid_to.clone(),
+            opt(e.rssi_from),
+            opt(e.rssi_to),
+            e.duration_s.map(py_float).unwrap_or_default(),
+            e.reason_code.map(|c| format!("0x{c:X}")).unwrap_or_default(),
+            e.reason.clone(),
+            e.text.clone(),
+        ]));
+    }
+    out
+}
+
+const SESSION_HEAD: [&str; 19] = [
+    "Время",
+    "Тип",
+    "Итог",
+    "SSID",
+    "Откуда",
+    "Куда",
+    "Ассоциация, мс",
+    "Аутентификация, мс",
+    "Всего, мс",
+    "IP через, мс",
+    "IPv4",
+    "DHCP-сервер",
+    "IP/DHCP",
+    "EAP",
+    "Учётка 802.1X",
+    "802.1X",
+    "Причина",
+    "Код причины",
+    "Ошибка EAP",
+];
+
+fn session_kind_ru(k: &str) -> Option<&'static str> {
+    match k {
+        "connect" => Some("подключение"),
+        "roam" => Some("роуминг"),
+        _ => None,
+    }
+}
+
+fn session_result_ru(r: &str) -> Option<&'static str> {
+    Some(match r {
+        "ok" => "успешно",
+        "fail" => "ошибка",
+        "aborted" => "прервано",
+        "in_progress" => "идёт",
+        _ => return None,
+    })
+}
+
+/// Таблица сессий (`session_rows`): заголовок и строки; пустая ячейка - `""` (в 1.x `None`).
+pub fn session_rows(sessions: &[&crate::session::Session], offset_min: i32) -> Vec<Vec<String>> {
+    let mut rows = vec![SESSION_HEAD.iter().map(|h| crate::i18n::tr(h)).collect::<Vec<_>>()];
+    for s in sessions {
+        rows.push(vec![
+            iso_naive(s.t_start, offset_min).replacen('T', " ", 1),
+            tr_or(session_kind_ru(&s.kind), &s.kind),
+            tr_or(session_result_ru(&s.result), &s.result),
+            s.ssid.clone(),
+            s.bssid_from.clone(),
+            s.bssid.clone(),
+            opt(s.assoc_ms()),
+            opt(s.auth_ms()),
+            opt(s.total_ms()),
+            opt(s.ip_ms()),
+            s.ip.clone(),
+            s.dhcp_server.clone(),
+            s.ip_note.clone(),
+            s.eap_name(),
+            s.onex_identity_text(),
+            s.onex_status_text(),
+            s.reason.clone(),
+            s.reason_code
+                .filter(|&c| c != 0)
+                .map(|c| format!("0x{c:X}"))
+                .unwrap_or_default(),
+            s.onex_error_code
+                .filter(|&c| c != 0)
+                .map(|c| format!("0x{c:08X} {}", s.onex_error).trim().to_string())
+                .unwrap_or_default(),
+        ]);
+    }
+    rows
+}
+
+/// CSV сессий (`render_sessions_csv`).
+pub fn render_sessions_csv(sessions: &[&crate::session::Session], offset_min: i32) -> String {
+    session_rows(sessions, offset_min).iter().map(|r| line(r)).collect()
+}

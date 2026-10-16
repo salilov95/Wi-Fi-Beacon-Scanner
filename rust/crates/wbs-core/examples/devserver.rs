@@ -4,12 +4,15 @@
 //!     (открыть http://127.0.0.1:8765/ в браузере)
 //!
 //! Данные - из снапшота (каждый «скан» возвращает его же). Сервер учебный: только для своей машины.
+//! `WBS_JOURNAL=../contract/journal/scenarios/demo.json` - заполнить журнал подключения сценарием
+//! (время сдвигается так, что сценарий кончается сейчас).
 
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 
-use wbs_core::app::{App, Config, FixtureBackend};
+use wbs_core::app::{App, Config, ConnSink, FixtureBackend};
+use wbs_core::json::Value;
 use wbs_core::model::Snapshot;
 
 fn serve(app: Arc<App>, stream: TcpStream) -> std::io::Result<()> {
@@ -54,6 +57,33 @@ fn serve(app: Arc<App>, stream: TcpStream) -> std::io::Result<()> {
     Ok(())
 }
 
+/// Сценарий журнала из contract/journal: все отметки времени сдвигаются к «сейчас».
+fn replay(app: &App, path: &str) {
+    let src = wbs_core::json::parse(&std::fs::read_to_string(path).expect("сценарий")).expect("JSON");
+    let ops = src.get("ops").and_then(Value::as_array).expect("ops").clone();
+    let last = ops
+        .iter()
+        .filter_map(|o| o.get("t").and_then(Value::as_f64))
+        .fold(0.0, f64::max);
+    let shift = wbs_core::clock::now_unix() - last;
+    let moved = |o: &Value| -> Value {
+        let Value::Obj(kv) = o else { return o.clone() };
+        Value::Obj(
+            kv.iter()
+                .map(|(k, v)| match (k.as_str(), v.as_f64()) {
+                    ("t" | "lease", Some(x)) => (k.clone(), Value::Num(x + shift)),
+                    _ => (k.clone(), v.clone()),
+                })
+                .collect(),
+        )
+    };
+    app.with_conn(&mut |c| {
+        for o in &ops {
+            wbs_core::conn::replay_op(c, &moved(o)).expect("операция сценария");
+        }
+    });
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let path = args.get(1).expect("путь к снапшоту JSON");
@@ -65,6 +95,9 @@ fn main() {
         ..Config::default()
     };
     let app = App::new(cfg, Box::new(FixtureBackend { snap }));
+    if let Ok(path) = std::env::var("WBS_JOURNAL") {
+        replay(&app, &path);
+    }
     let listener = TcpListener::bind(("127.0.0.1", port)).expect("порт занят");
     eprintln!("http://127.0.0.1:{port}/");
     for s in listener.incoming().flatten() {

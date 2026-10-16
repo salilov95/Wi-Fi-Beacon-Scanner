@@ -119,6 +119,7 @@ fn build_core() -> Arc<App> {
 
 fn main() {
     let core = build_core();
+    core.start_monitors(); // журнал подключения: опрос и уведомления Windows в своём потоке
     let for_protocol = Arc::clone(&core);
     let result = tauri::Builder::default()
         .register_asynchronous_uri_scheme_protocol("wbs", move |ctx, request, responder| {

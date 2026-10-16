@@ -1,0 +1,973 @@
+{
+ "scenario": "edges",
+ "ops": [
+  {
+   "op": "sample",
+   "t": 1792000000.0,
+   "state": "disconnected",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000001.0,
+   "state": "discovering",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  {
+   "op": "raw",
+   "t": 1792000001.04,
+   "source": 8,
+   "code": 9,
+   "name": "acm_connection_start"
+  },
+  {
+   "op": "stage",
+   "t": 1792000001.1,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000001.2,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000001.25,
+   "stage": "associated",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000001.3,
+   "stage": "authenticating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "onex",
+   "t": 1792000001.31,
+   "status": 1,
+   "reason_code": 0,
+   "reason": "",
+   "error_code": 0,
+   "error": "",
+   "eap_type": 25,
+   "identity": 2,
+   "restarted": false
+  },
+  {
+   "op": "onex",
+   "t": 1792000001.9,
+   "status": 3,
+   "reason_code": 0,
+   "reason": "",
+   "error_code": 0,
+   "error": "",
+   "eap_type": 25,
+   "identity": 2,
+   "restarted": false
+  },
+  {
+   "op": "stage",
+   "t": 1792000002.0,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000002.05,
+   "stage": "complete",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000002.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -50,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "ip",
+   "t": 1792000002.5,
+   "ip": "0.0.0.0",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": 1791999900.0
+  },
+  {
+   "op": "ip",
+   "t": 1792000003.4,
+   "ip": "10.1.2.3",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": 1792000002.6
+  },
+  {
+   "op": "sample",
+   "t": 1792000003.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -52,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "sample",
+   "t": 1792000004.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -58,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000030.0,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000030.03,
+   "stage": "associated",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000030.03,
+   "stage": "authenticating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000030.06,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000030.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "rssi": -61,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000031.0,
+   "stage": "roam_end",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000040.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "onex",
+   "t": 1792000040.5,
+   "status": 3,
+   "reason_code": 0,
+   "reason": "",
+   "error_code": 0,
+   "error": "",
+   "eap_type": 99,
+   "identity": null,
+   "restarted": false
+  },
+  {
+   "op": "reason",
+   "t": 1792000059.5,
+   "kind": "disconnected",
+   "code": 229379,
+   "reason": "AP deauth",
+   "ssid": "CORP",
+   "bssid": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000059.6,
+   "stage": "disconnected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": 229379,
+   "reason": "AP deauth"
+  },
+  {
+   "op": "sample",
+   "t": 1792000060.0,
+   "state": "disconnected",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000061.0,
+   "state": "associating",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  {
+   "op": "reason",
+   "t": 1792000061.5,
+   "kind": "attempt_fail",
+   "code": 327685,
+   "reason": "802.1X fail",
+   "ssid": "",
+   "bssid": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000062.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000062.1,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:03:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "onex",
+   "t": 1792000062.2,
+   "status": 2,
+   "reason_code": 16,
+   "reason": "no 802.1X",
+   "error_code": 0,
+   "error": "",
+   "eap_type": null,
+   "identity": null,
+   "restarted": false
+  },
+  {
+   "op": "stage",
+   "t": 1792000062.3,
+   "stage": "complete",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:03:02",
+   "code": 327685,
+   "reason": "802.1X fail"
+  },
+  {
+   "op": "stage",
+   "t": 1792000070.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000070.1,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:03:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000075.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000075.1,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000075.2,
+   "stage": "associated",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000075.3,
+   "stage": "authenticating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "onex",
+   "t": 1792000075.4,
+   "status": 1,
+   "reason_code": 0,
+   "reason": "по запросу Windows (MSM)",
+   "error_code": 0,
+   "error": "",
+   "eap_type": null,
+   "identity": null,
+   "restarted": true
+  },
+  {
+   "op": "onex",
+   "t": 1792000075.6,
+   "status": 4,
+   "reason_code": 327681,
+   "reason": "",
+   "error_code": 2148081683,
+   "error": "revocation",
+   "eap_type": 13,
+   "identity": 1,
+   "restarted": false
+  },
+  {
+   "op": "stage",
+   "t": 1792000200.0,
+   "stage": "associated",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000203.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -62,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000203.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000203.1,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000203.2,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "ip",
+   "t": 1792000204.0,
+   "ip": "169.254.10.20",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": null
+  },
+  {
+   "op": "sample",
+   "t": 1792000210.0,
+   "state": "disconnected",
+   "ssid": "",
+   "bssid": "",
+   "rssi": null,
+   "quality": null,
+   "channel": null,
+   "rx_mbps": null,
+   "tx_mbps": null,
+   "auth": "",
+   "cipher": "",
+   "onex": false,
+   "profile": ""
+  },
+  {
+   "op": "reason",
+   "t": 1792000212.0,
+   "kind": "disconnected",
+   "code": 163842,
+   "reason": "user",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02"
+  },
+  {
+   "op": "reason",
+   "t": 1792000240.0,
+   "kind": "disconnected",
+   "code": 163842,
+   "reason": "late",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02"
+  },
+  {
+   "op": "sample",
+   "t": 1792000250.0,
+   "state": "connected",
+   "ssid": "Guest",
+   "bssid": "00:e0:fc:10:03:02",
+   "rssi": -70,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000250.0,
+   "stage": "start",
+   "ssid": "Guest",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000250.1,
+   "stage": "connected",
+   "ssid": "Guest",
+   "bssid": "00:e0:fc:10:03:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "ip",
+   "t": 1792000251.0,
+   "ip": "192.168.1.5",
+   "dhcp": false,
+   "server": "",
+   "lease": null
+  },
+  {
+   "op": "ip",
+   "t": 1792000262.0,
+   "ip": "192.168.1.5",
+   "dhcp": false,
+   "server": "",
+   "lease": null
+  },
+  {
+   "op": "sample",
+   "t": 1792000270.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -78,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000270.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000270.2,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "ip",
+   "t": 1792000281.0,
+   "ip": "192.168.1.5",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": 1791999500.0
+  },
+  {
+   "op": "sample",
+   "t": 1792000300.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": null,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "scan",
+   "t": 1792000300.0,
+   "bss": [
+    [
+     "00:e0:fc:10:01:02",
+     "CORP",
+     -80
+    ],
+    [
+     "00:e0:fc:10:02:02",
+     "CORP",
+     -66
+    ],
+    [
+     "00:e0:fc:10:03:02",
+     "CORP",
+     -60
+    ],
+    [
+     "x",
+     "Other",
+     -40
+    ]
+   ]
+  },
+  {
+   "op": "scan",
+   "t": 1792000305.0,
+   "bss": [
+    [
+     "00:e0:fc:10:01:02",
+     "CORP",
+     -80
+    ],
+    [
+     "00:e0:fc:10:02:02",
+     "CORP",
+     -66
+    ],
+    [
+     "00:e0:fc:10:03:02",
+     "CORP",
+     -66
+    ]
+   ]
+  },
+  {
+   "op": "scan",
+   "t": 1792000311.0,
+   "bss": [
+    [
+     "00:e0:fc:10:01:02",
+     "CORP",
+     -80
+    ],
+    [
+     "00:e0:fc:10:02:02",
+     "CORP",
+     -66
+    ],
+    [
+     "00:e0:fc:10:03:02",
+     "CORP",
+     -66
+    ]
+   ]
+  },
+  {
+   "op": "scan",
+   "t": 1792000320.0,
+   "bss": [
+    [
+     "00:e0:fc:10:01:02",
+     "CORP",
+     -80
+    ],
+    [
+     "00:e0:fc:10:02:02",
+     "CORP",
+     -60
+    ]
+   ]
+  },
+  {
+   "op": "sample",
+   "t": 1792000321.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -77,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "scan",
+   "t": 1792000322.0,
+   "bss": [
+    [
+     "00:e0:fc:10:02:02",
+     "CORP",
+     -79
+    ]
+   ]
+  },
+  {
+   "op": "raw",
+   "t": 1792000322.06,
+   "source": 16,
+   "code": 4105,
+   "name": "msm_disassociating (x)"
+  },
+  {
+   "op": "sample",
+   "t": 1792000323.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -77,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": null,
+   "tx_mbps": 0.0,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000400.0,
+   "stage": "complete",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000401.0,
+   "stage": "roam_end",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000500.0,
+   "stage": "fail",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "sample",
+   "t": 1792000600.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "sample",
+   "t": 1792000601.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "rssi": -61,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "sample",
+   "t": 1792000631.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "sample",
+   "t": 1792000640.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "rssi": -62,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "sample",
+   "t": 1792000671.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  {
+   "op": "stage",
+   "t": 1792000700.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000700.0625,
+   "stage": "associating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000700.125,
+   "stage": "associated",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000700.1875,
+   "stage": "authenticating",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000700.3125,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "ip",
+   "t": 1792000701.0,
+   "ip": "10.9.9.9",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": 1792000698.8125
+  },
+  {
+   "op": "stage",
+   "t": 1792000800.0,
+   "stage": "start",
+   "ssid": "CORP",
+   "bssid": "",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "stage",
+   "t": 1792000800.0078125,
+   "stage": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:02:02",
+   "code": null,
+   "reason": ""
+  },
+  {
+   "op": "ip",
+   "t": 1792000800.5,
+   "ip": "10.9.9.10",
+   "dhcp": true,
+   "server": "10.0.0.1",
+   "lease": 1792000799.0078125
+  }
+ ]
+}

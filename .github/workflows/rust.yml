@@ -13,6 +13,7 @@ on:
       - "contract/**"
       - "wifi_beacon_scanner/web/static/**"
       - "tools/compare_state.py"
+      - "tools/journal_contract.py"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - "contract/**"
       - "wifi_beacon_scanner/web/static/**"
       - "tools/compare_state.py"
+      - "tools/journal_contract.py"
       - ".github/workflows/rust.yml"
 
 permissions:
@@ -173,9 +175,9 @@ jobs:
           cat > notes.md <<EOF
           **Альфа-версия 2.x на Rust + Tauri 2 - для проверки.** Рабочая версия - 1.x, она ставится и работает рядом, эта сборка её не трогает.
 
-          Что есть: скан через Windows Native Wifi API, таблица сетей, каналы, обзор, загрузка каналов, сигнал во времени, проблемы, Beacon (дерево IE), сравнение «до/после», «Мои SSID», выгрузка CSV/JSON. Результаты разбора и правил совпадают с 1.x на эталонах (contract/).
+          Что есть: скан через Windows Native Wifi API, таблица сетей, каналы, обзор, загрузка каналов, сигнал во времени, проблемы, Beacon (дерево IE), сравнение «до/после», «Мои SSID», журнал подключения и сессии (802.1X, IP/DHCP), выгрузка CSV/JSON. Результаты совпадают с 1.x на эталонах (contract/).
 
-          Чего пока нет (есть в 1.x): журнал подключения и сессии, журнал Windows, обход с планом этажа, отчёты HTML/PDF/Excel, проверка обновлений.
+          Чего пока нет (есть в 1.x): журнал Windows, обход с планом этажа, отчёты HTML/PDF/Excel, проверка обновлений, демо-режим.
 
           - \`WiFiBeaconScanner2-Setup-$VERSION.exe\` - установщик (для текущего пользователя, без прав администратора);
           - \`WiFiBeaconScanner2.exe\` - переносная версия (нужен WebView2, в Windows 11 он есть).

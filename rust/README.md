@@ -11,11 +11,11 @@ touch it, has its own workflow (`.github/workflows/rust.yml`), and 2.x builds ar
 
 | Crate | What | Status |
 |---|---|---|
-| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS, IE tree for the Beacon tab, 802.11 amendments, problems, channel quality and utilisation, translations; program state and its `/api/*` (history, before/after comparison, settings, CSV/JSON export); scanning through wlanapi.dll (Windows) | matches 1.x on every golden file in full (4 scans × 2 languages); `/api/state` and exports match the Python version (`tools/compare_state.py`) |
-| `app` | Tauri 2 window: the same UI as 1.x served through its own `wbs` protocol (no port, no local server); NSIS installer | 2.0.0-alpha.1, built in CI on Windows |
+| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS, IE tree for the Beacon tab, 802.11 amendments, problems, channel quality and utilisation, translations; the connection journal and sessions; program state and its `/api/*` (history, before/after comparison, settings, CSV/JSON export); scanning through wlanapi.dll (Windows) | matches 1.x on every golden file in full (4 scans × 2 languages); `/api/state` and exports match the Python version (`tools/compare_state.py`) |
+| `app` | Tauri 2 window: the same UI as 1.x served through its own `wbs` protocol (no port, no local server); NSIS installer | 2.0.0-alpha.2, built in CI on Windows |
 
-Not ported yet (2.0 alpha answers with a clear message): the connection journal and sessions, the Windows event log,
-the survey, HTML/PDF/Excel reports, the update check. 2.x installs next to 1.x: its own identifier, install folder,
+Not ported yet (2.0 alpha answers with a clear message): the Windows event log, the survey, HTML/PDF/Excel reports,
+the update check, the demo mode. 2.x installs next to 1.x: its own identifier, install folder,
 settings (`%APPDATA%\WiFiBeaconScanner2`) and log; 1.x settings are read once while 2.x has none of its own.
 
 ## How it is checked

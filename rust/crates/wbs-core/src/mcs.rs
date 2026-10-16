@@ -255,3 +255,178 @@ mod tests {
         assert!(!vht_valid(9, 3, 160));
     }
 }
+
+// ---------------------------------------------------------------- оценка MCS по скорости подключения
+
+/// Модуляция и кодовая скорость MCS 0..13.
+pub const MOD_NAME: [&str; 14] = [
+    "BPSK 1/2",
+    "QPSK 1/2",
+    "QPSK 3/4",
+    "16-QAM 1/2",
+    "16-QAM 3/4",
+    "64-QAM 2/3",
+    "64-QAM 3/4",
+    "64-QAM 5/6",
+    "256-QAM 3/4",
+    "256-QAM 5/6",
+    "1024-QAM 3/4",
+    "1024-QAM 5/6",
+    "4096-QAM 3/4",
+    "4096-QAM 5/6",
+];
+const LEGACY_RATES: [f64; 12] = [1.0, 2.0, 5.5, 11.0, 6.0, 9.0, 12.0, 18.0, 24.0, 36.0, 48.0, 54.0];
+
+impl Phy {
+    pub fn parse(s: &str) -> Option<Phy> {
+        match s {
+            "HT" => Some(Phy::Ht),
+            "VHT" => Some(Phy::Vht),
+            "HE" => Some(Phy::He),
+            _ => None,
+        }
+    }
+    fn widths(self) -> &'static [u32] {
+        match self {
+            Phy::Ht => &[20, 40],
+            _ => &[20, 40, 80, 160],
+        }
+    }
+    fn gis(self) -> &'static [f64] {
+        match self {
+            Phy::He => &[0.8, 1.6, 3.2],
+            _ => &[0.4, 0.8],
+        }
+    }
+}
+
+/// Вариант MCS для скорости подключения (`rate_to_mcs` в mcs.py).
+#[derive(Debug, Clone, PartialEq)]
+pub struct McsGuess {
+    /// "HT", "VHT", "HE" или "legacy".
+    pub phy: &'static str,
+    pub mcs: Option<u32>,
+    pub nss: u32,
+    pub width: u32,
+    pub gi: f64,
+    pub modulation: &'static str,
+    pub rate: f64,
+}
+
+impl McsGuess {
+    pub fn text(&self) -> String {
+        if self.phy == "legacy" {
+            return trf("legacy %g Мбит/с", &[self.rate.into()]);
+        }
+        trf(
+            "%s MCS %d (%s), потоков %d, %d МГц, GI %g мкс",
+            &[
+                self.phy.into(),
+                self.mcs.unwrap_or(0).into(),
+                self.modulation.into(),
+                self.nss.into(),
+                self.width.into(),
+                self.gi.into(),
+            ],
+        )
+    }
+    /// `dict(c, text=mcs_text(c))`.
+    pub fn to_value(&self) -> crate::json::Value {
+        use crate::json::Value;
+        Value::Obj(vec![
+            ("phy".into(), self.phy.into()),
+            ("mcs".into(), self.mcs.into()),
+            ("nss".into(), self.nss.into()),
+            ("width".into(), self.width.into()),
+            ("gi".into(), self.gi.into()),
+            ("mod".into(), self.modulation.into()),
+            ("rate".into(), self.rate.into()),
+            ("text".into(), self.text().into()),
+        ])
+    }
+}
+
+/// Какие MCS/NSS/ширина/GI дают такую скорость. Windows отдаёт скорость с округлением: допуск 0.6 Мбит/с
+/// плюс 0.1%. Порядок: стандарт и ширина BSS, затем `likely_nss` потоков, затем короткий GI.
+pub fn rate_to_mcs(
+    rate: Option<f64>,
+    max_phy: &str,
+    width_max: u32,
+    band: &str,
+    limit: usize,
+    max_nss: u32,
+    likely_nss: u32,
+) -> Vec<McsGuess> {
+    let rate = match rate {
+        Some(r) if r > 0.0 => r,
+        _ => return vec![],
+    };
+    let tol = 0.6 + rate * 0.001;
+    let order = [Phy::Ht, Phy::Vht, Phy::He];
+    let mut phys: Vec<Phy> = match order.iter().position(|p| p.as_str() == max_phy) {
+        Some(i) => order[..=i].to_vec(),
+        None => vec![],
+    };
+    if band == "2.4" {
+        phys.retain(|&p| p != Phy::Vht);
+    } else if band == "6" {
+        phys.retain(|&p| p == Phy::He);
+    }
+    let mut found = vec![];
+    for phy in phys {
+        for &width in phy.widths() {
+            if width > width_max {
+                continue;
+            }
+            for nss in 1..=max_nss.clamp(1, 4) {
+                for mcs in 0..=phy.max_mcs() {
+                    if phy == Phy::Vht && !vht_valid(mcs, nss, width) {
+                        continue;
+                    }
+                    for &gi in phy.gis() {
+                        if let Some(r) = phy_rate(phy, mcs, nss, width, Some(gi)) {
+                            if (r - rate).abs() <= tol {
+                                found.push(McsGuess {
+                                    phy: phy.as_str(),
+                                    mcs: Some(mcs),
+                                    nss,
+                                    width,
+                                    gi,
+                                    modulation: MOD_NAME[mcs as usize],
+                                    rate: crate::ie::round1(r),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if band != "6" && LEGACY_RATES.iter().any(|x| (rate - x).abs() < 0.05) {
+        found.push(McsGuess {
+            phy: "legacy",
+            mcs: None,
+            nss: 1,
+            width: 20,
+            gi: 0.8,
+            modulation: "",
+            rate,
+        });
+    }
+    let key = |c: &McsGuess| {
+        (
+            c.phy != max_phy,
+            c.width != width_max,
+            c.phy == "legacy",
+            c.nss != likely_nss,
+        )
+    };
+    found.sort_by(|a, b| {
+        key(a)
+            .cmp(&key(b))
+            .then(a.gi.partial_cmp(&b.gi).unwrap_or(std::cmp::Ordering::Equal))
+            .then(a.nss.cmp(&b.nss))
+    });
+    found.truncate(limit);
+    found
+}

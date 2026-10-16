@@ -44,6 +44,16 @@ class GoldenTests(unittest.TestCase):
         self.assertFalse(any("а" <= ch.lower() <= "я" for ch in text))
 
 
+class JournalContractTests(unittest.TestCase):
+    def test_journal_golden_matches_program(self):
+        """contract/journal (журнал подключения и сессии для версии на Rust) совпадает с conn.py/session.py.
+        Отдельным процессом: инструмент переводит часы процесса в UTC."""
+        import subprocess
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "journal_contract.py"), "check"],
+                           capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+
 class CatalogTests(unittest.TestCase):
     def test_exported_catalog_is_current(self):
         """contract/i18n/en.json (его читает версия на Rust) совпадает с i18n_en.py."""

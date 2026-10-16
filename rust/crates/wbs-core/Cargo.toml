@@ -1,6 +1,6 @@
 [package]
 name = "wbs-core"
-version = "2.0.0-alpha.1"
+version = "2.0.0-alpha.2"
 description = "Wi-Fi Beacon Scanner: разбор beacon (IE), правила, состояние программы и её API - без внешних крейтов"
 edition.workspace = true
 license.workspace = true

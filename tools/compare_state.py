@@ -6,7 +6,8 @@
 Что сравнивается: /api/state (строки таблицы с историей, проблемы с «Мои SSID» и порогом сигнала, свободность
 и загрузка каналов, сравнение с базой, история) на русском и английском, плюс выгрузки CSV и JSON.
 Не сравниваются поля, которые зависят от времени и источника данных (now, first_seen, время в истории),
-и то, что в 2.x ещё не перенесено (журнал подключения, сессии, обход). Выход 1 - есть расхождения.
+и то, что в 2.x ещё не перенесено (обход). Журнал подключения и сессии здесь пустые (монитор не запущен);
+их логику проверяет tools/journal_contract.py. Выход 1 - есть расхождения.
 """
 import json
 import os
@@ -27,7 +28,7 @@ from wifi_beacon_scanner.web.state import AppState  # noqa: E402
 
 FX = os.path.join(ROOT, "contract", "fixtures")
 FOCUS = ["net-01", "Cov-Roam"]
-VOLATILE = ("now", "backend", "interfaces", "interfaces_error", "conn", "sessions", "survey", "last_scan_ms", "scanning")
+VOLATILE = ("now", "backend", "interfaces", "interfaces_error", "survey", "last_scan_ms", "scanning")
 
 
 def fixture(name: str) -> str:
@@ -128,8 +129,11 @@ def main() -> int:
         for lang in ("ru", "en"):
             for main_name, base in cases:
                 base_text = changed_copy(main_name) if base == "changed" else (fixture(base) if base else None)
-                set_lang(lang)
+                # devserver создан один раз на русском, язык потом меняется: так же и здесь
+                # (тексты, собранные при создании, - «не запущен» у журнала - остаются на языке запуска)
+                set_lang("ru")
                 st = AppState(DemoBackend(), None)
+                st.set_lang(lang)
                 st.load_snapshot(Snapshot.from_json(fixture(main_name)))
                 st.set_config(FOCUS, -72)
                 if base_text:

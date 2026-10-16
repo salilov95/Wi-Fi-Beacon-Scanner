@@ -12,6 +12,7 @@ same result. It also protects 1.x itself — any change in parsing or rules show
 | `golden/<fixture>.<lang>.json` | Expected output for each snapshot, in Russian and English |
 | `schema/golden.schema.json` | Format of the expected output (JSON Schema 2020-12) |
 | `i18n/en.json` | English translation catalogue shared by both versions (exported by `tools/export_i18n.py`) |
+| `journal/` | Connection journal and sessions: event scenarios (`scenarios/`) and the 1.x result (`golden/`), `tools/journal_contract.py` |
 
 The expected output contains, for every snapshot:
 

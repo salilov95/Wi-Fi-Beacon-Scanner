@@ -19,12 +19,17 @@
 //! | `report` | CSV и снапшот JSON | `report.py` (без HTML/PDF/Excel) |
 //! | `prefs` | настройки вида | `web/state.py` (`sanitize_prefs`) |
 //! | `clock` | время и ISO 8601 без крейтов | - |
+//! | `conn` | журнал подключения: роуминги, обрывы, пинг-понг, залипание | `conn.py` |
+//! | `session` | сессии подключения: стадии, 802.1X, IP/DHCP | `session.py` |
+//! | `onex` | разбор уведомлений 802.1X | `onex.py` |
 //! | `app` | состояние программы и `/api/*` для окна | `web/state.py`, `web/server.py` |
 //! | `win` | скан через wlanapi.dll и мелочи ОС (только Windows) | `scanner_win.py` |
+//! | `win_conn` | монитор подключения: опрос, уведомления ACM/MSM/802.1X, IP/DHCP (только Windows) | `conn_win.py`, `ip_win.py` |
 
 pub mod amend;
 pub mod app;
 pub mod clock;
+pub mod conn;
 pub mod describe;
 pub mod diff;
 pub mod i18n;
@@ -32,10 +37,14 @@ pub mod ie;
 pub mod json;
 pub mod mcs;
 pub mod model;
+pub mod onex;
 pub mod oui;
 pub mod prefs;
 pub mod report;
 pub mod row;
 pub mod rules;
+pub mod session;
 #[cfg(any(windows, wbs_check_win))]
 pub mod win;
+#[cfg(any(windows, wbs_check_win))]
+pub mod win_conn;
