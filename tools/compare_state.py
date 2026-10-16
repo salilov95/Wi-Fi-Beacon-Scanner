@@ -98,12 +98,12 @@ def differences(a, b, path=""):
 
 
 class Rust:
-    def __init__(self, exe: str, env=None) -> None:
+    def __init__(self, exe: str, env=None, snap: str = "demo-office") -> None:
         s = socket.socket()
         s.bind(("127.0.0.1", 0))
         self.port = s.getsockname()[1]
         s.close()
-        self.proc = subprocess.Popen([exe, os.path.join(FX, "demo-office.json"), str(self.port)],
+        self.proc = subprocess.Popen([exe, os.path.join(FX, snap + ".json"), str(self.port)],
                                      stderr=subprocess.DEVNULL, env=dict(os.environ, **(env or {})))
         for _ in range(100):
             try:
@@ -181,6 +181,7 @@ def main() -> int:
     finally:
         rs.close()
     problems += compare_reports(sys.argv[1])
+    problems += compare_survey(sys.argv[1])
     print("итого расхождений: %d" % problems)
     return 1 if problems else 0
 
@@ -189,6 +190,8 @@ SCEN = os.path.join(ROOT, "contract", "journal", "scenarios", "demo.json")
 JOURNAL_END = 1_792_000_000.0
 REPORT_FOCUS = ["CORP", "net-01", "Cov-Roam"]
 _DT = re.compile(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d")
+# время снапшота: тестовый источник 2.x ставит время скана, источник 1.x здесь - время из файла
+_ISO = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d")
 
 
 def replay_journal(st) -> None:
@@ -299,6 +302,136 @@ def compare_reports(exe: str) -> int:
         rs.close()
     return problems
 
+
+
+# ---------------------------------------------------------------- обход
+PNG = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg=="
+_T = re.compile(r'"(t|scan_t)": ?[0-9.e+]+')
+
+
+class FixtureBackendPy:
+    """Как FixtureBackend в Rust: каждый скан - тот же снапшот."""
+    name = "fixture"
+
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def interfaces(self):
+        return ["fixture"]
+
+    def scan(self, interface_index, wait_s):
+        return Snapshot.from_json(self.text)
+
+    def start_conn_monitor(self, tracker, lock, interface_index=0):
+        return None
+
+
+def _wait_py(st) -> None:
+    for _ in range(200):
+        with st.lock:
+            if not st.scanning and not st.survey.has_pending():
+                return
+        time.sleep(0.05)
+
+
+def _wait_rs(rs) -> None:
+    for _ in range(200):
+        d = rs.get("/api/state")
+        if not d["scanning"] and not d["survey"]["pending"]:
+            return
+        time.sleep(0.05)
+
+
+def _norm(obj) -> str:
+    """Без времени точек (у версий оно разное) и в одном формате JSON."""
+    return _DT.sub("T", _T.sub(r'"\1": 0', json.dumps(obj, ensure_ascii=False, sort_keys=False)))
+
+
+def compare_survey(exe: str) -> int:
+    """План, точки (скан после клика), проект (выгрузка и загрузка), ошибки, таблица обхода в отчётах."""
+    problems = 0
+    for lang in ("ru", "en"):
+        rs = Rust(exe, snap="real-home-01")       # свой devserver на язык: счётчики обхода с нуля, как у нового AppState
+        try:
+            problems += _survey_case(rs, lang)
+        finally:
+            rs.close()
+    return problems
+
+
+def _survey_case(rs, lang: str) -> int:
+    text = fixture("real-home-01")
+    set_lang("ru")
+    st = AppState(FixtureBackendPy(text), None)
+    st.set_lang(lang)
+    st.load_snapshot(Snapshot.from_json(text))
+    st.set_config(["net-01", "net-02"], None)
+    rs.get("/api/prefs", json.dumps({"lang": lang}))
+    rs.get("/api/load", text)
+    rs.get("/api/config", json.dumps({"focus": ["net-01", "net-02"]}))
+    results = []
+
+    def both(path, body, py_call):
+        try:
+            want = py_call()
+            want = (404 if path.endswith("/delete") and not want["ok"] else 200, want)
+        except ValueError as e:
+            want = (400, {"error": str(e)})
+        try:
+            got = (200, json.loads(rs.raw(path, json.dumps(body))))
+        except urllib.error.HTTPError as e:
+            got = (e.code, json.loads(e.read()))
+        results.append((path, _norm(want), _norm(got)))
+
+    def set_plan(mime, data, name=None):
+        with st.lock:
+            st.survey.set_plan(mime, data, name)
+        return st.survey.summary()
+
+    both("/api/survey/point", {"x": 0.5, "y": 0.5}, lambda: st.survey_point(0.5, 0.5))      # плана нет
+    both("/api/survey/plan", {"mime": "image/gif", "data": PNG}, lambda: set_plan("image/gif", PNG))
+    both("/api/survey/plan", {"mime": "image/png", "data": "!!"}, lambda: set_plan("image/png", "!!"))
+    both("/api/survey/plan", {"mime": "image/jpeg", "data": PNG}, lambda: set_plan("image/jpeg", PNG))
+    both("/api/survey/plan", {"mime": "image/png", "data": PNG, "name": "Этаж 3"}, lambda: set_plan("image/png", PNG, "Этаж 3"))
+    for x, y in ((0.1, 0.2), (0.9, 0.95), (1.5, 0.5), (True, 0.1), (0, 1)):
+        both("/api/survey/point", {"x": x, "y": y}, lambda: st.survey_point(x, y))
+        _wait_py(st)
+        _wait_rs(rs)
+    both("/api/survey/delete", {"id": 2}, lambda: {"ok": st.survey.delete(2)})
+    both("/api/survey/delete", {"id": 99}, lambda: {"ok": st.survey.delete(99)})
+    results.append(("/api/survey/points", _norm(st.survey.points_dict()), _norm(rs.get("/api/survey/points"))))
+    results.append(("survey summary", _norm(st.to_dict()["survey"]), _norm(rs.get("/api/state")["survey"])))
+    proj = st.survey.to_project()
+    results.append(("/api/survey/project", _norm(proj), _norm(json.loads(rs.raw("/api/survey/project")))))
+    # проект 1.x загружается в 2.x; повреждённые проекты - те же ошибки
+    damaged = dict(proj, points=[dict(p, results={"x" * 40: ["a", "2.4", 1, -50], "ok": [5, None, "z", -60.7],
+                                                  "bad": [1, 2, 3]}, conn={"ssid": 1, "rssi": True})
+                                 for p in proj["points"]])
+
+    def load(body):
+        with st.lock:
+            st.survey.load_project(json.loads(json.dumps(body)))
+        return st.survey.summary()
+
+    for body in (damaged, dict(proj, version=2), dict(proj, format="x"), dict(proj, plan=None),
+                 dict(proj, points="x"), dict(proj, points=[1])):
+        both("/api/survey/project", body, lambda: load(body))
+    results.append(("points после загрузки", _norm(st.survey.points_dict()), _norm(rs.get("/api/survey/points"))))
+    both("/api/survey/project", proj, lambda: load(proj))
+    # таблица обхода в отчётах
+    body = json.dumps({"scope": "all"})
+    norm = lambda t: _ISO.sub("T", _DT.sub("T", t))   # noqa: E731
+    results.append(("отчёт HTML с обходом", norm(py_export(st, "html", "all").decode()),
+                    norm(rs.raw("/api/export/html", body).decode())))
+    want_x = {k: norm(v) for k, v in xlsx_parts(py_export(st, "xlsx", "all"), "").items()}
+    got_x = {k: norm(v) for k, v in xlsx_parts(rs.raw("/api/export/xlsx", body), "").items()}
+    results.append(("отчёт Excel с обходом", json.dumps(want_x, sort_keys=True), json.dumps(got_x, sort_keys=True)))
+    bad = [(p, a, b) for p, a, b in results if a != b]
+    print("%s обход: проверок %d, расхождений %d" % (lang, len(results), len(bad)))
+    for p, a, b in bad[:6]:
+        i = next((k for k in range(min(len(a), len(b))) if a[k] != b[k]), min(len(a), len(b)))
+        print("    %s с позиции %d:\n    1.x: %r\n    2.x: %r" % (p, i, a[max(0, i - 80):i + 120], b[max(0, i - 80):i + 120]))
+    return len(bad)
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -14,6 +14,7 @@
 //! | `row` | строка таблицы сетей | `web/state.py` (`bss_to_dict`) |
 //! | `i18n` | русский / английский, подстановки как `%` в Python | `i18n.py`, каталог `contract/i18n/en.json` |
 //! | `json` | чтение и запись JSON без serde | - |
+//! | `demo` | демо-режим: снапшот, журнал, журнал Windows | `backends.py` (Demo*), `demo.py` |
 //! | `diff` | сравнение «до/после» | `diff.py` |
 //! | `oui` | вендор по BSSID (файл manuf) | `oui.py` |
 //! | `report` | CSV и снапшот JSON | `report.py` (без HTML/PDF/Excel) |
@@ -22,6 +23,7 @@
 //! | `conn` | журнал подключения: роуминги, обрывы, пинг-понг, залипание | `conn.py` |
 //! | `session` | сессии подключения: стадии, 802.1X, IP/DHCP | `session.py` |
 //! | `onex` | разбор уведомлений 802.1X | `onex.py` |
+//! | `survey` | обход: план этажа, точки, проект | `survey.py` |
 //! | `update` | проверка новой версии на GitHub | `update.py` |
 //! | `winlog` | журнал Windows WLAN-AutoConfig: разбор XML события | `winlog.py` |
 //! | `xml` | минимальный разбор XML без крейтов | - |
@@ -36,6 +38,7 @@ pub mod amend;
 pub mod app;
 pub mod clock;
 pub mod conn;
+pub mod demo;
 pub mod describe;
 pub mod diff;
 pub mod i18n;
@@ -51,6 +54,7 @@ pub mod report;
 pub mod row;
 pub mod rules;
 pub mod session;
+pub mod survey;
 pub mod update;
 #[cfg(any(windows, wbs_check_win))]
 pub mod win;

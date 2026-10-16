@@ -16,6 +16,8 @@ use wbs_core::onex::{parse_restart, parse_result_update};
 use wbs_core::report::{render_journal_csv, render_sessions_csv};
 use wbs_core::winlog::parse_event_xml;
 
+const T0: f64 = 1_792_000_000.0;
+
 fn run(ops: &[Value]) -> ConnTracker {
     let mut trk = ConnTracker::new();
     for o in ops {
@@ -105,6 +107,15 @@ fn extras(src: &Value, lang: Lang) -> Value {
                         .collect(),
                 ),
             ),
+            ("demo_winlog".into(), Value::Arr(wbs_core::demo::demo_winlog(T0))),
+            ("demo_prefill".into(), {
+                let mut trk = ConnTracker::new();
+                wbs_core::demo::demo_prefill(&mut trk, T0 + 300.0);
+                Value::Obj(vec![
+                    ("conn".into(), trk.to_value(3600, 500)),
+                    ("sessions".into(), trk.sessions.to_value(200)),
+                ])
+            }),
             (
                 "winlog".into(),
                 Value::Arr(

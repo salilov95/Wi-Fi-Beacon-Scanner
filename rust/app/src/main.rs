@@ -33,6 +33,43 @@ fn env_dir(var: &str) -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("."))
 }
 
+/// Командная строка (как у 1.x `gui`): `--demo [снапшот.json]`, `--ssid SSID` (можно несколько раз),
+/// `--manuf путь`, `--lang ru|en`. Остальное игнорируется.
+#[derive(Default)]
+struct Args {
+    demo: Option<Option<PathBuf>>,
+    ssid: Vec<String>,
+    manuf: Option<PathBuf>,
+    lang: Option<wbs_core::i18n::Lang>,
+}
+
+fn parse_args() -> Args {
+    let mut a = Args::default();
+    let argv: Vec<String> = std::env::args().skip(1).collect();
+    let mut i = 0;
+    while i < argv.len() {
+        let next = argv.get(i + 1).filter(|v| !v.starts_with("--")).cloned();
+        match argv[i].as_str() {
+            "--demo" => {
+                a.demo = Some(next.clone().map(PathBuf::from));
+                i += next.is_some() as usize;
+            }
+            "--ssid" | "--manuf" | "--lang" if next.is_some() => {
+                let v = next.unwrap_or_default();
+                match argv[i].as_str() {
+                    "--ssid" => a.ssid.push(v),
+                    "--manuf" => a.manuf = Some(PathBuf::from(v)),
+                    _ => a.lang = Some(wbs_core::i18n::Lang::parse(&v)),
+                }
+                i += 1;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    a
+}
+
 fn load_oui() -> Option<OuiDb> {
     let embedded = String::from_utf8_lossy(MANUF);
     if !embedded.trim().is_empty() {
@@ -71,7 +108,7 @@ fn platform(_: Option<PathBuf>, _: i32) -> (Box<dyn Backend>, String, wbs_core::
     )
 }
 
-fn build_core() -> Arc<App> {
+fn build_core(args: &Args) -> Result<Arc<App>, String> {
     let roaming = env_dir("APPDATA");
     let local = env_dir("LOCALAPPDATA");
     let log_dir = local.join(APP_DIR).join("logs");
@@ -86,8 +123,24 @@ fn build_core() -> Arc<App> {
         log_line(Some(&lp), tz, "ERROR", &format!("panic: {info}"));
     }));
 
-    let (backend, os, system_lang) = platform(Some(log_path.clone()), tz);
-    let oui = load_oui();
+    let (mut backend, os, system_lang) = platform(Some(log_path.clone()), tz);
+    if let Some(demo) = &args.demo {
+        // демо-режим без сканирования; можно указать свой снапшот
+        let base = match demo {
+            Some(p) => {
+                let text = std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))?;
+                Some(wbs_core::model::Snapshot::from_json(&text)?)
+            }
+            None => None,
+        };
+        backend = Box::new(wbs_core::demo::DemoBackend::new(base, tz));
+    }
+    let oui = match &args.manuf {
+        Some(p) => std::fs::read(p)
+            .ok()
+            .map(|b| OuiDb::parse(&String::from_utf8_lossy(&b))),
+        None => load_oui(),
+    };
     let cfg = Config {
         version: VERSION.into(),
         os,
@@ -109,6 +162,8 @@ fn build_core() -> Arc<App> {
         https_get: Some(wbs_core::win::https_get),
         #[cfg(not(windows))]
         https_get: None,
+        focus: args.ssid.clone(),
+        lang: args.lang,
         test_mode: false,
     };
     let vendors = cfg.oui.as_ref().map_or(0, |d| d.len());
@@ -118,11 +173,19 @@ fn build_core() -> Arc<App> {
         "INFO",
         &format!("запуск {VERSION} (Rust + Tauri), {os_line}, вендоров в базе {vendors}"),
     );
-    core
+    Ok(core)
 }
 
 fn main() {
-    let core = build_core();
+    let args = parse_args();
+    let core = match build_core(&args) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{e}");
+            std::process::exit(2);
+        }
+    };
+    core.start_scan(0, 4.0); // первый скан идёт, пока открывается окно
     core.start_monitors(); // журнал подключения: опрос и уведомления Windows в своём потоке
     let for_protocol = Arc::clone(&core);
     let result = tauri::Builder::default()
@@ -162,6 +225,17 @@ fn main() {
                 .title(format!("Wi-Fi Beacon Scanner {VERSION}"))
                 .inner_size(1440.0, 900.0)
                 .min_inner_size(900.0, 560.0)
+                // ссылки наружу (страница релиза на GitHub) - в браузере по умолчанию, как из окна Edge в 1.x;
+                // окно для печати отчёта (about:blank, blob:) открывается внутри программы
+                .on_new_window(|url, _features| {
+                    let external = matches!(url.scheme(), "http" | "https") && url.host_str() != Some("wbs.localhost");
+                    if external {
+                        #[cfg(windows)]
+                        let _ = wbs_core::win::open_target(url.as_str());
+                        return tauri::webview::NewWindowResponse::Deny;
+                    }
+                    tauri::webview::NewWindowResponse::Allow
+                })
                 .build()?;
             Ok(())
         })

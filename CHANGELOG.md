@@ -31,6 +31,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   in both languages.
 - 2.0.0-alpha.3: HTML, PDF (Edge headless, as in 1.x) and Excel reports in 2.x, with the connection journal and
   sessions. `tools/compare_state.py` now compares the HTML byte for byte and the Excel workbook part by part with 1.x.
+- 2.0.0-alpha.4: the floor-plan survey (plan, points, project files, survey table in reports), the demo mode
+  (`--demo [scan.json]`: varying scans, the 1.x demo journal and Windows event log) and the command-line options of the
+  1.x exe (`--ssid`, `--manuf`, `--lang`). Links to GitHub open in the default browser. Log rotation as in 1.x.
 - The program itself is unchanged.
 
 ## [1.1.0] - 2026-10-14

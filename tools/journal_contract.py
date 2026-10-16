@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 from golden import differences, dump  # noqa: E402
 from wifi_beacon_scanner import i18n, onex, report  # noqa: E402
-from wifi_beacon_scanner.backends import DemoConnMonitor  # noqa: E402
+from wifi_beacon_scanner.backends import DemoConnMonitor, demo_winlog  # noqa: E402
 from wifi_beacon_scanner.conn import ConnSample, ConnTracker  # noqa: E402
 from wifi_beacon_scanner.demo import build_demo_snapshot  # noqa: E402
 from wifi_beacon_scanner.mcs import mcs_text, rate_to_mcs  # noqa: E402
@@ -316,7 +316,16 @@ def extras(lang):
         "mcs": [[dict(c, text=mcs_text(c)) for c in rate_to_mcs(r, phy, w, band, max_nss=n, likely_nss=min(n, 2))]
                 for r, phy, w, band, n in mcs_cases()],
         "winlog": [_winlog(x, m) for x, m in winlog_cases()],
+        "demo_winlog": demo_winlog(T0),
+        "demo_prefill": _demo_prefill(),
     }
+
+
+def _demo_prefill():
+    """Демо-журнал 1.x на текущем языке (2.x проигрывает сценарий demo.json с переводом причин)."""
+    trk = ConnTracker()
+    DemoConnMonitor(trk, None, build_demo_snapshot(), seed=7)._prefill(T0 + 300)
+    return {"conn": trk.to_dict(), "sessions": trk.sessions.to_dict()}
 
 
 def _winlog(xml, message):

@@ -386,6 +386,8 @@ pub struct ReportInput<'a> {
     pub journal: Option<&'a crate::conn::ConnTracker>,
     /// История замеров выбранных сетей (только Excel).
     pub history: Option<&'a History>,
+    /// Точки обхода - целиком (они про маршрут).
+    pub survey: &'a [crate::survey::Point],
     pub offset_min: i32,
 }
 
@@ -690,6 +692,31 @@ pub fn render_html(r: &ReportInput) -> String {
         }
         out.push("</tbody></table></div>".into());
     }
+    if !r.survey.is_empty() {
+        let rows = survey_rows(r.survey, r.focus, r.offset_min);
+        out.push(tr("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>"));
+        out.push(format!(
+            "<div class='wrap'><table><thead><tr>{}</tr></thead><tbody>",
+            rows[0]
+                .iter()
+                .map(|h| format!("<th>{}</th>", esc(&h.text())))
+                .collect::<String>()
+        ));
+        let rcols: Vec<bool> = rows[0].iter().map(|h| h.text().contains("RSSI")).collect();
+        for row in &rows[1..] {
+            out.push(format!(
+                "<tr>{}</tr>",
+                row.iter()
+                    .enumerate()
+                    .map(|(i, v)| match (rcols[i], v) {
+                        (true, Cell::Int(n)) => rssi_td(*n),
+                        _ => format!("<td>{}</td>", esc(&v.text())),
+                    })
+                    .collect::<String>()
+            ));
+        }
+        out.push("</tbody></table></div>".into());
+    }
     out.push(tr("<h2>Все BSS</h2><div class='wrap'><table><thead><tr>"));
     for name in [
         "SSID",
@@ -952,5 +979,67 @@ pub fn xlsx_sheets(r: &ReportInput) -> Vec<crate::xlsx::Sheet> {
         let ss: Vec<&crate::session::Session> = j.sessions.sessions.iter().collect();
         sheets.push((tr("Сессии"), session_rows(&ss, r.offset_min)));
     }
+    if !r.survey.is_empty() {
+        sheets.push((tr("Обход"), survey_rows(r.survey, r.focus, r.offset_min)));
+    }
     sheets
+}
+
+/// Таблица точек обхода (`survey_rows`): для каждого «моего» SSID лучший сигнал и сколько его BSS слышно от −75.
+pub fn survey_rows(points: &[crate::survey::Point], focus: &[String], offset_min: i32) -> Vec<Vec<Cell>> {
+    let names: Vec<String> = if focus.is_empty() {
+        vec![tr("(все сети)")]
+    } else {
+        focus.to_vec()
+    };
+    let mut head: Vec<Cell> = vec![
+        tr("Точка").into(),
+        "X, %".into(),
+        "Y, %".into(),
+        tr("Время").into(),
+        tr("Статус").into(),
+        tr("Подключение").into(),
+        tr("RSSI подключения").into(),
+    ];
+    for n in &names {
+        head.push(trf("Лучший RSSI: %s", &[Arg::S(n.clone())]).into());
+        head.push(trf("BSS от −75: %s", &[Arg::S(n.clone())]).into());
+    }
+    let mut rows = vec![head];
+    for p in points {
+        let status = match p.status.as_str() {
+            "done" => tr("готово"),
+            "pending" => tr("ожидает скан"),
+            "failed" => tr("ошибка"),
+            _ => String::new(),
+        };
+        let (cs, cb, cr) = p.conn.as_ref().map_or((String::new(), String::new(), None), |c| {
+            (c.ssid.clone(), c.bssid.clone(), c.rssi)
+        });
+        let mut row: Vec<Cell> = vec![
+            p.id.into(),
+            round1(p.x * 100.0).into(),
+            round1(p.y * 100.0).into(),
+            if p.t != 0.0 {
+                iso_naive(p.t, offset_min).replacen('T', " ", 1).into()
+            } else {
+                Cell::Str(String::new())
+            },
+            status.into(),
+            format!("{cs} {cb}").trim().to_string().into(),
+            cr.into(),
+        ];
+        for n in &names {
+            let vals: Vec<i64> = p
+                .results
+                .iter()
+                .filter(|(_, v)| focus.is_empty() || &v.0 == n)
+                .map(|(_, v)| v.3)
+                .collect();
+            row.push(vals.iter().max().copied().into());
+            row.push(vals.iter().filter(|&&v| v >= -75).count().into());
+        }
+        rows.push(row);
+    }
+    rows
 }

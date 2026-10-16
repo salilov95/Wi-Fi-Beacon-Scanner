@@ -54,13 +54,6 @@ pub fn pick(ru: &str, en: &str) -> String {
     }
 }
 
-fn not_ported(what_ru: &str, what_en: &str) -> String {
-    pick(
-        &format!("{what_ru}: в 2.0 alpha ещё не перенесено, пока это есть в версии 1.x"),
-        &format!("{what_en}: not ported to 2.0 alpha yet, use version 1.x for now"),
-    )
-}
-
 // ---------------------------------------------------------------- источник данных
 
 /// Ошибка скана; `kind = "location"` - нет разрешения на расположение (Windows 11 24H2+).
@@ -98,6 +91,8 @@ pub trait Backend: Send + Sync {
     ) -> Result<Option<Box<dyn MonitorHandle>>, String> {
         Ok(None)
     }
+    /// Позиция «ноутбука» на плане обхода (только демо).
+    fn set_position(&self, _x: f64, _y: f64) {}
     /// События журнала WLAN-AutoConfig/Operational за последние `hours` часов, новые первыми.
     fn read_winlog(&self, _hours: f64) -> Result<Vec<Value>, String> {
         Err(tr("журнал Windows недоступен для этого источника данных"))
@@ -160,6 +155,10 @@ pub struct Config {
     pub open: Option<OpenFn>,
     /// GET по HTTPS (хост, путь) -> тело: проверка обновлений. Нет - кнопка сообщит об ошибке.
     pub https_get: Option<HttpsGetFn>,
+    /// «Мои SSID» из командной строки (`--ssid`): на этот запуск, вместо сохранённых.
+    pub focus: Vec<String>,
+    /// Язык из командной строки (`--lang`): важнее выбранного в «Вид» и языка Windows.
+    pub lang: Option<Lang>,
     /// Тесты: не писать журнал в stderr.
     pub test_mode: bool,
 }
@@ -179,6 +178,8 @@ impl Default for Config {
             oui: None,
             open: None,
             https_get: None,
+            focus: vec![],
+            lang: None,
             test_mode: false,
         }
     }
@@ -274,6 +275,7 @@ struct Inner {
     baseline: Option<Arc<Snapshot>>,
     scan_args: (usize, f64),
     conn: ConnTracker,
+    survey: crate::survey::Survey,
 }
 
 pub struct App {
@@ -289,16 +291,23 @@ pub struct App {
 impl App {
     pub fn new(cfg: Config, backend: Box<dyn Backend>) -> Arc<App> {
         let prefs = load_prefs(&cfg);
-        let lang = prefs
-            .get("lang")
-            .and_then(Value::as_str)
-            .map(Lang::parse)
-            .unwrap_or(cfg.system_lang);
-        let focus = prefs
-            .get("focus")
-            .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(Value::as_str).map(String::from).collect())
-            .unwrap_or_default();
+        // язык: --lang, выбранный в «Вид», язык Windows (как в 1.x)
+        let lang = cfg.lang.unwrap_or_else(|| {
+            prefs
+                .get("lang")
+                .and_then(Value::as_str)
+                .map(Lang::parse)
+                .unwrap_or(cfg.system_lang)
+        });
+        let focus = if cfg.focus.is_empty() {
+            prefs
+                .get("focus")
+                .and_then(Value::as_array)
+                .map(|a| a.iter().filter_map(Value::as_str).map(String::from).collect())
+                .unwrap_or_default()
+        } else {
+            cfg.focus.clone()
+        };
         let app = Arc::new(App {
             cfg,
             backend,
@@ -323,6 +332,7 @@ impl App {
                 scan_args: (0, 4.0),
                 // текст «не запущен» - на языке программы при запуске, как в 1.x
                 conn: with_lang(lang, ConnTracker::new),
+                survey: with_lang(lang, crate::survey::Survey::new),
             }),
             log_lock: Mutex::new(()),
             connected: std::sync::atomic::AtomicBool::new(false),
@@ -388,11 +398,12 @@ impl App {
         true
     }
 
-    fn scan_worker(&self, idx: usize, wait_s: f64) {
+    fn scan_worker(self: &Arc<Self>, idx: usize, wait_s: f64) {
         let started = now_unix();
         let res = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| self.backend.scan(idx, wait_s)))
             .unwrap_or_else(|_| Err(ScanError::new(pick("скан упал (panic)", "scan crashed (panic)"))));
         let mut msgs: Vec<(&str, String)> = vec![];
+        let again;
         {
             let mut st = self.lock();
             match res {
@@ -442,6 +453,14 @@ impl App {
                         })
                         .collect();
                     st.conn.check_scan(now_unix(), &seen);
+                    let point_conn = st.conn.current().filter(|c| c.up()).map(|c| crate::survey::PointConn {
+                        ssid: c.ssid.clone(),
+                        bssid: c.bssid.clone(),
+                        rssi: c.rssi.map(i64::from),
+                    });
+                    if let Some(snap) = st.snapshot.clone() {
+                        st.survey.fill(started, &snap.bss, point_conn);
+                    }
                 }
                 Err(e) => {
                     let msg = if e.kind == "location" { tr(LOCATION_HINT) } else { e.msg };
@@ -449,14 +468,20 @@ impl App {
                         msgs.push(("ERROR", format!("скан не удался: {msg}")));
                     }
                     st.last_scan_ok = false;
+                    st.survey.fail_pending(started, &msg);
                     st.error = Some(msg);
                     st.error_kind = e.kind;
                 }
             }
             st.scanning = false;
+            again = st.survey.pending_after(started);
         }
         for (lvl, m) in msgs {
             self.log(lvl, &m);
+        }
+        // точку поставили во время скана: нужен скан уже из новой позиции
+        if again {
+            self.start_scan(idx, wait_s);
         }
     }
 
@@ -679,7 +704,7 @@ impl App {
             ),
             ("conn", self.conn_value(&st, bss)),
             ("sessions", st.conn.sessions.to_value(200)),
-            ("survey", survey_stub()),
+            ("survey", st.survey.summary()),
             ("history", history),
             ("now", round1(now_unix()).into()),
         ])
@@ -722,6 +747,18 @@ impl App {
             }
         }
         d
+    }
+
+    /// Точка обхода: создаётся «в ожидании», затем скан (`survey_point` в 1.x).
+    fn survey_point(self: &Arc<Self>, x: Option<&Value>, y: Option<&Value>) -> Result<Value, String> {
+        let (p, args) = {
+            let mut st = self.lock();
+            let p = st.survey.add_point(x, y, now_unix())?.clone();
+            (p, st.scan_args)
+        };
+        self.backend.set_position(p.x, p.y); // только демо: сканирует «из этой точки»
+        self.start_scan(args.0, args.1); // если скан уже идёт, после него запустится ещё один
+        Ok(p.to_value())
     }
 
     /// Журнал подключения: запускает монитор источника данных (`start_monitors` в 1.x).
@@ -797,7 +834,7 @@ impl App {
             _ => return Reply::err(404, tr("неизвестный формат")),
         }
         // снимок состояния под замком: дальше отчёт строится без блокировки окна
-        let (snap, findings, focus, history, journal) = {
+        let (snap, findings, focus, history, journal, points) = {
             let st = self.lock();
             match &st.snapshot {
                 None => return Reply::err(409, tr("ещё нет данных: сначала выполни скан")),
@@ -807,6 +844,7 @@ impl App {
                     st.focus.clone(),
                     st.history.clone(),
                     st.conn.clone(),
+                    st.survey.points.clone(),
                 ),
             }
         };
@@ -878,6 +916,7 @@ impl App {
                 util: Some(&util),
                 journal: Some(&journal),
                 history: Some(&hist),
+                survey: &points,
                 offset_min: self.cfg.tz_offset_min,
             };
             return match fmt {
@@ -1041,16 +1080,30 @@ impl App {
                 };
                 Reply::json(200, &crate::update::check(&self.cfg.version, fetched))
             }
-            "/api/survey/plan" => Reply::err(404, tr("план не загружен")),
-            "/api/survey/points" => Reply::json(
-                200,
-                &obj(vec![
-                    ("rev", 0.into()),
-                    ("name", tr("Обход").into()),
-                    ("points", Value::Arr(vec![])),
-                ]),
-            ),
-            "/api/survey/project" => Reply::err(409, tr("нечего сохранять: план не загружен")),
+            "/api/survey/plan" => {
+                let st = self.lock();
+                if !st.survey.has_plan() {
+                    return Reply::err(404, tr("план не загружен"));
+                }
+                let ctype = if st.survey.plan_mime == "image/png" {
+                    "image/png"
+                } else {
+                    "image/jpeg"
+                };
+                Reply::new(200, ctype, st.survey.plan.clone())
+            }
+            "/api/survey/points" => Reply::json(200, &self.lock().survey.points_value()),
+            "/api/survey/project" => {
+                let st = self.lock();
+                if !st.survey.has_plan() {
+                    return Reply::err(409, tr("нечего сохранять: план не загружен"));
+                }
+                Reply::file(
+                    st.survey.to_project().to_json().into_bytes(),
+                    "application/json",
+                    "wifi-survey.json",
+                )
+            }
             p if p.starts_with("/api/export/") => self.export(&p["/api/export/".len()..], "all", None),
             _ => Reply::err(404, "not found"),
         }
@@ -1104,14 +1157,34 @@ impl App {
                 b.get("bssids"),
             ),
             "/api/prefs" => Reply::json(200, &self.set_prefs(b)),
-            "/api/survey/plan" | "/api/survey/point" | "/api/survey/project" => {
-                Reply::err(501, not_ported("Обход с планом этажа", "Floor-plan survey"))
+            "/api/survey/plan" => {
+                let mut st = self.lock();
+                let mime = b.get("mime").map_or(String::new(), json_str);
+                let data = b.get("data").map_or(String::new(), json_str);
+                match st.survey.set_plan(&mime, &data, b.get("name")) {
+                    Ok(()) => Reply::json(200, &st.survey.summary()),
+                    Err(e) => Reply::err(400, e),
+                }
             }
-            "/api/conn/clear" => {
-                self.with_conn(&mut |c| c.clear());
+            "/api/survey/point" => match self.survey_point(b.get("x"), b.get("y")) {
+                Ok(p) => Reply::json(200, &p),
+                Err(e) => Reply::err(400, e),
+            },
+            "/api/survey/delete" => {
+                let ok = self.lock().survey.delete(b.get("id"));
+                Reply::json(if ok { 200 } else { 404 }, &obj(vec![("ok", ok.into())]))
+            }
+            "/api/survey/clear" => {
+                self.lock().survey.clear_points();
                 Reply::ok()
             }
-            "/api/survey/delete" | "/api/survey/clear" => Reply::ok(),
+            "/api/survey/project" => {
+                let mut st = self.lock();
+                match st.survey.load_project(b) {
+                    Ok(()) => Reply::json(200, &st.survey.summary()),
+                    Err(e) => Reply::err(400, e),
+                }
+            }
             "/api/baseline" => {
                 let truthy = |k: &str| !matches!(b.get(k), None | Some(Value::Null) | Some(Value::Bool(false)));
                 let mut st = self.lock();
@@ -1155,7 +1228,7 @@ impl App {
     }
 }
 
-/// Строка в журнал: файл до 1 МБ, потом он переименовывается в `app.log.1`. Без файла - в stderr.
+/// Строка в журнал: файл до 1 МБ, потом `app.log.1`...`app.log.3`. Без файла - в stderr.
 pub fn log_line(path: Option<&std::path::Path>, tz_offset_min: i32, level: &str, msg: &str) {
     let line = format!(
         "{} {level} {}\n",
@@ -1169,8 +1242,13 @@ pub fn log_line(path: Option<&std::path::Path>, tz_offset_min: i32, level: &str,
     if let Some(dir) = path.parent() {
         let _ = std::fs::create_dir_all(dir);
     }
+    // как RotatingFileHandler в 1.x: 1 МБ, три старых файла app.log.1...3
     if std::fs::metadata(path).map(|m| m.len() > 1_000_000).unwrap_or(false) {
-        let _ = std::fs::rename(path, path.with_extension("log.1"));
+        let old = |n: u32| path.with_extension(format!("log.{n}"));
+        let _ = std::fs::remove_file(old(3));
+        let _ = std::fs::rename(old(2), old(3));
+        let _ = std::fs::rename(old(1), old(2));
+        let _ = std::fs::rename(path, old(1));
     }
     use std::io::Write;
     if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
@@ -1189,6 +1267,14 @@ impl ConnSink for App {
     }
 }
 
+/// `str(v)` для строки из JSON-запроса.
+fn json_str(v: &Value) -> String {
+    match v {
+        Value::Str(s) => s.clone(),
+        other => other.to_json(),
+    }
+}
+
 fn load_prefs(cfg: &Config) -> Value {
     let own = cfg.prefs_path.as_ref().filter(|p| p.exists());
     let path = own.or(cfg.legacy_prefs_path.as_ref().filter(|p| p.exists()));
@@ -1196,15 +1282,4 @@ fn load_prefs(cfg: &Config) -> Value {
         .and_then(|t| json::parse(t.trim_start_matches('\u{feff}')).ok())
         .map(|v| sanitize(&v))
         .unwrap_or(Value::Obj(vec![]))
-}
-
-fn survey_stub() -> Value {
-    obj(vec![
-        ("has_plan", false.into()),
-        ("name", tr("Обход").into()),
-        ("rev", 0.into()),
-        ("plan_rev", 0.into()),
-        ("points", 0.into()),
-        ("pending", 0.into()),
-    ])
 }

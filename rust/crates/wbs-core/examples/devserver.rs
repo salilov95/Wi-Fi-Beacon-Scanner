@@ -4,6 +4,7 @@
 //!     (открыть http://127.0.0.1:8765/ в браузере)
 //!
 //! Данные - из снапшота (каждый «скан» возвращает его же). Сервер учебный: только для своей машины.
+//! `WBS_BACKEND=demo` - демо-режим (скан с разбросом RSSI, журнал подключения, журнал Windows).
 //! `WBS_BACKEND=windows` (только Windows) - настоящий скан, журнал Windows и проверка обновлений.
 //! `WBS_JOURNAL=../contract/journal/scenarios/demo.json` - заполнить журнал подключения сценарием
 //! (время сдвигается так, что сценарий кончается сейчас или в `WBS_JOURNAL_AT`).
@@ -102,14 +103,22 @@ fn main() {
         ..Config::default()
     };
     #[allow(unused_mut)]
-    let mut backend: Box<dyn wbs_core::app::Backend> = Box::new(FixtureBackend { snap });
+    let mut backend: Box<dyn wbs_core::app::Backend> = if std::env::var("WBS_BACKEND").as_deref() == Ok("demo") {
+        Box::new(wbs_core::demo::DemoBackend::new(Some(snap), 0))
+    } else {
+        Box::new(FixtureBackend { snap })
+    };
     // WBS_BACKEND=windows: настоящий источник Windows (скан, журнал Windows) и WinHTTP - для проверки в CI
     #[cfg(windows)]
     if std::env::var("WBS_BACKEND").as_deref() == Ok("windows") {
         backend = Box::new(wbs_core::win::WindowsBackend::new(None, 0));
         cfg.https_get = Some(wbs_core::win::https_get);
     }
+    let demo = std::env::var("WBS_BACKEND").as_deref() == Ok("demo");
     let app = App::new(cfg, backend);
+    if demo {
+        app.start_monitors();
+    }
     if let Ok(path) = std::env::var("WBS_JOURNAL") {
         replay(&app, &path);
     }
