@@ -11,10 +11,9 @@ touch it, has its own workflow (`.github/workflows/rust.yml`), and 2.x builds ar
 
 | Crate | What | Status |
 |---|---|---|
-| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS and PHY rate, network table row | 37 row fields match 1.x on every golden file |
+| `crates/wbs-core` | beacon (IE) parsing, BSS model, security, MCS, IE tree for the Beacon tab, 802.11 amendments, problems, channel quality and utilisation, translations | matches 1.x on every golden file in full (4 scans × 2 languages) |
 
-Not ported yet: 802.11 amendment notes and the IE tree for the Beacon tab (need the translation catalogue),
-problems, channel quality and utilisation, the Tauri window, wlanapi scanning, the connection journal, reports.
+Not ported yet: the Tauri window, wlanapi scanning, history and charts, the connection journal, reports, the survey.
 
 ## How it is checked
 

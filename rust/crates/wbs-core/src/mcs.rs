@@ -4,6 +4,7 @@
 //! Скорость - по формуле стандарта: N_SD * N_BPSCS * R * N_SS / T_SYM, порядок операций тот же,
 //! что в Python, чтобы совпадали и последние знаки.
 
+use crate::i18n::{tr, trf};
 use crate::ie::{map_streams, BssInfo};
 
 /// (бит на поднесущую, кодовая скорость) для MCS 0..13; одинаково для VHT и HE, для HT - MCS по модулю 8.
@@ -95,11 +96,60 @@ fn map_max(m: u16, table: fn(u16) -> u32) -> Option<u32> {
 }
 
 fn vht_map_max(v: u16) -> u32 {
-    [7, 8, 9][v as usize]
+    VHT_MAP_MAX[v as usize]
 }
 
 fn he_map_max(v: u16) -> u32 {
-    [7, 9, 11][v as usize]
+    HE_MAP_MAX[v as usize]
+}
+
+/// Максимум MCS по 2-битному значению карты VHT: 0 -> 7, 1 -> 8, 2 -> 9.
+pub const VHT_MAP_MAX: [u32; 3] = [7, 8, 9];
+/// Максимум MCS по 2-битному значению карты HE: 0 -> 7, 1 -> 9, 2 -> 11.
+pub const HE_MAP_MAX: [u32; 3] = [7, 9, 11];
+
+/// «MCS 0-9, потоков 2», если все потоки одинаковы, иначе по потокам (`map_text` в mcs.py).
+pub fn map_text(m: u16, table: &[u32; 3]) -> String {
+    let per: Vec<u32> = (0..8)
+        .map(|i| (m >> (2 * i)) & 3)
+        .filter(|&v| v != 3)
+        .map(|v| table[v as usize])
+        .collect();
+    if per.is_empty() {
+        return tr("нет");
+    }
+    if per.iter().all(|&v| v == per[0]) {
+        return trf("MCS 0-%d, потоков %d", &[per[0].into(), per.len().into()]);
+    }
+    per.iter()
+        .enumerate()
+        .map(|(i, &v)| trf("поток %d: MCS 0-%d", &[(i + 1).into(), v.into()]))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+/// Битовая маска HT-MCS как диапазоны: «MCS 0-15» (`ht_mask_text` в mcs.py).
+pub fn ht_mask_text(mask: u32) -> String {
+    let idx: Vec<u32> = (0..32).filter(|i| mask >> i & 1 == 1).collect();
+    if idx.is_empty() {
+        return tr("нет");
+    }
+    let mut out = vec![];
+    let mut start = idx[0];
+    for (k, &a) in idx.iter().enumerate() {
+        let next = idx.get(k + 1).copied();
+        if next != Some(a + 1) {
+            out.push(if start == a {
+                a.to_string()
+            } else {
+                format!("{start}-{a}")
+            });
+            if let Some(n) = next {
+                start = n;
+            }
+        }
+    }
+    format!("MCS {}", out.join(", "))
 }
 
 /// Что умеет AP по beacon: стандарт, потоки, старший MCS и потолок PHY-скорости на рабочей ширине.
