@@ -5,6 +5,7 @@
 //!
 //! Данные - из снапшота (каждый «скан» возвращает его же). Сервер учебный: только для своей машины.
 //! `WBS_BACKEND=demo` - демо-режим (скан с разбросом RSSI, журнал подключения, журнал Windows).
+//! `WBS_MANUF=путь` - база вендоров (manuf из Wireshark).
 //! `WBS_BACKEND=windows` (только Windows) - настоящий скан, журнал Windows и проверка обновлений.
 //! `WBS_JOURNAL=../contract/journal/scenarios/demo.json` - заполнить журнал подключения сценарием
 //! (время сдвигается так, что сценарий кончается сейчас или в `WBS_JOURNAL_AT`).
@@ -100,6 +101,11 @@ fn main() {
     let mut cfg = Config {
         system_lang: wbs_core::i18n::Lang::parse(&std::env::var("WBS_LANG").unwrap_or_else(|_| "ru".into())),
         tz_offset_min: wbs_core::clock::env_offset_min(),
+        // WBS_MANUF=путь - база вендоров (manuf из Wireshark), как --manuf у окна; для скриншотов
+        oui: std::env::var("WBS_MANUF")
+            .ok()
+            .and_then(|p| std::fs::read(p).ok())
+            .map(|b| wbs_core::oui::OuiDb::parse(&String::from_utf8_lossy(&b))),
         ..Config::default()
     };
     #[allow(unused_mut)]
