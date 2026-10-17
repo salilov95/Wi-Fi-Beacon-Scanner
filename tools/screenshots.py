@@ -21,11 +21,9 @@ import urllib.request
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 
-EXE, MANUF, OUT, LANG, THEME = sys.argv[1:6]
-ONLY = set(sys.argv[6:])
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PORT = 8820 + (LANG == "en")
-BASE = "http://127.0.0.1:%d" % PORT
+LANG = "ru"            # язык подписей плана и проекта обхода; main() берёт его из аргументов
+BASE = ""
 
 
 def api(path, body=None):
@@ -109,136 +107,146 @@ def survey_project(bss) -> dict:
             "plan": {"mime": "image/png", "data": base64.b64encode(floor_plan()).decode()}, "points": pts}
 
 
-env = dict(os.environ, WBS_BACKEND="demo", WBS_LANG=LANG, WBS_MANUF=MANUF)
-srv = subprocess.Popen([EXE, os.path.join(REPO, "contract/fixtures/demo-base.json"), str(PORT)],
-                       env=env, stderr=subprocess.DEVNULL)
-try:
-    for _ in range(100):
-        try:
-            api("/api/prefs", {"lang": LANG, "theme": THEME, "auto": False, "connWin": 300})
-            break
-        except OSError:
-            time.sleep(0.1)
-    api("/api/config", {"focus": ["CORP"]})
-    for _ in range(14):                       # история для «Тренда» и «Сигнала во времени»
-        api("/api/scan", {"wait": 1})
-        time.sleep(3.5)                       # шаг около 5 с, как у автоскана
-        wait_idle()
+def main() -> None:
+    global LANG, BASE
+    exe, manuf, out, LANG, theme = sys.argv[1:6]
+    only = set(sys.argv[6:])
+    port = 8820 + (LANG == "en")
+    BASE = "http://127.0.0.1:%d" % port
+    env = dict(os.environ, WBS_BACKEND="demo", WBS_LANG=LANG, WBS_manuf=manuf)
+    srv = subprocess.Popen([exe, os.path.join(REPO, "contract/fixtures/demo-base.json"), str(port)],
+                           env=env, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(100):
+            try:
+                api("/api/prefs", {"lang": LANG, "theme": theme, "auto": False, "connWin": 300})
+                break
+            except OSError:
+                time.sleep(0.1)
+        api("/api/config", {"focus": ["CORP"]})
+        for _ in range(14):                       # история для «Тренда» и «Сигнала во времени»
+            api("/api/scan", {"wait": 1})
+            time.sleep(3.5)                       # шаг около 5 с, как у автоскана
+            wait_idle()
 
-    os.makedirs(OUT, exist_ok=True)
-    with sync_playwright() as pw:
-        br = pw.chromium.launch()
+        os.makedirs(out, exist_ok=True)
+        with sync_playwright() as pw:
+            br = pw.chromium.launch()
 
-        def page(w, h):
-            pg = br.new_page(viewport={"width": w, "height": h}, bypass_csp=True)
-            pg.goto(BASE + "/")
-            pg.wait_for_selector("#tbody tr")
-            time.sleep(1.2)
-            return pg
+            def page(w, h):
+                pg = br.new_page(viewport={"width": w, "height": h}, bypass_csp=True)
+                pg.goto(BASE + "/")
+                pg.wait_for_selector("#tbody tr")
+                time.sleep(1.2)
+                return pg
 
-        def tab(pg, name):
-            pg.click('[data-tab="%s"]' % name)
-            time.sleep(0.8)
-
-        def expand(pg):
-            pg.click("#maxBtn")
-            time.sleep(0.8)
-
-        def panel(pg, name, max_h=None):
-            """Развёрнутая панель: от вкладок до низа содержимого (не до низа окна)."""
-            box = pg.locator("#panel").bounding_box()
-            bottom = pg.evaluate("""() => { let m = 0;
-                for (const el of document.querySelectorAll('#panelBody *')) {
-                  const r = el.getBoundingClientRect();
-                  if (r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden') m = Math.max(m, r.bottom);
-                } return m; }""")
-            hgt = min(bottom - box["y"] + 16, max_h or 10_000, box["height"])
-            pg.screenshot(path=os.path.join(OUT, name + ".png"),
-                          clip={"x": box["x"], "y": box["y"], "width": box["width"], "height": hgt})
-
-        def select_connected(pg):
-            pg.locator("#tbody tr:has(.tag.me)").first.click()
-            time.sleep(0.6)
-
-        def want(name):
-            return not ONLY or name in ONLY
-
-        if want("main"):
-            pg = page(1760, 1000)
-            pg.screenshot(path=os.path.join(OUT, "main.png"))
-            pg.close()
-
-        if want("standards"):
-            pg = page(1760, 960)
-            select_connected(pg)
-            tab(pg, "beacon")
-            pg.click("#stdBtn")
-            time.sleep(0.4)
-            pg.locator("#stdList label").nth(5).click()        # 802.11r
-            time.sleep(0.8)
-            pg.screenshot(path=os.path.join(OUT, "standards.png"))
-            pg.close()
-
-        if want("beacon"):
-            pg = page(1760, 960)
-            select_connected(pg)
-            tab(pg, "beacon")                                   # RSN, HT Cap, HT Op раскрыты по умолчанию
-            expand(pg)
-            pg.screenshot(path=os.path.join(OUT, "beacon.png"))
-            pg.close()
-
-        for name, t, h in (("overview", "overview", None), ("utilization", "util", None),
-                           ("signal", "signal", 800), ("heatmap", "signal", None), ("connection", "conn", 1018),
-                           ("findings", "findings", 1018)):
-            if not want(name):
-                continue
-            pg = page(1600, 1000)
-            tab(pg, t)
-            expand(pg)
-            if name == "heatmap":
-                pg.click('[data-sig="heat"]')
+            def tab(pg, name):
+                pg.click('[data-tab="%s"]' % name)
                 time.sleep(0.8)
-            elif name == "signal":
-                pg.click('[data-sig="lines"]')
-                time.sleep(0.8)
-            panel(pg, name, h)
-            pg.close()
 
-        if want("sessions") or want("winlog"):
-            for name, t in (("sessions", "sessions"), ("winlog", "winlog")):
-                if not want(name):
-                    continue
+            def expand(pg):
+                pg.click("#maxBtn")
+                time.sleep(0.8)
+
+            def panel(pg, name, max_h=None):
+                """Развёрнутая панель: от вкладок до низа содержимого (не до низа окна)."""
+                box = pg.locator("#panel").bounding_box()
+                bottom = pg.evaluate("""() => { let m = 0;
+                    for (const el of document.querySelectorAll('#panelBody *')) {
+                      const r = el.getBoundingClientRect();
+                      if (r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden') m = Math.max(m, r.bottom);
+                    } return m; }""")
+                hgt = min(bottom - box["y"] + 16, max_h or 10_000, box["height"])
+                pg.screenshot(path=os.path.join(out, name + ".png"),
+                              clip={"x": box["x"], "y": box["y"], "width": box["width"], "height": hgt})
+
+            def select_connected(pg):
+                pg.locator("#tbody tr:has(.tag.me)").first.click()
+                time.sleep(0.6)
+
+            def want(name):
+                return not only or name in only
+
+            if want("main"):
                 pg = page(1760, 1000)
-                tab(pg, t)
-                expand(pg)
-                time.sleep(1.5)
-                rows = pg.locator("#panelBody tbody tr")
-                if t == "sessions":
-                    rows.nth(3).click()
-                else:
-                    pg.locator("#panelBody tbody tr", has_text="12013").first.click()
-                time.sleep(0.8)
-                pg.screenshot(path=os.path.join(OUT, name + ".png"))
+                pg.screenshot(path=os.path.join(out, "main.png"))
                 pg.close()
 
-        if want("light"):
-            api("/api/prefs", {"lang": LANG, "theme": "light", "auto": False, "connWin": 300})
-            pg = page(1600, 1000)
-            pg.screenshot(path=os.path.join(OUT, "light.png"))
-            pg.close()
-            api("/api/prefs", {"lang": LANG, "theme": THEME, "auto": False, "connWin": 300})
+            if want("standards"):
+                pg = page(1760, 960)
+                select_connected(pg)
+                tab(pg, "beacon")
+                pg.click("#stdBtn")
+                time.sleep(0.4)
+                pg.locator("#stdList label").nth(5).click()        # 802.11r
+                time.sleep(0.8)
+                pg.screenshot(path=os.path.join(out, "standards.png"))
+                pg.close()
 
-        if want("survey"):
-            rows = api("/api/state")["bss"]
-            r = api("/api/survey/project", survey_project(rows))
-            assert "error" not in r, r
-            pg = page(1600, 1000)
-            tab(pg, "survey")
-            expand(pg)
-            pg.click('[data-svmode="view"]')
-            time.sleep(1.5)
-            panel(pg, "survey", 900)
-            pg.close()
-        br.close()
-finally:
-    srv.terminate()
+            if want("beacon"):
+                pg = page(1760, 960)
+                select_connected(pg)
+                tab(pg, "beacon")                                   # RSN, HT Cap, HT Op раскрыты по умолчанию
+                expand(pg)
+                pg.screenshot(path=os.path.join(out, "beacon.png"))
+                pg.close()
+
+            for name, t, h in (("overview", "overview", None), ("utilization", "util", None),
+                               ("signal", "signal", 800), ("heatmap", "signal", None), ("connection", "conn", 1018),
+                               ("findings", "findings", 1018)):
+                if not want(name):
+                    continue
+                pg = page(1600, 1000)
+                tab(pg, t)
+                expand(pg)
+                if name == "heatmap":
+                    pg.click('[data-sig="heat"]')
+                    time.sleep(0.8)
+                elif name == "signal":
+                    pg.click('[data-sig="lines"]')
+                    time.sleep(0.8)
+                panel(pg, name, h)
+                pg.close()
+
+            if want("sessions") or want("winlog"):
+                for name, t in (("sessions", "sessions"), ("winlog", "winlog")):
+                    if not want(name):
+                        continue
+                    pg = page(1760, 1000)
+                    tab(pg, t)
+                    expand(pg)
+                    time.sleep(1.5)
+                    rows = pg.locator("#panelBody tbody tr")
+                    if t == "sessions":
+                        rows.nth(3).click()
+                    else:
+                        pg.locator("#panelBody tbody tr", has_text="12013").first.click()
+                    time.sleep(0.8)
+                    pg.screenshot(path=os.path.join(out, name + ".png"))
+                    pg.close()
+
+            if want("light"):
+                api("/api/prefs", {"lang": LANG, "theme": "light", "auto": False, "connWin": 300})
+                pg = page(1600, 1000)
+                pg.screenshot(path=os.path.join(out, "light.png"))
+                pg.close()
+                api("/api/prefs", {"lang": LANG, "theme": theme, "auto": False, "connWin": 300})
+
+            if want("survey"):
+                rows = api("/api/state")["bss"]
+                r = api("/api/survey/project", survey_project(rows))
+                assert "error" not in r, r
+                pg = page(1600, 1000)
+                tab(pg, "survey")
+                expand(pg)
+                pg.click('[data-svmode="view"]')
+                time.sleep(1.5)
+                panel(pg, "survey", 900)
+                pg.close()
+            br.close()
+    finally:
+        srv.terminate()
+
+
+if __name__ == "__main__":
+    main()
