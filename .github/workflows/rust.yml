@@ -201,13 +201,19 @@ jobs:
           $lnk = (Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Recurse -Filter *.lnk |
             Where-Object { $_.Name -like '*Beacon*' } | ForEach-Object FullName) -join '; '
           Write-Output "::notice title=install::код $($p.ExitCode); $($key.DisplayName) $($key.DisplayVersion), издатель $($key.Publisher); папка $dir; файлы: $files; ярлык: $lnk; удаление: $($key.UninstallString)"
+          # настройки пользователя и профиль WebView2 (папка по идентификатору приложения) - что удаление с ними сделает
+          New-Item -ItemType Directory -Force "$env:APPDATA\WiFiBeaconScanner2" | Out-Null
+          if (-not (Test-Path "$env:APPDATA\WiFiBeaconScanner2\prefs.json")) { '{"theme":"dark"}' | Set-Content "$env:APPDATA\WiFiBeaconScanner2\prefs.json" }
+          $wv = Join-Path $env:LOCALAPPDATA 'io.github.salilov95.wifibeaconscanner2'
+          Write-Output "::notice title=webview profile::$wv есть: $(Test-Path $wv); $((Get-ChildItem $wv -ErrorAction SilentlyContinue | ForEach-Object Name) -join ', ')"
           Start-Process -FilePath $uninst -ArgumentList '/S' -Wait
           # деинсталлятор NSIS доделывает работу из своей копии во временной папке - ждём, пока exe исчезнут
           for ($i = 0; $i -lt 30 -and (Test-Path (Join-Path $dir '*.exe')); $i++) { Start-Sleep 1 }
           if (Test-Path (Join-Path $dir '*.exe')) { Write-Output "::error title=uninstall::после удаления в $dir остались exe"; exit 1 }
-          $settings = Test-Path "$env:APPDATA\WiFiBeaconScanner2"
+          $settings = Test-Path "$env:APPDATA\WiFiBeaconScanner2\prefs.json"
           $logs = Test-Path "$env:LOCALAPPDATA\WiFiBeaconScanner2\logs"
-          Write-Output "::notice title=uninstall::удалено; настройки %APPDATA%\WiFiBeaconScanner2 остались: $settings; журнал остался: $logs"
+          $lnkLeft = (Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Recurse -Filter *.lnk | Where-Object { $_.Name -like '*Beacon*' }).Count
+          Write-Output "::notice title=uninstall::удалено; prefs.json остался: $settings; журнал остался: $logs; профиль WebView2 остался: $(Test-Path $wv); ярлыков осталось: $lnkLeft"
       - uses: actions/upload-artifact@v4
         with:
           name: WiFiBeaconScanner2
