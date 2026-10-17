@@ -16,9 +16,9 @@
 <p align="center">
   <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Download" src="https://img.shields.io/badge/download-Windows_10%2F11-0a6c8f?style=flat-square&logo=windows"></a>
   <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/salilov95/Wi-Fi-Beacon-Scanner?style=flat-square"></a>
-  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Python" src="https://img.shields.io/badge/python-3.8%2B-3776ab?style=flat-square&logo=python&logoColor=white">
-  <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-none-2ea44f?style=flat-square">
+  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/rust.yml"><img alt="Build" src="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/rust.yml/badge.svg"></a>
+  <img alt="Rust + Tauri 2" src="https://img.shields.io/badge/Rust-Tauri_2-b7410e?style=flat-square&logo=rust&logoColor=white">
+  <img alt="No admin rights" src="https://img.shields.io/badge/admin_rights-not_needed-2ea44f?style=flat-square">
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square"></a>
 </p>
 
@@ -55,7 +55,8 @@
 - **Reports** - PDF, Excel, HTML, CSV, JSON: all networks, only yours, or exactly what the table shows.
 - **English and Russian** - the interface, problems, beacon decoding and reports; the language follows Windows
   and can be switched in View → Language.
-- **Ready for fleet deployment** - silent installer, seven themes, no external dependencies.
+- **Ready for fleet deployment** - a small per-user installer with silent mode, no administrator rights,
+  seven themes.
 
 ### 802.11 amendments
 
@@ -145,12 +146,12 @@ Number of APs per channel, distribution by signal level, security, Wi-Fi generat
 ### Reports and themes
 
 PDF and Excel reports (with color scales for signal and load), HTML, CSV, measurement history, connection
-journal, JSON snapshot. Seven color themes, including a dark one.
+journal, JSON snapshot. Seven color themes: the screenshots above use the dark one, below is the light one.
 
 <table>
   <tr>
     <td width="50%" valign="top"><img src="docs/images/en/report.png" alt="PDF report"></td>
-    <td width="50%" valign="top"><img src="docs/images/en/dark.png" alt="Dark theme"></td>
+    <td width="50%" valign="top"><img src="docs/images/en/light.png" alt="Light theme"></td>
   </tr>
 </table>
 
@@ -167,8 +168,8 @@ Windows only - no administrator rights, no access to the wireless controller:
 | `Microsoft-Windows-WLAN-AutoConfig/Operational` event log | history of connections, failures and disconnects with Windows' own text |
 | Wireshark `manuf` file | vendor by OUI |
 
-This is not monitor mode: retransmissions, EAPOL and roaming frames are not visible this way. The UI is a local
-page on `127.0.0.1` in a dedicated Edge window; the app only goes online when you click "Check for updates".
+This is not monitor mode: retransmissions, EAPOL and roaming frames are not visible this way. The app has its own
+window (WebView2): no local server, no open port. It only goes online when you click "Check for updates".
 
 ## Installation
 
@@ -176,31 +177,32 @@ Download from the [Releases](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/r
 
 | File | Purpose |
 |---|---|
-| `WiFiBeaconScanner-Setup-<version>.exe` | installer: Program Files, Start menu shortcut, regular uninstall |
-| `WiFiBeaconScanner.exe` | portable single-file version, no installation |
+| `WiFiBeaconScanner2-Setup-<version>.exe` | installer for the current user: no administrator rights, Start menu shortcut, regular uninstall |
+| `WiFiBeaconScanner2.exe` | portable single-file version, no installation |
 
 Silent install (SCCM, Intune, GPO, PDQ):
 
 ```
-WiFiBeaconScanner-Setup-1.0.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+WiFiBeaconScanner2-Setup-2.0.0.exe /S
 ```
 
-The files are not code-signed, so SmartScreen asks for confirmation when you run them manually
-("More info" → "Run anyway"). Details in [Installation and deployment](docs/en/deployment.md).
+Windows 10/11 with WebView2 (built into Windows 11 and current Windows 10). The files are not code-signed, so
+SmartScreen asks for confirmation when you run them manually ("More info" → "Run anyway"). Details in
+[Installation and deployment](docs/en/deployment.md).
 
-From source (Python 3.8+, no dependencies):
+Version 2 installs next to 1.x and does not change it; on first start it picks up the 1.x settings. Version 1.x
+(Python) stays available: [v1.1.0](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.1.0) and
+the `1.x` branch.
 
-```
-python -m wifi_beacon_scanner gui            # scan
-python -m wifi_beacon_scanner gui --demo     # try it on demo data (works on any OS)
-```
+Try it without Wi-Fi: `WiFiBeaconScanner2.exe --demo`. Building from source is described in
+[Development](docs/en/development.md).
 
 ## Documentation
 
 - [Installation and deployment](docs/en/deployment.md) - silent install, where data is stored, limitations
 - [Diagnostics](docs/en/diagnostics.md) - all checks, 802.11 amendments, signal scale, channel load, MCS and PHY rate
 - [Connection journal and sessions](docs/en/connection-journal.md) - roams, disconnects, connection stages, 802.1X, DHCP
-- [Development, build and release](docs/en/development.md) - running from source, CLI, tests, building the exe, releases
+- [Development, build and release](docs/en/development.md) - layout of version 2, building, tests, releases; the 1.x reference
 - [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md)
 

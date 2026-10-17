@@ -16,9 +16,9 @@
 <p align="center">
   <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Скачать" src="https://img.shields.io/badge/скачать-Windows_10%2F11-0a6c8f?style=flat-square&logo=windows"></a>
   <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/latest"><img alt="Версия" src="https://img.shields.io/github/v/release/salilov95/Wi-Fi-Beacon-Scanner?style=flat-square&label=версия"></a>
-  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Python" src="https://img.shields.io/badge/python-3.8%2B-3776ab?style=flat-square&logo=python&logoColor=white">
-  <img alt="Зависимости" src="https://img.shields.io/badge/зависимости-нет-2ea44f?style=flat-square">
+  <a href="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/rust.yml"><img alt="Сборка" src="https://github.com/salilov95/Wi-Fi-Beacon-Scanner/actions/workflows/rust.yml/badge.svg"></a>
+  <img alt="Rust + Tauri 2" src="https://img.shields.io/badge/Rust-Tauri_2-b7410e?style=flat-square&logo=rust&logoColor=white">
+  <img alt="Без прав администратора" src="https://img.shields.io/badge/права_администратора-не_нужны-2ea44f?style=flat-square">
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/лицензия-MIT-lightgrey?style=flat-square"></a>
 </p>
 
@@ -54,7 +54,8 @@
 - **Отчёты** - PDF, Excel, HTML, CSV, JSON: по всем сетям, только по своим или как в таблице.
 - **Русский и английский** - интерфейс, проблемы, расшифровка beacon и отчёты; язык берётся из Windows,
   переключается в «Вид» → «Язык».
-- **Для раздачи на ноутбуки** - установщик с тихой установкой, семь тем, без внешних зависимостей.
+- **Для раздачи на ноутбуки** - небольшой установщик для пользователя с тихой установкой, без прав администратора,
+  семь тем.
 
 ### Дополнения 802.11
 
@@ -143,12 +144,12 @@ RSSI всех точек выбранной сети по сканам: лини
 ### Отчёты и темы
 
 Отчёт в PDF и Excel (с цветовыми шкалами сигнала и загрузки), HTML, CSV, история замеров, журнал
-подключения, снапшот JSON. Семь тем оформления, включая тёмную.
+подключения, снапшот JSON. Семь тем оформления: скриншоты выше - в тёмной, ниже - светлая.
 
 <table>
   <tr>
     <td width="50%" valign="top"><img src="docs/images/report.png" alt="PDF-отчёт"></td>
-    <td width="50%" valign="top"><img src="docs/images/dark.png" alt="Тёмная тема"></td>
+    <td width="50%" valign="top"><img src="docs/images/light.png" alt="Светлая тема"></td>
   </tr>
 </table>
 
@@ -165,8 +166,8 @@ RSSI всех точек выбранной сети по сканам: лини
 | журнал `Microsoft-Windows-WLAN-AutoConfig/Operational` | история подключений, отказов и отключений с текстом Windows |
 | `manuf` из Wireshark | вендор по OUI |
 
-Это не monitor mode: ретрансмиты, EAPOL и кадры роуминга так не увидеть. Интерфейс - локальная страница
-на `127.0.0.1` в отдельном окне Edge; в интернет программа ходит только по кнопке «Проверить обновления».
+Это не monitor mode: ретрансмиты, EAPOL и кадры роуминга так не увидеть. У программы своё окно (WebView2):
+без локального сервера и открытого порта. В интернет она ходит только по кнопке «Проверить обновления».
 
 ## Установка
 
@@ -174,31 +175,31 @@ RSSI всех точек выбранной сети по сканам: лини
 
 | Файл | Для чего |
 |---|---|
-| `WiFiBeaconScanner-Setup-<версия>.exe` | установщик: Program Files, ярлык в «Пуске», штатное удаление |
-| `WiFiBeaconScanner.exe` | переносная версия одним файлом, без установки |
+| `WiFiBeaconScanner2-Setup-<версия>.exe` | установщик для текущего пользователя: без прав администратора, ярлык в «Пуске», штатное удаление |
+| `WiFiBeaconScanner2.exe` | переносная версия одним файлом, без установки |
 
 Тихая установка (SCCM, Intune, GPO, PDQ):
 
 ```
-WiFiBeaconScanner-Setup-1.0.1.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+WiFiBeaconScanner2-Setup-2.0.0.exe /S
 ```
 
-Файлы не подписаны сертификатом, поэтому при ручном запуске SmartScreen попросит подтверждение
-(«Подробнее» → «Выполнить в любом случае»). Подробности - в [установке и раздаче](docs/ru/deployment.md).
+Нужны Windows 10/11 с WebView2 (встроен в Windows 11 и актуальную Windows 10). Файлы не подписаны сертификатом,
+поэтому при ручном запуске SmartScreen попросит подтверждение («Подробнее» → «Выполнить в любом случае»).
+Подробности - в [установке и раздаче](docs/ru/deployment.md).
 
-Из исходников (Python 3.8+, зависимостей нет):
+Версия 2 ставится рядом с 1.x и её не трогает; при первом запуске подхватывает настройки 1.x. Версия 1.x
+(на Python) остаётся доступной: [v1.1.0](https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.1.0)
+и ветка `1.x`.
 
-```
-python -m wifi_beacon_scanner gui            # сканировать
-python -m wifi_beacon_scanner gui --demo     # посмотреть на демо-данных
-```
+Посмотреть без Wi-Fi: `WiFiBeaconScanner2.exe --demo`. Сборка из исходников - в [разработке](docs/ru/development.md).
 
 ## Документация
 
 - [Установка и раздача на ноутбуки](docs/ru/deployment.md) - тихая установка, где хранятся данные, ограничения
 - [Диагностика](docs/ru/diagnostics.md) - все проверки, дополнения 802.11, шкала сигнала, загрузка канала, MCS и PHY-скорость
 - [Журнал подключения и сессии](docs/ru/connection-journal.md) - роуминги, обрывы, стадии подключения, 802.1X, DHCP
-- [Разработка, сборка и выпуск](docs/ru/development.md) - запуск из исходников, CLI, тесты, сборка exe, релизы
+- [Разработка, сборка и выпуск](docs/ru/development.md) - устройство версии 2, сборка, тесты, выпуск; эталон 1.x
 - [История изменений](CHANGELOG.ru.md)
 - [Как вносить изменения](CONTRIBUTING.ru.md) · [Безопасность](SECURITY.md) · [Правила поведения](CODE_OF_CONDUCT.md)
 
