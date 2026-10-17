@@ -12,6 +12,7 @@
 | `golden/<снапшот>.<язык>.json` | Эталонный выход для каждого снапшота на русском и английском |
 | `schema/golden.schema.json` | Формат эталона (JSON Schema 2020-12) |
 | `i18n/en.json` | Английский каталог переводов, общий для обеих версий (выгружает `tools/export_i18n.py`) |
+| `journal/` | Журнал подключения и сессии: сценарии событий (`scenarios/`) и результат 1.x (`golden/`), `tools/journal_contract.py` |
 
 В эталоне для каждого снапшота:
 
@@ -25,7 +26,8 @@
 | Снапшот | Откуда |
 |---|---|
 | `real-home-01` | реальный скан (MediaTek MT7921, Windows 11), обезличен |
-| `demo-office` | демо-режим (`DemoBackend`) |
+| `demo-office` | один скан демо-режима (`DemoBackend`: RSSI уже покачан, слабый BSS пропал) |
+| `demo-base` | сам демо-офис, `build_demo_snapshot()`; его качает `--demo` в 2.x. Пишет `tools/make_contract_fixtures.py` |
 | `synthetic-edge` | собранные вручную крайние случаи: устаревшая ширина VHT, AKM 23/24/25, FILS, 6 ГГц канал 2, одно радио с несколькими SSID |
 | `synthetic-coverage` | собран `tools/make_contract_fixtures.py`, чтобы пройти по веткам разбора IE и правил (ничьи, Tx MCS Set, TPC, флаги 6 ГГц, 802.11u, vendor IE...) |
 

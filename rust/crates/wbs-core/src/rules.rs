@@ -825,8 +825,36 @@ pub fn util_level(u: f64) -> (&'static str, String) {
     ("low", tr("свободен"))
 }
 
-/// Загрузка каналов по QBSS Load (`channel_utilization` без истории): `{"channels": [...], "no_data": [...]}`.
-pub fn channel_utilization(bss: &[Bss]) -> Value {
+fn util_series(rep: &[&Bss], history: Option<&History>) -> Value {
+    let Some(h) = history.filter(|h| !h.is_empty()) else {
+        return Value::Arr(vec![]);
+    };
+    // время положительное: порядок битов f64 совпадает с порядком чисел
+    let mut per_t: std::collections::BTreeMap<u64, f64> = std::collections::BTreeMap::new();
+    for b in rep {
+        for (t, _, u) in h.get(&b.bssid).into_iter().flatten() {
+            if let Some(u) = u {
+                let e = per_t.entry(t.to_bits()).or_insert(0.0);
+                *e = e.max(*u);
+            }
+        }
+    }
+    let skip = per_t.len().saturating_sub(60);
+    Value::Arr(
+        per_t
+            .into_iter()
+            .skip(skip)
+            .map(|(t, u)| Value::Arr(vec![f64::from_bits(t).into(), u.into()]))
+            .collect(),
+    )
+}
+
+/// История замеров по BSSID: `(время unix, RSSI, загрузка QBSS)` - как `AppState.history` в 1.x.
+pub type History = std::collections::HashMap<String, std::collections::VecDeque<(f64, i32, Option<f64>)>>;
+
+/// Загрузка каналов по QBSS Load (`channel_utilization`): `{"channels": [...], "no_data": [...]}`.
+/// С историей у канала есть `series` - максимум загрузки по времени (последние 60 точек).
+pub fn channel_utilization(bss: &[Bss], history: Option<&History>) -> Value {
     let mut channels: Vec<(f64, &'static str, i32, Value)> = vec![];
     let mut no_data: Vec<(&'static str, i32, Value)> = vec![];
     for ((band, ch), items) in group_by(bss.iter(), |b| (b.band(), b.channel())) {
@@ -887,7 +915,7 @@ pub fn channel_utilization(bss: &[Bss]) -> Value {
                 ("bss".into(), items.len().into()),
                 ("stations".into(), Value::Int(stations as i64)),
                 ("aps".into(), aps_v),
-                ("series".into(), Value::Arr(vec![])),
+                ("series".into(), util_series(&rep, history)),
             ]),
         ));
     }

@@ -1,0 +1,1434 @@
+{
+ "lang": "ru",
+ "conn": {
+  "status": "не запущен",
+  "current": {
+   "t": 1792000671.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  "samples": [
+   [
+    1792000000.0,
+    null,
+    ""
+   ],
+   [
+    1792000001.0,
+    null,
+    ""
+   ],
+   [
+    1792000002.0,
+    -50,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000003.0,
+    -52,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000004.0,
+    -58,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000030.0,
+    -61,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000040.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000060.0,
+    null,
+    ""
+   ],
+   [
+    1792000061.0,
+    null,
+    ""
+   ],
+   [
+    1792000203.0,
+    -62,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000210.0,
+    null,
+    ""
+   ],
+   [
+    1792000250.0,
+    -70,
+    "00:e0:fc:10:03:02"
+   ],
+   [
+    1792000270.0,
+    -78,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000300.0,
+    null,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000321.0,
+    -77,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000323.0,
+    -77,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000600.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000601.0,
+    -61,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000631.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000640.0,
+    -62,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000671.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ]
+  ],
+  "events": [
+   {
+    "t": 1792000002.0,
+    "kind": "connected",
+    "severity": "info",
+    "text": "Подключён к CORP после 2 с без связи",
+    "ssid": "CORP",
+    "bssid_from": "",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": null,
+    "rssi_to": -50,
+    "duration_s": 2.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000030.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -58,
+    "rssi_to": -61,
+    "duration_s": 28.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000040.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -61,
+    "rssi_to": -60,
+    "duration_s": 10.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000040.0,
+    "kind": "pingpong",
+    "severity": "warning",
+    "text": "Пинг-понг: вернулся на прежнюю BSS через 10 с",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -61,
+    "rssi_to": -60,
+    "duration_s": 10.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000060.0,
+    "kind": "disconnected",
+    "severity": "critical",
+    "text": "Связь пропала (отключён)",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "",
+    "rssi_from": -60,
+    "rssi_to": null,
+    "duration_s": 20.0,
+    "reason_code": 229379,
+    "reason": "AP deauth"
+   },
+   {
+    "t": 1792000061.5,
+    "kind": "attempt_fail",
+    "severity": "critical",
+    "text": "Не удалось подключиться к сети",
+    "ssid": "",
+    "bssid_from": "",
+    "bssid_to": "",
+    "rssi_from": null,
+    "rssi_to": null,
+    "duration_s": null,
+    "reason_code": 327685,
+    "reason": "802.1X fail"
+   },
+   {
+    "t": 1792000203.0,
+    "kind": "connected",
+    "severity": "info",
+    "text": "Подключён к CORP после 143 с без связи",
+    "ssid": "CORP",
+    "bssid_from": "",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": null,
+    "rssi_to": -62,
+    "duration_s": 143.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000210.0,
+    "kind": "disconnected",
+    "severity": "critical",
+    "text": "Связь пропала (отключён)",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "",
+    "rssi_from": -62,
+    "rssi_to": null,
+    "duration_s": 7.0,
+    "reason_code": 163842,
+    "reason": "user"
+   },
+   {
+    "t": 1792000240.0,
+    "kind": "disconnect_reason",
+    "severity": "warning",
+    "text": "Windows сообщила об отключении",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "",
+    "rssi_from": null,
+    "rssi_to": null,
+    "duration_s": null,
+    "reason_code": 163842,
+    "reason": "late"
+   },
+   {
+    "t": 1792000250.0,
+    "kind": "connected",
+    "severity": "info",
+    "text": "Подключён к Guest после 40 с без связи",
+    "ssid": "Guest",
+    "bssid_from": "",
+    "bssid_to": "00:e0:fc:10:03:02",
+    "rssi_from": null,
+    "rssi_to": -70,
+    "duration_s": 40.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000270.0,
+    "kind": "ssid_change",
+    "severity": "warning",
+    "text": "Переключился на другую сеть: Guest → CORP",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:03:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -70,
+    "rssi_to": -78,
+    "duration_s": 20.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000311.0,
+    "kind": "sticky",
+    "severity": "warning",
+    "text": "Залипание: держится за слабую BSS, хотя рядом есть сильнее на 14 дБ",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -80,
+    "rssi_to": -66,
+    "duration_s": 11.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000601.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -60,
+    "rssi_to": -61,
+    "duration_s": 331.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000631.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -61,
+    "rssi_to": -60,
+    "duration_s": 30.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000631.0,
+    "kind": "pingpong",
+    "severity": "warning",
+    "text": "Пинг-понг: вернулся на прежнюю BSS через 30 с",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -61,
+    "rssi_to": -60,
+    "duration_s": 30.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000640.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -60,
+    "rssi_to": -62,
+    "duration_s": 9.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000640.0,
+    "kind": "pingpong",
+    "severity": "warning",
+    "text": "Пинг-понг: вернулся на прежнюю BSS через 9 с",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -60,
+    "rssi_to": -62,
+    "duration_s": 9.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000671.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -62,
+    "rssi_to": -60,
+    "duration_s": 31.0,
+    "reason_code": null,
+    "reason": ""
+   }
+  ],
+  "stats": {
+   "roams": 6,
+   "disconnects": 2,
+   "pingpong": 3,
+   "sticky": 1,
+   "attempt_fail": 1,
+   "ssid_change": 1,
+   "down_s": 185.0,
+   "since": 1792000000.0,
+   "until": 1792000671.0,
+   "dwell": [
+    {
+     "bssid": "00:e0:fc:10:01:02",
+     "s": 395.0
+    },
+    {
+     "bssid": "00:e0:fc:10:02:02",
+     "s": 71.0
+    },
+    {
+     "bssid": "00:e0:fc:10:03:02",
+     "s": 20.0
+    }
+   ]
+  },
+  "raw": [
+   {
+    "t": 1792000001.0,
+    "source": 8,
+    "code": 9,
+    "name": "acm_connection_start"
+   },
+   {
+    "t": 1792000322.1,
+    "source": 16,
+    "code": 4105,
+    "name": "msm_disassociating (x)"
+   }
+  ]
+ },
+ "conn_small": {
+  "status": "не запущен",
+  "current": {
+   "t": 1792000671.0,
+   "state": "connected",
+   "ssid": "CORP",
+   "bssid": "00:e0:fc:10:01:02",
+   "rssi": -60,
+   "quality": 80,
+   "channel": 36,
+   "rx_mbps": 1201.0,
+   "tx_mbps": 864.7,
+   "auth": "WPA2 (RSNA)",
+   "cipher": "CCMP",
+   "onex": true,
+   "profile": "CORP"
+  },
+  "samples": [
+   [
+    1792000600.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000601.0,
+    -61,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000631.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ],
+   [
+    1792000640.0,
+    -62,
+    "00:e0:fc:10:02:02"
+   ],
+   [
+    1792000671.0,
+    -60,
+    "00:e0:fc:10:01:02"
+   ]
+  ],
+  "events": [
+   {
+    "t": 1792000640.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -60,
+    "rssi_to": -62,
+    "duration_s": 9.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000640.0,
+    "kind": "pingpong",
+    "severity": "warning",
+    "text": "Пинг-понг: вернулся на прежнюю BSS через 9 с",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "bssid_to": "00:e0:fc:10:02:02",
+    "rssi_from": -60,
+    "rssi_to": -62,
+    "duration_s": 9.0,
+    "reason_code": null,
+    "reason": ""
+   },
+   {
+    "t": 1792000671.0,
+    "kind": "roam",
+    "severity": "info",
+    "text": "Роуминг",
+    "ssid": "CORP",
+    "bssid_from": "00:e0:fc:10:02:02",
+    "bssid_to": "00:e0:fc:10:01:02",
+    "rssi_from": -62,
+    "rssi_to": -60,
+    "duration_s": 31.0,
+    "reason_code": null,
+    "reason": ""
+   }
+  ],
+  "stats": {
+   "roams": 6,
+   "disconnects": 2,
+   "pingpong": 3,
+   "sticky": 1,
+   "attempt_fail": 1,
+   "ssid_change": 1,
+   "down_s": 185.0,
+   "since": 1792000000.0,
+   "until": 1792000671.0,
+   "dwell": [
+    {
+     "bssid": "00:e0:fc:10:01:02",
+     "s": 395.0
+    },
+    {
+     "bssid": "00:e0:fc:10:02:02",
+     "s": 71.0
+    },
+    {
+     "bssid": "00:e0:fc:10:03:02",
+     "s": 20.0
+    }
+   ]
+  },
+  "raw": [
+   {
+    "t": 1792000001.0,
+    "source": 8,
+    "code": 9,
+    "name": "acm_connection_start"
+   },
+   {
+    "t": 1792000322.1,
+    "source": 16,
+    "code": 4105,
+    "name": "msm_disassociating (x)"
+   }
+  ]
+ },
+ "sessions": {
+  "sessions": [
+   {
+    "id": 1,
+    "kind": "connect",
+    "t_start": 1792000001.1,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "ok",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000001.1,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000001.2,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000001.25,
+      "stage": "associated",
+      "detail": ""
+     },
+     {
+      "t": 1792000001.3,
+      "stage": "authenticating",
+      "detail": ""
+     },
+     {
+      "t": 1792000001.31,
+      "stage": "onex",
+      "detail": "идёт"
+     },
+     {
+      "t": 1792000001.9,
+      "stage": "onex",
+      "detail": "успех"
+     },
+     {
+      "t": 1792000002.0,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000002.05,
+      "stage": "complete",
+      "detail": ""
+     },
+     {
+      "t": 1792000002.6,
+      "stage": "dhcp",
+      "detail": "10.1.2.3, DHCP-сервер 10.0.0.1, новая аренда DHCP"
+     }
+    ],
+    "t_assoc_start": 1792000001.2,
+    "t_assoc_done": 1792000001.25,
+    "t_auth_start": 1792000001.3,
+    "t_connected": 1792000002.0,
+    "t_end": 1792000002.05,
+    "onex_status": 3,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": 25,
+    "onex_identity": 2,
+    "onex_restarts": 0,
+    "t_ip": 1792000002.6,
+    "ip": "10.1.2.3",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": 1792000002.6,
+    "ip_note": "новая аренда DHCP",
+    "ip_kind": "lease",
+    "ip_checked": true,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": 50,
+    "auth_ms": 700,
+    "total_ms": 900,
+    "ip_ms": 600,
+    "eap_name": "PEAP",
+    "onex_status_ru": "успех",
+    "onex_identity_ru": "пользователь"
+   },
+   {
+    "id": 2,
+    "kind": "roam",
+    "t_start": 1792000030.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:02:02",
+    "bssid_from": "00:e0:fc:10:01:02",
+    "result": "ok",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000030.0,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000030.03,
+      "stage": "associated",
+      "detail": ""
+     },
+     {
+      "t": 1792000030.03,
+      "stage": "authenticating",
+      "detail": ""
+     },
+     {
+      "t": 1792000030.06,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000031.0,
+      "stage": "roam_end",
+      "detail": ""
+     },
+     {
+      "t": 1792000040.5,
+      "stage": "onex",
+      "detail": "успех"
+     }
+    ],
+    "t_assoc_start": 1792000030.0,
+    "t_assoc_done": 1792000030.03,
+    "t_auth_start": 1792000030.03,
+    "t_connected": 1792000030.06,
+    "t_end": 1792000030.06,
+    "onex_status": 3,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": 99,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "10.1.2.3",
+    "lease_at_connect": 1792000002.6,
+    "assoc_ms": 30,
+    "auth_ms": 30,
+    "total_ms": 60,
+    "ip_ms": null,
+    "eap_name": "EAP 99",
+    "onex_status_ru": "успех",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 3,
+    "kind": "connect",
+    "t_start": 1792000062.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:03:02",
+    "bssid_from": "",
+    "result": "fail",
+    "reason": "802.1X: no 802.1X",
+    "reason_code": 16,
+    "stages": [
+     {
+      "t": 1792000062.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000062.1,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000062.2,
+      "stage": "onex",
+      "detail": "нет ответа от аутентификатора (802.1X не включён на AP?): no 802.1X"
+     },
+     {
+      "t": 1792000062.3,
+      "stage": "complete",
+      "detail": "802.1X fail"
+     }
+    ],
+    "t_assoc_start": 1792000062.1,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": null,
+    "t_end": 1792000062.2,
+    "onex_status": 2,
+    "onex_reason": "no 802.1X",
+    "onex_reason_code": 16,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": null,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "нет ответа от аутентификатора (802.1X не включён на AP?)",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 4,
+    "kind": "connect",
+    "t_start": 1792000070.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:03:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000070.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000070.1,
+      "stage": "associating",
+      "detail": ""
+     }
+    ],
+    "t_assoc_start": 1792000070.1,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": null,
+    "t_end": 1792000075.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": null,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 5,
+    "kind": "connect",
+    "t_start": 1792000075.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "fail",
+    "reason": "802.1X: revocation",
+    "reason_code": 327681,
+    "stages": [
+     {
+      "t": 1792000075.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000075.1,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000075.2,
+      "stage": "associated",
+      "detail": ""
+     },
+     {
+      "t": 1792000075.3,
+      "stage": "authenticating",
+      "detail": ""
+     },
+     {
+      "t": 1792000075.4,
+      "stage": "onex_restart",
+      "detail": "по запросу Windows (MSM)"
+     },
+     {
+      "t": 1792000075.6,
+      "stage": "onex",
+      "detail": "отказ"
+     }
+    ],
+    "t_assoc_start": 1792000075.1,
+    "t_assoc_done": 1792000075.2,
+    "t_auth_start": 1792000075.3,
+    "t_connected": null,
+    "t_end": 1792000075.6,
+    "onex_status": 4,
+    "onex_reason": "",
+    "onex_reason_code": 327681,
+    "onex_error": "revocation",
+    "onex_error_code": 2148081683,
+    "eap_type": 13,
+    "onex_identity": 1,
+    "onex_restarts": 1,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": 100,
+    "auth_ms": null,
+    "total_ms": null,
+    "ip_ms": null,
+    "eap_name": "EAP-TLS",
+    "onex_status_ru": "отказ",
+    "onex_identity_ru": "компьютер"
+   },
+   {
+    "id": 6,
+    "kind": "connect",
+    "t_start": 1792000200.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000200.0,
+      "stage": "associated",
+      "detail": ""
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": 1792000200.0,
+    "t_auth_start": null,
+    "t_connected": null,
+    "t_end": 1792000203.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "",
+    "dhcp_server": "",
+    "dhcp": null,
+    "lease_obtained": null,
+    "ip_note": "",
+    "ip_kind": "",
+    "ip_checked": false,
+    "ip_at_connect": "",
+    "lease_at_connect": null,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": null,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 7,
+    "kind": "connect",
+    "t_start": 1792000203.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000203.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000203.1,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000203.2,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000204.0,
+      "stage": "ip",
+      "detail": "169.254.10.20, DHCP-сервер 10.0.0.1, APIPA 169.254.x.x: DHCP-сервер не ответил"
+     }
+    ],
+    "t_assoc_start": 1792000203.1,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000203.2,
+    "t_end": 1792000250.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000204.0,
+    "ip": "169.254.10.20",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": null,
+    "ip_note": "APIPA 169.254.x.x: DHCP-сервер не ответил",
+    "ip_kind": "apipa",
+    "ip_checked": true,
+    "ip_at_connect": "10.1.2.3",
+    "lease_at_connect": 1792000002.6,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 200,
+    "ip_ms": 800,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 8,
+    "kind": "connect",
+    "t_start": 1792000250.0,
+    "ssid": "Guest",
+    "bssid": "00:e0:fc:10:03:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000250.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000250.1,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000251.0,
+      "stage": "ip",
+      "detail": "192.168.1.5, адрес появился"
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000250.1,
+    "t_end": 1792000270.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000251.0,
+    "ip": "192.168.1.5",
+    "dhcp_server": "",
+    "dhcp": false,
+    "lease_obtained": null,
+    "ip_note": "адрес появился",
+    "ip_kind": "appeared",
+    "ip_checked": true,
+    "ip_at_connect": "169.254.10.20",
+    "lease_at_connect": 1792000002.6,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 100,
+    "ip_ms": 900,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 9,
+    "kind": "connect",
+    "t_start": 1792000270.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "ok",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000270.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000270.2,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000281.0,
+      "stage": "ip",
+      "detail": "192.168.1.5, DHCP-сервер 10.0.0.1, адрес сохранился с прошлого подключения, новой аренды DHCP не было"
+     },
+     {
+      "t": 1792000400.0,
+      "stage": "complete",
+      "detail": ""
+     },
+     {
+      "t": 1792000401.0,
+      "stage": "roam_end",
+      "detail": ""
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000270.2,
+    "t_end": 1792000400.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": null,
+    "ip": "192.168.1.5",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": null,
+    "ip_note": "адрес сохранился с прошлого подключения, новой аренды DHCP не было",
+    "ip_kind": "kept",
+    "ip_checked": true,
+    "ip_at_connect": "192.168.1.5",
+    "lease_at_connect": 1792000002.6,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 200,
+    "ip_ms": null,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 10,
+    "kind": "connect",
+    "t_start": 1792000700.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000700.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.0625,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.125,
+      "stage": "associated",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.1875,
+      "stage": "authenticating",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.3125,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.3125,
+      "stage": "dhcp",
+      "detail": "10.9.9.9, DHCP-сервер 10.0.0.1, новая аренда DHCP"
+     }
+    ],
+    "t_assoc_start": 1792000700.0625,
+    "t_assoc_done": 1792000700.125,
+    "t_auth_start": 1792000700.1875,
+    "t_connected": 1792000700.3125,
+    "t_end": 1792000800.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000700.3125,
+    "ip": "10.9.9.9",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": 1792000698.8125,
+    "ip_note": "новая аренда DHCP",
+    "ip_kind": "lease",
+    "ip_checked": true,
+    "ip_at_connect": "192.168.1.5",
+    "lease_at_connect": 1791999500.0,
+    "assoc_ms": 62,
+    "auth_ms": 125,
+    "total_ms": 312,
+    "ip_ms": 0,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 11,
+    "kind": "connect",
+    "t_start": 1792000800.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:02:02",
+    "bssid_from": "",
+    "result": "in_progress",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000800.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000800.0078125,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000800.0078125,
+      "stage": "dhcp",
+      "detail": "10.9.9.10, DHCP-сервер 10.0.0.1, новая аренда DHCP"
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000800.0078125,
+    "t_end": null,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000800.0078125,
+    "ip": "10.9.9.10",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": 1792000799.0078125,
+    "ip_note": "новая аренда DHCP",
+    "ip_kind": "lease",
+    "ip_checked": true,
+    "ip_at_connect": "10.9.9.9",
+    "lease_at_connect": 1792000698.8125,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 8,
+    "ip_ms": 0,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   }
+  ],
+  "summary": {
+   "connects": 10,
+   "connects_ok": 2,
+   "connects_fail": 7,
+   "roams": 1,
+   "roams_fail": 0,
+   "connect_ms_med": 900,
+   "roam_ms_med": 60,
+   "auth_ms_med": 125,
+   "ip_ms_med": 600,
+   "onex_ok": 2,
+   "onex_fail": 2
+  }
+ },
+ "sessions_small": {
+  "sessions": [
+   {
+    "id": 10,
+    "kind": "connect",
+    "t_start": 1792000700.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:01:02",
+    "bssid_from": "",
+    "result": "aborted",
+    "reason": "прервано новой попыткой",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000700.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.0625,
+      "stage": "associating",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.125,
+      "stage": "associated",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.1875,
+      "stage": "authenticating",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.3125,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000700.3125,
+      "stage": "dhcp",
+      "detail": "10.9.9.9, DHCP-сервер 10.0.0.1, новая аренда DHCP"
+     }
+    ],
+    "t_assoc_start": 1792000700.0625,
+    "t_assoc_done": 1792000700.125,
+    "t_auth_start": 1792000700.1875,
+    "t_connected": 1792000700.3125,
+    "t_end": 1792000800.0,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000700.3125,
+    "ip": "10.9.9.9",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": 1792000698.8125,
+    "ip_note": "новая аренда DHCP",
+    "ip_kind": "lease",
+    "ip_checked": true,
+    "ip_at_connect": "192.168.1.5",
+    "lease_at_connect": 1791999500.0,
+    "assoc_ms": 62,
+    "auth_ms": 125,
+    "total_ms": 312,
+    "ip_ms": 0,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   },
+   {
+    "id": 11,
+    "kind": "connect",
+    "t_start": 1792000800.0,
+    "ssid": "CORP",
+    "bssid": "00:e0:fc:10:02:02",
+    "bssid_from": "",
+    "result": "in_progress",
+    "reason": "",
+    "reason_code": null,
+    "stages": [
+     {
+      "t": 1792000800.0,
+      "stage": "start",
+      "detail": ""
+     },
+     {
+      "t": 1792000800.0078125,
+      "stage": "connected",
+      "detail": ""
+     },
+     {
+      "t": 1792000800.0078125,
+      "stage": "dhcp",
+      "detail": "10.9.9.10, DHCP-сервер 10.0.0.1, новая аренда DHCP"
+     }
+    ],
+    "t_assoc_start": null,
+    "t_assoc_done": null,
+    "t_auth_start": null,
+    "t_connected": 1792000800.0078125,
+    "t_end": null,
+    "onex_status": null,
+    "onex_reason": "",
+    "onex_reason_code": null,
+    "onex_error": "",
+    "onex_error_code": null,
+    "eap_type": null,
+    "onex_identity": null,
+    "onex_restarts": 0,
+    "t_ip": 1792000800.0078125,
+    "ip": "10.9.9.10",
+    "dhcp_server": "10.0.0.1",
+    "dhcp": true,
+    "lease_obtained": 1792000799.0078125,
+    "ip_note": "новая аренда DHCP",
+    "ip_kind": "lease",
+    "ip_checked": true,
+    "ip_at_connect": "10.9.9.9",
+    "lease_at_connect": 1792000698.8125,
+    "assoc_ms": null,
+    "auth_ms": null,
+    "total_ms": 8,
+    "ip_ms": 0,
+    "eap_name": "",
+    "onex_status_ru": "",
+    "onex_identity_ru": ""
+   }
+  ],
+  "summary": {
+   "connects": 10,
+   "connects_ok": 2,
+   "connects_fail": 7,
+   "roams": 1,
+   "roams_fail": 0,
+   "connect_ms_med": 900,
+   "roam_ms_med": 60,
+   "auth_ms_med": 125,
+   "ip_ms_med": 600,
+   "onex_ok": 2,
+   "onex_fail": 2
+  }
+ },
+ "journal_csv": "time;event;ssid;bssid_from;bssid_to;rssi_from;rssi_to;duration_s;reason_code;reason;text\r\n2026-10-14T17:46:42;подключение;CORP;;00:e0:fc:10:01:02;;-50;2.0;;;Подключён к CORP после 2 с без связи\r\n2026-10-14T17:47:10;роуминг;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;-58;-61;28.0;;;Роуминг\r\n2026-10-14T17:47:20;роуминг;CORP;00:e0:fc:10:02:02;00:e0:fc:10:01:02;-61;-60;10.0;;;Роуминг\r\n2026-10-14T17:47:20;пинг-понг;CORP;00:e0:fc:10:02:02;00:e0:fc:10:01:02;-61;-60;10.0;;;Пинг-понг: вернулся на прежнюю BSS через 10 с\r\n2026-10-14T17:47:40;обрыв;CORP;00:e0:fc:10:01:02;;-60;;20.0;0x38003;AP deauth;Связь пропала (отключён)\r\n2026-10-14T17:47:41;неудачное подключение;;;;;;;0x50005;802.1X fail;Не удалось подключиться к сети\r\n2026-10-14T17:50:03;подключение;CORP;;00:e0:fc:10:01:02;;-62;143.0;;;Подключён к CORP после 143 с без связи\r\n2026-10-14T17:50:10;обрыв;CORP;00:e0:fc:10:01:02;;-62;;7.0;0x28002;user;Связь пропала (отключён)\r\n2026-10-14T17:50:40;отключение (по данным Windows);CORP;00:e0:fc:10:01:02;;;;;0x28002;late;Windows сообщила об отключении\r\n2026-10-14T17:50:50;подключение;Guest;;00:e0:fc:10:03:02;;-70;40.0;;;Подключён к Guest после 40 с без связи\r\n2026-10-14T17:51:10;смена сети;CORP;00:e0:fc:10:03:02;00:e0:fc:10:01:02;-70;-78;20.0;;;Переключился на другую сеть: Guest → CORP\r\n2026-10-14T17:51:51;залипание;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;-80;-66;11.0;;;Залипание: держится за слабую BSS, хотя рядом есть сильнее на 14 дБ\r\n2026-10-14T17:56:41;роуминг;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;-60;-61;331.0;;;Роуминг\r\n2026-10-14T17:57:11;роуминг;CORP;00:e0:fc:10:02:02;00:e0:fc:10:01:02;-61;-60;30.0;;;Роуминг\r\n2026-10-14T17:57:11;пинг-понг;CORP;00:e0:fc:10:02:02;00:e0:fc:10:01:02;-61;-60;30.0;;;Пинг-понг: вернулся на прежнюю BSS через 30 с\r\n2026-10-14T17:57:20;роуминг;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;-60;-62;9.0;;;Роуминг\r\n2026-10-14T17:57:20;пинг-понг;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;-60;-62;9.0;;;Пинг-понг: вернулся на прежнюю BSS через 9 с\r\n2026-10-14T17:57:51;роуминг;CORP;00:e0:fc:10:02:02;00:e0:fc:10:01:02;-62;-60;31.0;;;Роуминг\r\n",
+ "sessions_csv": "Время;Тип;Итог;SSID;Откуда;Куда;Ассоциация, мс;Аутентификация, мс;Всего, мс;IP через, мс;IPv4;DHCP-сервер;IP/DHCP;EAP;Учётка 802.1X;802.1X;Причина;Код причины;Ошибка EAP\r\n2026-10-14 17:46:41;подключение;успешно;CORP;;00:e0:fc:10:01:02;50;700;900;600;10.1.2.3;10.0.0.1;новая аренда DHCP;PEAP;пользователь;успех;;;\r\n2026-10-14 17:47:10;роуминг;успешно;CORP;00:e0:fc:10:01:02;00:e0:fc:10:02:02;30;30;60;;;;;EAP 99;;успех;;;\r\n2026-10-14 17:47:42;подключение;ошибка;CORP;;00:e0:fc:10:03:02;;;;;;;;;;нет ответа от аутентификатора (802.1X не включён на AP?);802.1X: no 802.1X;0x10;\r\n2026-10-14 17:47:50;подключение;прервано;CORP;;00:e0:fc:10:03:02;;;;;;;;;;;прервано новой попыткой;;\r\n2026-10-14 17:47:55;подключение;ошибка;CORP;;00:e0:fc:10:01:02;100;;;;;;;EAP-TLS;компьютер;отказ;802.1X: revocation;0x50001;0x80092013 revocation\r\n2026-10-14 17:50:00;подключение;прервано;CORP;;00:e0:fc:10:01:02;;;;;;;;;;;прервано новой попыткой;;\r\n2026-10-14 17:50:03;подключение;прервано;CORP;;00:e0:fc:10:01:02;;;200;800;169.254.10.20;10.0.0.1;APIPA 169.254.x.x: DHCP-сервер не ответил;;;;прервано новой попыткой;;\r\n2026-10-14 17:50:50;подключение;прервано;Guest;;00:e0:fc:10:03:02;;;100;900;192.168.1.5;;адрес появился;;;;прервано новой попыткой;;\r\n2026-10-14 17:51:10;подключение;успешно;CORP;;00:e0:fc:10:01:02;;;200;;192.168.1.5;10.0.0.1;адрес сохранился с прошлого подключения, новой аренды DHCP не было;;;;;;\r\n2026-10-14 17:58:20;подключение;прервано;CORP;;00:e0:fc:10:01:02;62;125;312;0;10.9.9.9;10.0.0.1;новая аренда DHCP;;;;прервано новой попыткой;;\r\n2026-10-14 18:00:00;подключение;идёт;CORP;;00:e0:fc:10:02:02;;;8;0;10.9.9.10;10.0.0.1;новая аренда DHCP;;;;;;\r\n"
+}

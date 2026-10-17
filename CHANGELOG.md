@@ -7,20 +7,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-17
+
+Version 2 is the same app rewritten in Rust + Tauri 2: its own window instead of a local server and an Edge window,
+with every feature of 1.1. The interface, tabs, analysis and reports are the same; the results match 1.1 on the
+reference scans in `contract/`.
+
+### Changed
+- The app has its own window (WebView2, built into Windows 10/11). There is no local server on `127.0.0.1`, no open
+  port and no Edge window; links to GitHub open in the default browser.
+- Files: `WiFiBeaconScanner2-Setup-2.0.0.exe` (installer for the current user, no administrator rights; silent
+  install `/S`) and the portable `WiFiBeaconScanner2.exe`. Version 2 installs next to 1.x and does not change it.
+- Settings are in `%APPDATA%\WiFiBeaconScanner2`, the log in `%LOCALAPPDATA%\WiFiBeaconScanner2\logs\app.log`.
+  While version 2 has no settings of its own, it starts with the 1.x settings (theme, columns, "My SSIDs",
+  language); the 1.x file is never changed.
+- README screenshots are in the dark theme.
+
+### Removed
+- The command line `interfaces`, `scan`, `analyze` and the window options `--port`, `--no-browser`, `--keep-running`
+  stay in 1.x (`python -m wifi_beacon_scanner`); version 2 ignores the last three. `--demo`, `--ssid`, `--manuf` and
+  `--lang` work as before (`--ssid=CORP` too).
+
 ### Development
-- `contract/`: expected output on fixed scans (network rows with the decoded IE tree, problems, channel quality and
-  utilisation, Russian and English), its JSON Schema and three fixtures, one of them a real anonymised scan.
-  `tests/test_contract.py` compares the program with it. This is the reference for the Rust + Tauri version.
-- `tools/anonymize_snapshot.py`: anonymises a scan before it goes into the public repository.
-- `rust/`: start of version 2.x in Rust + Tauri 2. The `wbs-core` crate parses beacons (IE), the BSS model,
-  security, MCS and PHY rate and builds the network table row; 37 row fields match 1.x on every golden file
-  (`rust/crates/wbs-core/tests/contract.rs`). Separate workflow `.github/workflows/rust.yml`
-  (Windows and Linux: rustfmt, clippy, tests); 1.x build and releases are not affected.
-- `wbs-core` now also builds the IE tree for the Beacon tab, 802.11 amendment notes, problems, channel quality and
-  utilisation in Russian and English; the whole golden document matches 1.x. Shared translation catalogue
-  `contract/i18n/en.json` (`tools/export_i18n.py`), coverage fixture `synthetic-coverage`
-  (`tools/make_contract_fixtures.py`).
-- The program itself is unchanged.
+- `rust/`: the `wbs-core` crate (everything except the window, no external crates; Windows APIs through `raw-dylib`)
+  and the Tauri 2 shell `rust/app`. Workflow `.github/workflows/rust.yml`: rustfmt, clippy and tests on Windows and
+  Linux, a PDF printed with the real Edge, the Windows event log and the update check on a Windows runner, the window
+  build, a start-up check, silent install and uninstall; releases with "Run workflow → publish" on `main`.
+- `contract/`: reference output on fixed scans (network rows with the IE tree, problems, channels, both languages),
+  connection journal and session scenarios (`contract/journal`), a real anonymised scan, synthetic coverage and the
+  demo office. `tools/compare_state.py` compares the Rust API with 1.x: state, CSV/JSON exports, HTML byte for byte,
+  Excel part by part, the survey and view settings. Also `tools/anonymize_snapshot.py`, `tools/journal_contract.py`,
+  `tools/make_contract_fixtures.py`, `tools/screenshots.py`.
+- 1.x moves to the `1.x` branch: fixes are released there with `v1.*` tags and do not become the latest release.
 
 ## [1.1.0] - 2026-10-14
 
@@ -168,7 +186,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   utilization, signal over time, connection journal, floor plan survey, findings, beacon, compare), PDF/Excel/
   HTML/CSV/JSON reports, color themes.
 
-[Unreleased]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v2.0.0
 [1.1.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.1.0
 [1.0.1]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.1
 [1.0.0]: https://github.com/salilov95/Wi-Fi-Beacon-Scanner/releases/tag/v1.0.0

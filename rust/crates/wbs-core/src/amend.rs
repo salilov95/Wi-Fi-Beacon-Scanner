@@ -172,6 +172,16 @@ fn explain(code: &str, b: &Bss) -> Option<String> {
     }
 }
 
+/// Строка для CSV и отчётов: «d e h i k r v w TWT» (`short` в 1.x).
+pub fn short(std: &[(&str, String)]) -> String {
+    STANDARDS
+        .iter()
+        .filter(|(c, _, _)| std.iter().any(|(k, _)| k == c))
+        .map(|(_, label, _)| *label)
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// `[(код, пояснение)]` только для объявленных точкой дополнений, в порядке STANDARDS.
 pub fn standards(b: &Bss) -> Vec<(&'static str, String)> {
     STANDARDS

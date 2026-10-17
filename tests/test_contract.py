@@ -29,6 +29,13 @@ class GoldenTests(unittest.TestCase):
             for lang in golden.LANGS:
                 self.assertTrue(os.path.exists(golden.golden_path(name, lang)), (name, lang))
 
+    def test_demo_base_is_current(self):
+        # 2.x в --demo крутит contract/fixtures/demo-base.json: он должен быть ровно build_demo_snapshot() из 1.x
+        import make_contract_fixtures
+        with open(make_contract_fixtures.DEMO_BASE, encoding="utf-8") as f:
+            self.assertEqual(json.load(f), make_contract_fixtures.demo_base(),
+                             "демо 1.x изменилось: python tools/make_contract_fixtures.py и python tools/golden.py update")
+
     def test_real_fixture_present(self):
         self.assertIn("real-home-01", golden.fixtures())     # хотя бы один снапшот с реального адаптера
 
@@ -42,6 +49,16 @@ class GoldenTests(unittest.TestCase):
             g = json.load(f)
         text = json.dumps(g["findings"], ensure_ascii=False)
         self.assertFalse(any("а" <= ch.lower() <= "я" for ch in text))
+
+
+class JournalContractTests(unittest.TestCase):
+    def test_journal_golden_matches_program(self):
+        """contract/journal (журнал подключения и сессии для версии на Rust) совпадает с conn.py/session.py.
+        Отдельным процессом: инструмент переводит часы процесса в UTC."""
+        import subprocess
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "journal_contract.py"), "check"],
+                           capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
 
 class CatalogTests(unittest.TestCase):

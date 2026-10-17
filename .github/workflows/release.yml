@@ -1,13 +1,15 @@
-# Сборка WiFiBeaconScanner.exe (переносной) и WiFiBeaconScanner-Setup-<версия>.exe (установщик) на Windows.
+# Версия 1.x (Python): сборка WiFiBeaconScanner.exe (переносной) и WiFiBeaconScanner-Setup-<версия>.exe (установщик).
+# С 2.0.0 основная версия - 2.x (rust.yml); исправления 1.x выпускаются из ветки 1.x тегами v1.*, такой релиз
+# не становится «последним» (releases/latest остаётся за 2.x).
 #   - Actions → Release → Run workflow с галочкой «publish»: сборка + GitHub Release v<версия из __init__.py>,
 #     тег создаётся на собранном коммите;
 #   - тег версии (git tag v0.7.0 && git push origin v0.7.0): то же самое;
 #   - Run workflow без галочки: только сборка, файлы лежат в артефакте запуска.
-name: Release
+name: Release 1.x
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v1.*"]
   workflow_dispatch:
     inputs:
       publish:
@@ -112,5 +114,5 @@ jobs:
             # черновик этой же версии больше не нужен: публикуем настоящий релиз
             $old = gh release view $tag --json isDraft -q .isDraft 2>$null
             if ($old -eq "true") { gh release delete $tag --yes }
-            gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md
+            gh release create $tag $setup dist/WiFiBeaconScanner.exe dist/SHA256SUMS.txt --target "${{ github.sha }}" --title "Wi-Fi Beacon Scanner $tag" --notes-file release-notes.md --latest=false
           }

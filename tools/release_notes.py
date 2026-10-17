@@ -1,6 +1,8 @@
 """Текст GitHub Release: ссылки на файлы и разделы CHANGELOG.md (английский) и CHANGELOG.ru.md для версии.
 
     python tools/release_notes.py 1.0.1 --setup WiFiBeaconScanner-Setup-1.0.1.exe --out release-notes.md
+    python tools/release_notes.py 2.0.0 --setup WiFiBeaconScanner2-Setup-2.0.0.exe --portable WiFiBeaconScanner2.exe \
+        --silent /S --out release-notes.md
 Без --out печатает только разделы CHANGELOG.
 """
 import argparse
@@ -26,25 +28,30 @@ def section(version: str, lang: str = "ru") -> str:
     return m.group(1).strip() if m else ""
 
 
-def notes(version: str, setup: str) -> str:
+INNO_SILENT = "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-"     # установщик 1.x (Inno Setup)
+
+
+def notes(version: str, setup: str, portable: str = "WiFiBeaconScanner.exe", silent: str = INNO_SILENT) -> str:
     en, ru = section(version, "en"), section(version, "ru")
     return ("## Download / Скачать\n\n"
-            "- **%s** - installer / установщик (silent / тихая установка: `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-`)\n"
-            "- **WiFiBeaconScanner.exe** - portable, no installation / переносная версия без установки\n"
+            "- **%s** - installer / установщик (silent / тихая установка: `%s`)\n"
+            "- **%s** - portable, no installation / переносная версия без установки\n"
             "- **SHA256SUMS.txt** - checksums / контрольные суммы\n\n"
             "## What's new\n\n%s\n\n"
-            "## Что нового\n\n%s\n" % (setup, en or "See CHANGELOG.md", ru or "см. CHANGELOG.ru.md"))
+            "## Что нового\n\n%s\n" % (setup, silent, portable, en or "See CHANGELOG.md", ru or "см. CHANGELOG.ru.md"))
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("version")
     ap.add_argument("--setup", default="WiFiBeaconScanner-Setup.exe")
+    ap.add_argument("--portable", default="WiFiBeaconScanner.exe")
+    ap.add_argument("--silent", default=INNO_SILENT, help="ключи тихой установки (у 2.x, NSIS, - /S)")
     ap.add_argument("--out")
     a = ap.parse_args()
     if a.out:
         with open(a.out, "w", encoding="utf-8") as f:
-            f.write(notes(a.version, a.setup))
+            f.write(notes(a.version, a.setup, a.portable, a.silent))
     else:
         print(section(a.version, "en"))
         print()

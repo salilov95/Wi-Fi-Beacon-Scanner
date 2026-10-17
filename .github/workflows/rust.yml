@@ -1,14 +1,41 @@
-# Версия 2.x на Rust (папка rust/): формат, clippy, тесты и сверка с эталонами contract/golden.
-# Запускается только когда меняются rust/, contract/ или этот файл - сборку и релизы 1.x (ci.yml, release.yml)
-# не трогает. Итог каждого шага пишется аннотацией (::notice / ::error), чтобы его было видно без логов.
+# Версия 2.x на Rust (папка rust/): формат, clippy, тесты, сверка с эталонами contract/golden и с API 1.x,
+# сборка окна (Tauri 2) и установщика для Windows.
+# Запускается только когда меняются rust/, contract/, интерфейс (он зашит в exe 2.x) или этот файл - сборку
+# и релизы 1.x (ci.yml, release.yml) не трогает. Итог каждого шага пишется аннотацией (::notice / ::error),
+# чтобы его было видно без логов.
+#
+# Выпуск версии 2.x: поднять версию (rust/app/tauri.conf.json, rust/app/Cargo.toml, rust/crates/wbs-core/Cargo.toml),
+# раздел в обоих CHANGELOG, слить в main, затем Actions → Rust → Run workflow на main с галочкой «publish»:
+# тесты, сборка, проверки и GitHub Release v<версия> (тег - на собранном коммите, текст - из CHANGELOG).
+# Версия с дефисом (2.1.0-rc.1) публикуется как pre-release и «последней» не становится.
 name: Rust
 
 on:
   push:
     branches: [main]
-    paths: ["rust/**", "contract/**", ".github/workflows/rust.yml"]
+    paths:
+      - "rust/**"
+      - "contract/**"
+      - "wifi_beacon_scanner/web/static/**"
+      - "tools/compare_state.py"
+      - "tools/journal_contract.py"
+      - "tools/release_notes.py"
+      - ".github/workflows/rust.yml"
   pull_request:
-    paths: ["rust/**", "contract/**", ".github/workflows/rust.yml"]
+    paths:
+      - "rust/**"
+      - "contract/**"
+      - "wifi_beacon_scanner/web/static/**"
+      - "tools/compare_state.py"
+      - "tools/journal_contract.py"
+      - "tools/release_notes.py"
+      - ".github/workflows/rust.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Опубликовать GitHub Release v<версия из rust/app/tauri.conf.json> (только с main)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -54,4 +81,178 @@ jobs:
             summary=$(grep -E "^test result|проверено строк" /tmp/tests.log | tr '\n' '|')
             echo "::notice title=tests summary ${{ matrix.os }}::$summary"
           fi
+          # Windows: печать PDF через Edge, журнал Windows (wevtapi) и проверка обновлений (WinHTTP) на devserver
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            step devserver cargo build --example devserver
+            WBS_BACKEND=windows target/debug/examples/devserver.exe ../contract/fixtures/demo-office.json 8799 2>/tmp/devserver.log &
+            sleep 3
+            curl -s -X POST localhost:8799/api/load --data-binary @../contract/fixtures/real-home-01.json > /dev/null
+            code=$(curl -s -o /tmp/r.pdf -w "%{http_code}" -X POST localhost:8799/api/export/pdf -d '{"scope":"all"}')
+            if [ "$code" = 200 ] && head -c 5 /tmp/r.pdf | grep -q "%PDF"; then
+              echo "::notice title=pdf windows::Edge напечатал PDF, $(wc -c < /tmp/r.pdf) байт"
+            else
+              fail=1; echo "::error title=pdf windows::HTTP $code: $(head -c 600 /tmp/r.pdf | tr '\n' ' ')"
+            fi
+            echo "::notice title=winlog windows::$(curl -s 'localhost:8799/api/winlog?hours=48' | head -c 600)"
+            echo "::notice title=update windows::$(curl -s localhost:8799/api/update | head -c 600)"
+            curl -s -X POST localhost:8799/api/quit -d '{}' > /dev/null || true
+          fi
+          # API 2.x против 1.x (Python): /api/state, выгрузки CSV и JSON, отчёты HTML и Excel
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            step devserver cargo build --example devserver
+            step compare_state python3 ../tools/compare_state.py target/debug/examples/devserver
+            echo "::notice title=compare_state::$(tail -n 1 /tmp/compare_state.log)"
+          fi
           exit $fail
+
+  app:
+    # Окно 2.x (Tauri 2): exe и установщик NSIS для Windows. Скан пока только на Windows.
+    # Черновик pre-release v<версия> с файлами для проверки: только для веток этого репозитория, не публикуется
+    # (опубликовать - решение владельца). Прошлый черновик той же версии заменяется.
+    needs: core
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: rust/app
+    steps:
+      - uses: actions/checkout@v5
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal -c rustfmt,clippy
+          echo "::notice title=rust app::$(rustc --version), node $(node --version)"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            rust/app/target
+          key: app-${{ runner.os }}-${{ env.RUSTUP_TOOLCHAIN }}-${{ hashFiles('rust/app/Cargo.toml') }}
+          restore-keys: app-${{ runner.os }}-${{ env.RUSTUP_TOOLCHAIN }}-
+      # База вендоров (колонка «Вендор»), как в release.yml. Не скачалась - собираем без неё.
+      - name: Vendor database (optional)
+        continue-on-error: true
+        shell: pwsh
+        run: Invoke-WebRequest https://www.wireshark.org/download/automated/data/manuf -OutFile "$env:RUNNER_TEMP/manuf"
+      - name: fmt, clippy, build, installer
+        env:
+          WBS_MANUF: ${{ runner.temp }}/manuf
+        run: |
+          fail=0
+          step() {
+            local name="$1"; shift
+            if "$@" > "/tmp/$name.log" 2>&1; then
+              echo "::notice title=$name app::ok"
+            else
+              fail=1
+              # первая ошибка компилятора важнее хвоста лога
+              local msg
+              msg=$(grep -E -A14 "^error" "/tmp/$name.log" | head -c 3500)
+              [ -z "$msg" ] && msg=$(tail -c 3500 "/tmp/$name.log")
+              echo "::error title=$name app::$(echo "$msg" | tr '\n' '|' | sed 's/%/%25/g')"
+            fi
+            cat "/tmp/$name.log"
+          }
+          rm -rf target/release/bundle      # из кэша могут прийти установщики прошлых версий
+          step fmt cargo fmt --check
+          step clippy cargo clippy --release -- -D warnings
+          step bundle npx --yes @tauri-apps/cli@2 build --ci
+          [ $fail = 0 ] || exit 1
+          v=$(grep -m1 '"version"' tauri.conf.json | sed -E 's/.*"([^"]+)",?/\1/')
+          mkdir -p ../../dist2
+          cp target/release/wbs-app.exe ../../dist2/WiFiBeaconScanner2.exe
+          cp target/release/bundle/nsis/*_"$v"_*-setup.exe "../../dist2/WiFiBeaconScanner2-Setup-$v.exe"
+          (cd ../../dist2 && sha256sum *.exe > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+          echo "::notice title=bundle::$(npx --yes @tauri-apps/cli@2 --version), $(cd ../../dist2 && ls -l *.exe | awk '{print $9" "$5}' | tr '\n' ' ')"
+          echo "::notice title=crates::$(grep -A1 -E '^name = "(tauri|tauri-build|wry|tao)"$' Cargo.lock | tr -d '\n' | sed 's/--/  /g')"
+      # Запуск собранного exe: окно должно открыться и запросить у программы состояние
+      # (в журнале «окно подключилось»). Wi-Fi на runner нет - ошибки скана здесь ожидаемы.
+      - name: Smoke test (window opens and talks to the core)
+        continue-on-error: true
+        run: |
+          ../../dist2/WiFiBeaconScanner2.exe &
+          pid=$!
+          log="$LOCALAPPDATA/WiFiBeaconScanner2/logs/app.log"
+          ok=0
+          for i in $(seq 1 40); do
+            sleep 1
+            if grep -q "окно подключилось" "$log" 2>/dev/null; then ok=1; break; fi
+          done
+          kill $pid 2>/dev/null || taskkill //F //IM WiFiBeaconScanner2.exe || true
+          echo "::notice title=smoke log::$(tr '\n' '|' < "$log" 2>/dev/null | head -c 3000)"
+          if [ $ok = 1 ]; then echo "::notice title=smoke::окно открылось и подключилось к ядру"; else echo "::error title=smoke::окно не подключилось за 40 с"; exit 1; fi
+      # Тихая установка и удаление, как при раздаче через SCCM/Intune: куда ставится, что видно в «Программах»,
+      # что остаётся после удаления. Итог - в аннотациях (по ним написан docs/*/deployment.md).
+      - name: Silent install and uninstall (NSIS /S)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem ../../dist2/WiFiBeaconScanner2-Setup-*.exe | Select-Object -First 1
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait -PassThru
+          $key = Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty |
+            Where-Object { $_.DisplayName -like 'Wi-Fi Beacon Scanner 2*' } | Select-Object -First 1
+          if (-not $key) { Write-Output "::error title=install::установщик (код $($p.ExitCode)) не создал запись в «Программах»"; exit 1 }
+          $uninst = $key.UninstallString.Trim('"')
+          $dir = if ($key.InstallLocation) { $key.InstallLocation.Trim('"') } else { Split-Path $uninst }
+          $files = (Get-ChildItem $dir -File | ForEach-Object Name) -join ', '
+          $lnk = (Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Recurse -Filter *.lnk |
+            Where-Object { $_.Name -like '*Beacon*' } | ForEach-Object FullName) -join '; '
+          Write-Output "::notice title=install::код $($p.ExitCode); $($key.DisplayName) $($key.DisplayVersion), издатель $($key.Publisher); папка $dir; файлы: $files; ярлык: $lnk; удаление: $($key.UninstallString)"
+          # настройки пользователя и профиль WebView2 (папка по идентификатору приложения) - что удаление с ними сделает
+          New-Item -ItemType Directory -Force "$env:APPDATA\WiFiBeaconScanner2" | Out-Null
+          if (-not (Test-Path "$env:APPDATA\WiFiBeaconScanner2\prefs.json")) { '{"theme":"dark"}' | Set-Content "$env:APPDATA\WiFiBeaconScanner2\prefs.json" }
+          $wv = Join-Path $env:LOCALAPPDATA 'io.github.salilov95.wifibeaconscanner2'
+          Write-Output "::notice title=webview profile::$wv есть: $(Test-Path $wv); $((Get-ChildItem $wv -ErrorAction SilentlyContinue | ForEach-Object Name) -join ', ')"
+          Start-Process -FilePath $uninst -ArgumentList '/S' -Wait
+          # деинсталлятор NSIS доделывает работу из своей копии во временной папке - ждём, пока exe исчезнут
+          for ($i = 0; $i -lt 30 -and (Test-Path (Join-Path $dir '*.exe')); $i++) { Start-Sleep 1 }
+          if (Test-Path (Join-Path $dir '*.exe')) { Write-Output "::error title=uninstall::после удаления в $dir остались exe"; exit 1 }
+          $settings = Test-Path "$env:APPDATA\WiFiBeaconScanner2\prefs.json"
+          $logs = Test-Path "$env:LOCALAPPDATA\WiFiBeaconScanner2\logs"
+          $lnkLeft = (Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Recurse -Filter *.lnk | Where-Object { $_.Name -like '*Beacon*' }).Count
+          Write-Output "::notice title=uninstall::удалено; prefs.json остался: $settings; журнал остался: $logs; профиль WebView2 остался: $(Test-Path $wv); ярлыков осталось: $lnkLeft"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WiFiBeaconScanner2
+          path: dist2/*
+          if-no-files-found: error
+      # Выпуск: Run workflow на main с «publish». Черновик этой версии заменяется настоящим релизом.
+      - name: Publish release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: dist2
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error title=publish::публикуется только main, а не $GITHUB_REF"; exit 1; fi
+          tag="v$VERSION"
+          if [ "$(gh release view "$tag" --json isDraft -q .isDraft 2>/dev/null)" = "true" ]; then gh release delete "$tag" --yes; fi
+          if gh release view "$tag" > /dev/null 2>&1; then echo "::error title=publish::$tag уже опубликован"; exit 1; fi
+          # MSYS_NO_PATHCONV: иначе bash в Windows превратит «/S» в путь
+          MSYS_NO_PATHCONV=1 python ../tools/release_notes.py "$VERSION" --setup "WiFiBeaconScanner2-Setup-$VERSION.exe" \
+            --portable WiFiBeaconScanner2.exe --silent /S --out notes.md
+          case "$VERSION" in *-*) kind="--prerelease --latest=false" ;; *) kind="--latest" ;; esac
+          gh release create "$tag" WiFiBeaconScanner2-Setup-*.exe WiFiBeaconScanner2.exe SHA256SUMS.txt \
+            --target "$GITHUB_SHA" --title "Wi-Fi Beacon Scanner $VERSION" --notes-file notes.md $kind
+          echo "::notice title=publish::$tag опубликован ($kind)"
+      - name: Draft pre-release (not published)
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        working-directory: dist2
+        run: |
+          tag="v$VERSION"
+          if [ "$(gh release view "$tag" --json isDraft -q .isDraft 2>/dev/null)" = "true" ]; then gh release delete "$tag" --yes; fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "::notice title=draft::$tag уже опубликован - черновик не создаю"; exit 0
+          fi
+          # текст - из CHANGELOG (раздел версии или «Не выпущено»), сверху - пометка о черновике
+          MSYS_NO_PATHCONV=1 python ../tools/release_notes.py "$VERSION" --setup "WiFiBeaconScanner2-Setup-$VERSION.exe" \
+            --portable WiFiBeaconScanner2.exe --silent /S --out body.md
+          { printf '**Черновая сборка для проверки, не опубликована** (коммит %s).\n\n' "${SHA:0:7}"; cat body.md; } > notes.md
+          gh release create "$tag" WiFiBeaconScanner2-Setup-*.exe WiFiBeaconScanner2.exe SHA256SUMS.txt \
+            --draft --prerelease --target "$SHA" --title "Wi-Fi Beacon Scanner $tag (черновик)" --notes-file notes.md
+          echo "::notice title=draft::черновик $tag создан (не опубликован)"
