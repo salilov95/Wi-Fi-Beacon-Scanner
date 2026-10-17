@@ -3,7 +3,9 @@
 //! Несколько листов, строка заголовка жирным с заливкой, закреплённая первая строка, автофильтр, ширина колонок
 //! по содержимому, строки - inline strings. Колонки сигнала и загрузки получают цветовую шкалу (условное
 //! форматирование): RSSI от красного (−85) через жёлтый (−67) к зелёному (−50), загрузка наоборот (0/50/75%).
-//! XML частей совпадает с 1.x; zip - без сжатия (Excel читает такой так же).
+//! Оформление версии 2: заголовок - белым по цвету программы, строки через одну подкрашены (условное
+//! форматирование по ROW(), поэтому полоски остаются ровными после сортировки и фильтра), важность проблемы -
+//! цветом. Значения ячеек те же, что в 1.x (`tools/compare_state.py` сверяет их); zip - без сжатия.
 
 use crate::i18n::{py_float, tr};
 use crate::report::Cell;
@@ -87,12 +89,27 @@ pub fn scale_for(header: &str) -> Option<([&'static str; 3], [&'static str; 3])>
     None
 }
 
-fn scales_xml(rows: &[Vec<Cell>]) -> String {
+fn scales_xml(rows: &[Vec<Cell>], ncols: usize) -> String {
     if rows.len() < 2 {
         return String::new();
     }
     let mut out = String::new();
     let mut prio = 1;
+    // важность проблемы: критично - красным, внимание - янтарным (dxf 1 и 2)
+    for (ci, h) in rows[0].iter().enumerate() {
+        if h.text() != tr("Важность") {
+            continue;
+        }
+        let c = col(ci);
+        for (word, dxf) in [("Критично", 1), ("Внимание", 2)] {
+            out.push_str(&format!(
+                "<conditionalFormatting sqref=\"{c}2:{c}{}\"><cfRule type=\"cellIs\" dxfId=\"{dxf}\" priority=\"{prio}\" operator=\"equal\"><formula>\"{}\"</formula></cfRule></conditionalFormatting>",
+                rows.len(),
+                escape(&tr(word))
+            ));
+            prio += 1;
+        }
+    }
     for (ci, h) in rows[0].iter().enumerate() {
         let Some((pts, cols)) = scale_for(&h.text()) else {
             continue;
@@ -106,6 +123,12 @@ fn scales_xml(rows: &[Vec<Cell>]) -> String {
         ));
         prio += 1;
     }
+    // полосы: каждая вторая строка данных (dxf 0), ниже по приоритету, чем шкалы
+    out.push_str(&format!(
+        "<conditionalFormatting sqref=\"A2:{}{}\"><cfRule type=\"expression\" dxfId=\"0\" priority=\"{prio}\"><formula>MOD(ROW(),2)=1</formula></cfRule></conditionalFormatting>",
+        col(ncols.max(1) - 1),
+        rows.len()
+    ));
     out
 }
 
@@ -125,6 +148,8 @@ pub fn sheet_xml(rows: &[Vec<Cell>]) -> String {
     let mut out = String::from(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">",
     );
+    // печать: альбомная, по ширине страницы
+    out.push_str("<sheetPr><pageSetUpPr fitToPage=\"1\"/></sheetPr>");
     if !rows.is_empty() {
         out.push_str("<sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\"/></sheetView></sheetViews>");
     }
@@ -145,13 +170,18 @@ pub fn sheet_xml(rows: &[Vec<Cell>]) -> String {
             .enumerate()
             .map(|(ci, v)| cell(&format!("{}{}", col(ci), ri + 1), v, if ri == 0 { 1 } else { 0 }))
             .collect();
-        out.push_str(&format!("<row r=\"{}\">{cells}</row>", ri + 1));
+        if ri == 0 {
+            out.push_str(&format!("<row r=\"1\" ht=\"22\" customHeight=\"1\">{cells}</row>"));
+        } else {
+            out.push_str(&format!("<row r=\"{}\">{cells}</row>", ri + 1));
+        }
     }
     out.push_str("</sheetData>");
     if rows.len() > 1 && ncols > 0 {
         out.push_str(&format!("<autoFilter ref=\"A1:{}{}\"/>", col(ncols - 1), rows.len()));
-        out.push_str(&scales_xml(rows));
+        out.push_str(&scales_xml(rows, ncols));
     }
+    out.push_str("<pageMargins left=\"0.4\" right=\"0.4\" top=\"0.5\" bottom=\"0.5\" header=\"0.3\" footer=\"0.3\"/><pageSetup paperSize=\"9\" orientation=\"landscape\" fitToWidth=\"1\" fitToHeight=\"0\"/>");
     out.push_str("</worksheet>");
     out
 }
@@ -190,15 +220,19 @@ pub fn sheet_names(names: &[String]) -> Vec<String> {
 const STYLES: &str = concat!(
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>",
     "<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">",
-    "<fonts count=\"2\"><font><sz val=\"11\"/><name val=\"Calibri\"/></font>",
-    "<font><b/><sz val=\"11\"/><name val=\"Calibri\"/></font></fonts>",
+    "<fonts count=\"2\"><font><sz val=\"11\"/><color rgb=\"FF15202B\"/><name val=\"Calibri\"/></font>",
+    "<font><b/><sz val=\"11\"/><color rgb=\"FFFFFFFF\"/><name val=\"Calibri\"/></font></fonts>",
     "<fills count=\"3\"><fill><patternFill patternType=\"none\"/></fill><fill><patternFill patternType=\"gray125\"/></fill>",
-    "<fill><patternFill patternType=\"solid\"><fgColor rgb=\"FFDDE7EE\"/><bgColor indexed=\"64\"/></patternFill></fill></fills>",
-    "<borders count=\"1\"><border><left/><right/><top/><bottom/><diagonal/></border></borders>",
+    "<fill><patternFill patternType=\"solid\"><fgColor rgb=\"FF0A6C8F\"/><bgColor indexed=\"64\"/></patternFill></fill></fills>",
+    "<borders count=\"2\"><border><left/><right/><top/><bottom/><diagonal/></border>",
+    "<border><left/><right/><top/><bottom style=\"medium\"><color rgb=\"FF15202B\"/></bottom><diagonal/></border></borders>",
     "<cellStyleXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\"/></cellStyleXfs>",
     "<cellXfs count=\"2\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\" xfId=\"0\"/>",
-    "<xf numFmtId=\"0\" fontId=\"1\" fillId=\"2\" borderId=\"0\" xfId=\"0\" applyFont=\"1\" applyFill=\"1\"/></cellXfs>",
-    "<cellStyles count=\"1\"><cellStyle name=\"Normal\" xfId=\"0\" builtinId=\"0\"/></cellStyles></styleSheet>"
+    "<xf numFmtId=\"0\" fontId=\"1\" fillId=\"2\" borderId=\"1\" xfId=\"0\" applyFont=\"1\" applyFill=\"1\" applyBorder=\"1\" applyAlignment=\"1\"><alignment vertical=\"center\"/></xf></cellXfs>",
+    "<cellStyles count=\"1\"><cellStyle name=\"Normal\" xfId=\"0\" builtinId=\"0\"/></cellStyles>",
+    "<dxfs count=\"3\"><dxf><fill><patternFill><bgColor rgb=\"FFF3F6F8\"/></patternFill></fill></dxf>",
+    "<dxf><font><b/><color rgb=\"FFB4261F\"/></font></dxf><dxf><font><b/><color rgb=\"FFA15C00\"/></font></dxf></dxfs>",
+    "</styleSheet>"
 );
 
 const XML_HEAD: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";

@@ -389,41 +389,9 @@ pub struct ReportInput<'a> {
     /// Точки обхода - целиком (они про маршрут).
     pub survey: &'a [crate::survey::Point],
     pub offset_min: i32,
+    /// Версия программы (подпись внизу HTML-отчёта).
+    pub version: &'a str,
 }
-
-const CSS: &str = "
-:root{--bg:#fff;--fg:#1c1f23;--mut:#5c6670;--line:#d9dee3;--card:#f6f8fa;
---crit:#b3261e;--warn:#9a5b00;--info:#2457a6}
-@media (prefers-color-scheme:dark){:root{--bg:#14171a;--fg:#e6e9ec;--mut:#9aa5b0;--line:#2c333a;--card:#1b2025;
---crit:#ff8a80;--warn:#ffb74d;--info:#8ab4f8}}
-body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,Segoe UI,sans-serif}
-main{max-width:1200px;margin:0 auto}
-h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:28px 0 10px}
-.mut{color:var(--mut)}
-.sum{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
-.sum div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 16px;min-width:120px}
-.sum b{display:block;font-size:24px}
-.f{border:1px solid var(--line);border-left-width:4px;border-radius:6px;background:var(--card);padding:10px 14px;margin:8px 0}
-.f.critical{border-left-color:var(--crit)}.f.warning{border-left-color:var(--warn)}.f.info{border-left-color:var(--info)}
-.f h3{margin:0 0 2px;font-size:15px}.tag{font-size:12px;font-weight:600}
-.critical .tag{color:var(--crit)}.warning .tag{color:var(--warn)}.info .tag{color:var(--info)}
-.rec{margin-top:4px}code{font-size:12px;color:var(--mut)}
-.wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{position:sticky;top:0;background:var(--card)}
-.ubar{display:inline-block;width:160px;height:10px;background:var(--line);border-radius:3px;overflow:hidden;vertical-align:middle}
-.ubar i{display:block;height:100%}
-.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 16px}
-.kv dt{color:var(--mut)}.kv dd{margin:0}
-@page{size:A4 landscape;margin:12mm}
-@media print{
-  :root{--bg:#fff;--fg:#1c1f23;--mut:#5c6670;--line:#d9dee3;--card:#f6f8fa;--crit:#b3261e;--warn:#9a5b00;--info:#2457a6}
-  body{padding:0;font-size:11px}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  h2{break-after:avoid}.f,tr{break-inside:avoid}table{font-size:10px}th{position:static}
-  .wrap{overflow:visible}td,th{white-space:normal}
-}
-";
 
 /// `html.escape`: & < > " '.
 pub fn esc(s: &str) -> String {
@@ -440,11 +408,6 @@ fn sev_ru(s: &str) -> &'static str {
         crate::rules::WARNING => "Внимание",
         _ => "Информация",
     }
-}
-
-fn util_color(u: f64) -> String {
-    let hue = (130.0 * (1.0 - (u / 75.0).clamp(0.0, 1.0))).round_ties_even() as i64;
-    format!("hsl({hue} 70% 40%)")
 }
 
 const RSSI_STOPS: [(f64, f64); 5] = [
@@ -469,14 +432,6 @@ pub fn rssi_hue(r: f64) -> i64 {
     RSSI_STOPS[4].1 as i64
 }
 
-fn rssi_color(r: f64) -> String {
-    format!("hsl({} 72% 36%)", rssi_hue(r))
-}
-
-fn rssi_td(v: i64) -> String {
-    format!("<td style='color:{};font-weight:600'>{v}</td>", rssi_color(v as f64))
-}
-
 use crate::i18n::{pyfmt, tr, trf, Arg};
 
 fn vf(v: Option<&Value>) -> f64 {
@@ -494,280 +449,9 @@ fn vi(v: Option<&Value>) -> i64 {
     v.and_then(|x| x.as_f64()).map_or(0, |x| x as i64)
 }
 
-/// HTML-отчёт (`render_html`): сводка, проблемы, загрузка каналов, журнал и сессии, все BSS.
+/// HTML-отчёт (он же PDF): вёрстка версии 2 - `report_html.rs`.
 pub fn render_html(r: &ReportInput) -> String {
-    let snap = r.snap;
-    let count = |sev: &str| r.findings.iter().filter(|f| f.severity == sev).count();
-    let mut out: Vec<String> = vec![];
-    out.push(trf(
-        "<!doctype html><html lang='ru'><head><meta charset='utf-8'><meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; style-src 'unsafe-inline'; img-src data:\"><meta name='viewport' content='width=device-width,initial-scale=1'><title>Wi-Fi Beacon Scanner: отчёт</title><style>%s</style></head><body><main>",
-        &[Arg::S(CSS.into())],
-    ));
-    out.push(tr("<h1>Wi-Fi Beacon Scanner: отчёт</h1>"));
-    let focus_note = if r.focus.is_empty() {
-        String::new()
-    } else {
-        tr(" · мои SSID: ") + &esc(&r.focus.join(", "))
-    };
-    let iface = if snap.interface.is_empty() {
-        "-"
-    } else {
-        &snap.interface
-    };
-    out.push(trf(
-        "<div class='mut'>Снято: %s · адаптер: %s · BSS в отчёте: %d%s</div>",
-        &[
-            Arg::S(esc(&snap.taken_at)),
-            Arg::S(esc(iface)),
-            Arg::I(snap.bss.len() as i64),
-            Arg::S(focus_note),
-        ],
-    ));
-    if !r.note.is_empty() {
-        out.push(trf(
-            "<div class='mut'>В отчёт включены: %s</div>",
-            &[Arg::S(esc(r.note))],
-        ));
-    }
-    let ssids = ssid_count(&snap.bss);
-    out.push(trf(
-        "<div class='sum'><div><b>%d</b>BSS</div><div><b>%d</b>SSID</div><div><b>%d</b>Критично</div><div><b>%d</b>Внимание</div><div><b>%d</b>Информация</div></div>",
-        &[
-            Arg::I(snap.bss.len() as i64),
-            Arg::I(ssids as i64),
-            Arg::I(count(crate::rules::CRITICAL) as i64),
-            Arg::I(count(crate::rules::WARNING) as i64),
-            Arg::I(count(crate::rules::INFO) as i64),
-        ],
-    ));
-    out.push(tr("<h2>Проблемы</h2>"));
-    if r.findings.is_empty() {
-        out.push(tr("<p class='mut'>Проблем по заданным правилам не найдено.</p>"));
-    }
-    for f in r.findings {
-        out.push(format!(
-            "<div class='f {}'><span class='tag'>{} · {}</span><h3>{}</h3><div>{}</div>",
-            f.severity,
-            tr(sev_ru(f.severity)),
-            esc(&f.code),
-            esc(&f.title),
-            esc(&f.detail)
-        ));
-        if !f.recommendation.is_empty() {
-            out.push(trf(
-                "<div class='rec'><b>Что проверить:</b> %s</div>",
-                &[Arg::S(esc(&f.recommendation))],
-            ));
-        }
-        if !f.bssids.is_empty() {
-            let shown: Vec<&str> = f.bssids.iter().take(8).map(String::as_str).collect();
-            let more = if f.bssids.len() > 8 {
-                format!(" … (+{})", f.bssids.len() - 8)
-            } else {
-                String::new()
-            };
-            out.push(format!("<code>{}{more}</code>", esc(&shown.join(", "))));
-        }
-        out.push("</div>".into());
-    }
-    if let Some(util) = r.util {
-        let channels = util
-            .get("channels")
-            .and_then(Value::as_array)
-            .cloned()
-            .unwrap_or_default();
-        if !channels.is_empty() {
-            out.push(tr("<h2>Загрузка каналов (QBSS Load)</h2><p class='mut'>Доля времени, когда сама AP считает канал занятым; на канал взят максимум среди AP, сообщающих эту цифру.</p>"));
-            out.push(tr("<div class='wrap'><table><thead><tr><th>ГГц</th><th>Канал</th><th>Загрузка</th><th></th><th>Уровень</th><th>Среднее</th><th>AP с данными</th><th>Станций</th><th>Самые загруженные</th></tr></thead><tbody>"));
-            for ch in &channels {
-                let aps = ch.get("aps").and_then(Value::as_array).cloned().unwrap_or_default();
-                let top = aps
-                    .iter()
-                    .take(3)
-                    .map(|a| pyfmt("%s %.0f%%", &[Arg::S(vs(a.get("ssid"))), Arg::F(vf(a.get("util")))]))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                let mx = vf(ch.get("max"));
-                out.push(trf(
-                    "<tr><td>%s</td><td>%s</td><td><span class='ubar'><i style='width:%.0f%%;background:%s'></i></span></td><td>%.0f%%</td><td>%s</td><td>%.0f%%</td><td>%d из %d</td><td>%d</td><td>%s</td></tr>",
-                    &[
-                        Arg::S(esc(&vs(ch.get("band")))),
-                        Arg::S(vs(ch.get("channel"))),
-                        Arg::F(mx.max(1.0)),
-                        Arg::S(util_color(mx)),
-                        Arg::F(mx),
-                        Arg::S(esc(&vs(ch.get("label")))),
-                        Arg::F(vf(ch.get("avg"))),
-                        Arg::I(vi(ch.get("reporting"))),
-                        Arg::I(vi(ch.get("bss"))),
-                        Arg::I(vi(ch.get("stations"))),
-                        Arg::S(esc(&top)),
-                    ],
-                ));
-            }
-            out.push("</tbody></table></div>".into());
-            let no_data = util
-                .get("no_data")
-                .and_then(Value::as_array)
-                .cloned()
-                .unwrap_or_default();
-            if !no_data.is_empty() {
-                let list = no_data
-                    .iter()
-                    .map(|x| {
-                        trf(
-                            "%s ГГц канал %s",
-                            &[Arg::S(vs(x.get("band"))), Arg::S(vs(x.get("channel")))],
-                        )
-                    })
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                out.push(trf(
-                    "<p class='mut'>Нет данных QBSS Load: %s.</p>",
-                    &[Arg::S(esc(&list))],
-                ));
-            }
-        }
-    }
-    if let Some(j) = r.journal.filter(|j| !j.events.is_empty()) {
-        let st = j.stats();
-        out.push(tr("<h2>Подключение ноутбука</h2>"));
-        out.push(trf(
-            "<dl class='kv'><dt>Роумингов</dt><dd>%d</dd><dt>Обрывов</dt><dd>%d (без связи %.0f с)</dd><dt>Пинг-понгов</dt><dd>%d</dd><dt>Залипаний</dt><dd>%d</dd><dt>Неудачных подключений</dt><dd>%d</dd></dl>",
-            &[
-                Arg::I(vi(st.get("roams"))),
-                Arg::I(vi(st.get("disconnects"))),
-                Arg::F(vf(st.get("down_s"))),
-                Arg::I(vi(st.get("pingpong"))),
-                Arg::I(vi(st.get("sticky"))),
-                Arg::I(vi(st.get("attempt_fail"))),
-            ],
-        ));
-        out.push(tr("<div class='wrap'><table><thead><tr><th>Время</th><th>Событие</th><th>SSID</th><th>Откуда</th><th>Куда</th><th>RSSI</th><th>Длительность</th><th>Причина</th></tr></thead><tbody>"));
-        let skip = j.events.len().saturating_sub(200);
-        for ev in j.events.iter().skip(skip).rev() {
-            let rs = [ev.rssi_from, ev.rssi_to]
-                .iter()
-                .flatten()
-                .map(|x| {
-                    format!(
-                        "<span style='color:{};font-weight:600'>{x}</span>",
-                        rssi_color(*x as f64)
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(" → ");
-            let dur = ev.duration_s.map(|d| trf("%.0f с", &[Arg::F(d)])).unwrap_or_default();
-            out.push(format!(
-                "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{rs}</td><td>{dur}</td><td>{}</td></tr>",
-                &iso_naive(ev.t, r.offset_min)[11..19],
-                esc(&tr_or(journal_kind_ru(&ev.kind), &ev.kind)),
-                esc(&ev.ssid),
-                esc(&ev.bssid_from),
-                esc(&ev.bssid_to),
-                esc(&ev.reason)
-            ));
-        }
-        out.push("</tbody></table></div>".into());
-    }
-    if let Some(j) = r.journal.filter(|j| !j.sessions.sessions.is_empty()) {
-        let skip = j.sessions.sessions.len().saturating_sub(200);
-        let ss: Vec<&crate::session::Session> = j.sessions.sessions.iter().skip(skip).rev().collect();
-        let rows = session_rows(&ss, r.offset_min);
-        const KEEP: [usize; 12] = [0, 1, 2, 4, 5, 6, 7, 8, 9, 13, 15, 16];
-        out.push(tr("<h2>Сессии подключения</h2><p class='mut'>Стадии по уведомлениям Windows: ассоциация, аутентификация (802.1X и 4-way handshake), получение IPv4.</p>"));
-        out.push(format!(
-            "<div class='wrap'><table><thead><tr>{}</tr></thead><tbody>",
-            KEEP.iter()
-                .map(|&i| format!("<th>{}</th>", esc(&rows[0][i].text())))
-                .collect::<String>()
-        ));
-        for row in &rows[1..] {
-            out.push(format!(
-                "<tr>{}</tr>",
-                KEEP.iter()
-                    .map(|&i| format!("<td>{}</td>", esc(&row[i].text())))
-                    .collect::<String>()
-            ));
-        }
-        out.push("</tbody></table></div>".into());
-    }
-    if !r.survey.is_empty() {
-        let rows = survey_rows(r.survey, r.focus, r.offset_min);
-        out.push(tr("<h2>Обход: точки замеров</h2><p class='mut'>Карта покрытия сохраняется отдельно из вкладки «Обход» (PNG).</p>"));
-        out.push(format!(
-            "<div class='wrap'><table><thead><tr>{}</tr></thead><tbody>",
-            rows[0]
-                .iter()
-                .map(|h| format!("<th>{}</th>", esc(&h.text())))
-                .collect::<String>()
-        ));
-        let rcols: Vec<bool> = rows[0].iter().map(|h| h.text().contains("RSSI")).collect();
-        for row in &rows[1..] {
-            out.push(format!(
-                "<tr>{}</tr>",
-                row.iter()
-                    .enumerate()
-                    .map(|(i, v)| match (rcols[i], v) {
-                        (true, Cell::Int(n)) => rssi_td(*n),
-                        _ => format!("<td>{}</td>", esc(&v.text())),
-                    })
-                    .collect::<String>()
-            ));
-        }
-        out.push("</tbody></table></div>".into());
-    }
-    out.push(tr("<h2>Все BSS</h2><div class='wrap'><table><thead><tr>"));
-    for name in [
-        "SSID",
-        "BSSID",
-        "Вендор",
-        "ГГц",
-        "Канал",
-        "Ширина",
-        "RSSI",
-        "Безопасность",
-        "Поколение",
-        "Макс. MCS",
-        "Макс. PHY, Мбит/с",
-        "802.11",
-        "Загрузка",
-        "Станций",
-        "Страна",
-    ] {
-        out.push(format!("<th>{}</th>", esc(&tr(name))));
-    }
-    out.push("</tr></thead><tbody>".into());
-    for b in sorted_bss(&snap.bss) {
-        let i = &b.info;
-        let cap = capability(i);
-        let mcs = cap
-            .mcs
-            .map_or(String::new(), |m| format!("{} {} x{}", cap.phy, m, cap.nss));
-        let rate = cap.rate.map_or(String::new(), |x| pyfmt("%.0f", &[Arg::F(x)]));
-        let util = i.qbss_util_pct.map_or(String::new(), |u| pyfmt("%.0f%%", &[Arg::F(u)]));
-        let td = |s: String| format!("<td>{}</td>", esc(&s));
-        out.push(format!(
-            "<tr>{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}</tr>",
-            td(b.ssid_display()),
-            td(b.bssid.clone()),
-            td(b.vendor.clone().unwrap_or_default()),
-            td(b.band().into()),
-            td(b.channel().to_string()),
-            td(i.width_mhz().to_string()),
-            rssi_td(b.rssi as i64),
-            td(b.security()),
-            td(b.generation_label()),
-            td(mcs),
-            td(rate),
-            td(short(&standards(b))),
-            td(util),
-            td(i.qbss_stations.map(|x| x.to_string()).unwrap_or_default()),
-            td(i.country.clone().unwrap_or_default()),
-        ));
-    }
-    out.push("</tbody></table></div></main></body></html>".into());
-    out.concat()
+    crate::report_html::render_html(r)
 }
 
 /// Число разных видимых SSID.
@@ -776,6 +460,38 @@ fn ssid_count(bss: &[Bss]) -> usize {
     seen.sort();
     seen.dedup();
     seen.len()
+}
+
+/// Заголовок колонки листа BSS в Excel: по-человечески (в CSV остаются имена полей для скриптов).
+fn xlsx_head(c: &str) -> String {
+    let (ru, en) = match c {
+        "ssid" => ("SSID", "SSID"),
+        "bssid" => ("BSSID", "BSSID"),
+        "vendor" => ("Вендор", "Vendor"),
+        "band_ghz" => ("Диапазон, ГГц", "Band, GHz"),
+        "channel" => ("Канал", "Channel"),
+        "width_mhz" => ("Ширина, МГц", "Width, MHz"),
+        "rssi_dbm" => ("RSSI, дБм", "RSSI, dBm"),
+        "link_quality" => ("Качество (драйвер), %", "Link quality (driver), %"),
+        "security" => ("Безопасность", "Security"),
+        "ciphers" => ("Шифры", "Ciphers"),
+        "generation" => ("Поколение", "Generation"),
+        "streams" => ("Потоков", "Streams"),
+        "phy" => ("PHY", "PHY"),
+        "max_mcs" => ("Макс. MCS", "Max MCS"),
+        "max_rate_mbps" => ("Макс. PHY, Мбит/с", "Max PHY, Mbit/s"),
+        "dot11k" => ("802.11k", "802.11k"),
+        "dot11r" => ("802.11r", "802.11r"),
+        "dot11v" => ("802.11v", "802.11v"),
+        "standards" => ("Дополнения 802.11", "802.11 amendments"),
+        "util_pct" => ("Загрузка, %", "Load, %"),
+        "stations" => ("Станций", "Stations"),
+        "country" => ("Страна", "Country"),
+        "beacon_interval" => ("Интервал beacon, TU", "Beacon interval, TU"),
+        "dtim" => ("DTIM", "DTIM"),
+        other => (other, other),
+    };
+    crate::app::pick(ru, en)
 }
 
 /// Excel-отчёт (`build_xlsx_report`): листы «Сводка», «BSS», «Проблемы», загрузка, история, журнал, сессии.
@@ -839,7 +555,10 @@ pub fn xlsx_sheets(r: &ReportInput) -> Vec<crate::xlsx::Sheet> {
         summary.push(row(tr("Залипаний").into(), num("sticky")));
     }
     let mut sheets: Vec<crate::xlsx::Sheet> = vec![(tr("Сводка"), summary)];
-    let mut bss_rows = vec![CSV_COLUMNS.iter().map(|&c| Cell::from(c)).collect::<Vec<_>>()];
+    let mut bss_rows = vec![CSV_COLUMNS
+        .iter()
+        .map(|&c| Cell::from(xlsx_head(c)))
+        .collect::<Vec<_>>()];
     bss_rows.extend(sorted_bss(&snap.bss).into_iter().map(bss_cells));
     sheets.push(("BSS".into(), bss_rows));
     let mut fr: Vec<Vec<Cell>> = vec![[

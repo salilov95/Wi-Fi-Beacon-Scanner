@@ -4,12 +4,12 @@
     python tools/compare_state.py rust/target/debug/examples/devserver
 
 Что сравнивается: /api/state (строки таблицы с историей, проблемы с «Мои SSID» и порогом сигнала, свободность
-и загрузка каналов, сравнение с базой, история) на русском и английском, выгрузки CSV и JSON, отчёты HTML и Excel
-(все сети, «Мои SSID», выбранные строки) с журналом подключения (демо-сценарий contract/journal), CSV журнала и сессий.
-Excel сравнивается по XML частей книги (zip у версий разный); время в листе истории - время загрузки, его не сравниваем.
-Не сравниваются поля, которые зависят от времени и источника данных (now, first_seen, время в истории),
-и то, что в 2.x ещё не перенесено (обход). Журнал подключения и сессии здесь пустые (монитор не запущен);
-их логику проверяет tools/journal_contract.py. Выход 1 - есть расхождения.
+и загрузка каналов, сравнение с базой, история) на русском и английском, выгрузки CSV и JSON, CSV журнала и сессий,
+обход и настройки вида. Отчёты (все сети, «Мои SSID», выбранные строки; с журналом подключения из демо-сценария
+contract/journal): у 2.x своя вёрстка, поэтому HTML сверяется по содержимому - всё, что есть в отчёте 1.x (BSS,
+тексты проблем, журнал и сессии, точки обхода), должно быть в HTML 2.x; Excel - по значениям ячеек (оформление
+и заголовки листа BSS у 2.x свои). Не сравниваются поля, которые зависят от времени и источника данных (now,
+first_seen, время в истории). Логику журнала и сессий проверяет tools/journal_contract.py. Выход 1 - есть расхождения.
 """
 import io
 import json
@@ -248,6 +248,64 @@ def xlsx_parts(data: bytes, history_name: str):
     return parts
 
 
+def xlsx_values(data: bytes, history_name: str):
+    """Значения ячеек по листам, без оформления: {лист: {ячейка: текст}}. У версии 2 своё оформление
+    и человеческие заголовки листа BSS, а данные - те же, что у 1.x."""
+    import html
+    import xml.etree.ElementTree as ET
+    import zipfile
+    m = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+    z = zipfile.ZipFile(io.BytesIO(data))
+    out = {}
+    for name, sid in re.findall(r'<sheet name="([^"]*)" sheetId="(\d+)"', z.read("xl/workbook.xml").decode("utf-8")):
+        name = html.unescape(name)
+        cells = {}
+        for c in ET.fromstring(z.read("xl/worksheets/sheet%s.xml" % sid)).iter(m + "c"):
+            t, v = c.find(m + "is/" + m + "t"), c.find(m + "v")
+            val = t.text if t is not None else (v.text if v is not None else None)
+            if val is None or (name == "BSS" and re.fullmatch(r"[A-Z]+1", c.get("r"))):
+                continue                     # заголовки листа BSS у 2.x свои
+            cells[c.get("r")] = _DT.sub("T", val) if name == history_name else val
+        out[name] = cells
+    return out
+
+
+def html_facts(st, scope, bssids):
+    """Что обязано быть в HTML-отчёте 2.x, раз оно есть в отчёте 1.x: все BSS, тексты проблем,
+    события журнала и сессии (по BSSID и причинам), точки обхода."""
+    import html
+    snap, findings, _focus, _hist, _note = st.export_view(scope, bssids)
+    facts = [b.bssid for b in snap.bss]
+    for f in findings:
+        facts += [f.title, f.detail, f.recommendation, f.code]
+    conn = st.conn.to_dict(max_samples=0, max_events=100000)
+    for e in conn["events"][-200:]:
+        facts += [e.get("bssid_to") or "", e.get("reason") or ""]
+    for ss in st.conn.sessions.to_dict(max_sessions=100000)["sessions"][-200:]:
+        facts += [ss.get("bssid") or "", ss.get("reason") or ""]
+    return sorted({html.escape(x) for x in facts if x})
+
+
+def compare_report_pair(st, rs, lang, label, scope, bssids, hist_name) -> int:
+    """HTML: всё содержимое отчёта 1.x есть в 2.x; Excel: те же значения ячеек."""
+    body = json.dumps({"scope": scope, "bssids": bssids})
+    got_html = rs.raw("/api/export/html", body).decode("utf-8")
+    missing = [f for f in html_facts(st, scope, bssids) if f not in got_html]
+    want_x = xlsx_values(py_export(st, "xlsx", scope, bssids), hist_name)
+    got_x = xlsx_values(rs.raw("/api/export/xlsx", body), hist_name)
+    bad_sheets = sorted(k for k in set(want_x) | set(got_x) if want_x.get(k) != got_x.get(k))
+    for k in bad_sheets[:3]:
+        a, b = want_x.get(k, {}), got_x.get(k, {})
+        diff = sorted(r for r in set(a) | set(b) if a.get(r) != b.get(r))[:5]
+        print("    Excel, лист %s: %s" % (k, ", ".join("%s 1.x=%r 2.x=%r" % (r, a.get(r), b.get(r)) for r in diff)))
+    for f in missing[:5]:
+        print("    в HTML 2.x нет: %r" % f)
+    print("%s %-18s %-5s HTML: всё на месте%s, Excel: %s" % (
+        lang, label, scope, "" if not missing else " - НЕТ %d" % len(missing),
+        "значения совпадают" if not bad_sheets else "листов отличается: %d" % len(bad_sheets)))
+    return len(missing) + len(bad_sheets)
+
+
 def compare_reports(exe: str) -> int:
     from wifi_beacon_scanner.i18n import tr
     rs = Rust(exe, {"WBS_JOURNAL": SCEN, "WBS_JOURNAL_AT": repr(JOURNAL_END)})
@@ -266,33 +324,16 @@ def compare_reports(exe: str) -> int:
                 rs.get("/api/config", json.dumps({"focus": REPORT_FOCUS, "weak_rssi": -72}))
                 some = [b.bssid for b in st.snapshot.bss[::3]]
                 for scope, bssids in (("all", None), ("focus", None), ("list", some)):
-                    body = json.dumps({"scope": scope, "bssids": bssids})
                     try:
-                        want_html = py_export(st, "html", scope, bssids)
+                        st.export_view(scope, bssids)
                     except ValueError as e:
-                        got = rs.get_status("/api/export/html", body)
+                        got = rs.get_status("/api/export/html", json.dumps({"scope": scope, "bssids": bssids}))
                         ok = got == 400
                         print("%s %-18s %-5s отчёт: обе версии отказали (%s)" % (lang, name, scope, e) if ok else
                               "%s %-18s %-5s отчёт: 1.x отказала, 2.x - HTTP %s" % (lang, name, scope, got))
                         problems += not ok
                         continue
-                    got_html = rs.raw("/api/export/html", body)
-                    html_ok = want_html == got_html
-                    if not html_ok:
-                        a, b = want_html.decode(), got_html.decode()
-                        i = next((k for k in range(min(len(a), len(b))) if a[k] != b[k]), min(len(a), len(b)))
-                        print("    HTML отличается с позиции %d:\n    1.x: %r\n    2.x: %r" % (i, a[i - 60:i + 120], b[i - 60:i + 120]))
-                    hist_name = tr("История")
-                    want_x = xlsx_parts(py_export(st, "xlsx", scope, bssids), hist_name)
-                    got_x = xlsx_parts(rs.raw("/api/export/xlsx", body), hist_name)
-                    bad_parts = sorted(k for k in set(want_x) | set(got_x) if want_x.get(k) != got_x.get(k))
-                    for k in bad_parts[:3]:
-                        a, b = want_x.get(k, ""), got_x.get(k, "")
-                        i = next((n for n in range(min(len(a), len(b))) if a[n] != b[n]), min(len(a), len(b)))
-                        print("    xlsx %s с позиции %d:\n    1.x: %r\n    2.x: %r" % (k, i, a[i - 60:i + 120], b[i - 60:i + 120]))
-                    problems += (not html_ok) + len(bad_parts)
-                    print("%s %-18s %-5s HTML %s, Excel %s" % (lang, name, scope, "совпадает" if html_ok else "ОТЛИЧАЕТСЯ",
-                                                              "совпадает" if not bad_parts else "частей отличается: %d" % len(bad_parts)))
+                    problems += compare_report_pair(st, rs, lang, name, scope, bssids, tr("История"))
                 for fmt, rows in (("journal", lambda: report.render_journal_csv(st.conn.to_dict(0, 100000)["events"])),
                                   ("sessions", lambda: report.render_sessions_csv(st.conn.sessions.to_dict(100000)["sessions"]))):
                     ok = rs.raw("/api/export/" + fmt) == rows().encode("utf-8-sig")
@@ -459,10 +500,15 @@ def _survey_case(rs, lang: str) -> int:
     # таблица обхода в отчётах
     body = json.dumps({"scope": "all"})
     norm = lambda t: _ISO.sub("T", _DT.sub("T", t))   # noqa: E731
-    results.append(("отчёт HTML с обходом", norm(py_export(st, "html", "all").decode()),
-                    norm(rs.raw("/api/export/html", body).decode())))
-    want_x = {k: norm(v) for k, v in xlsx_parts(py_export(st, "xlsx", "all"), "").items()}
-    got_x = {k: norm(v) for k, v in xlsx_parts(rs.raw("/api/export/xlsx", body), "").items()}
+    got_html = rs.raw("/api/export/html", body).decode()
+    # таблица обхода: каждая ячейка таблицы 1.x есть в HTML 2.x
+    import html as _html
+    cells = {_html.escape(str(c)) for r in report.survey_rows(st.survey.points, ["net-01", "net-02"])[1:]
+             for c in r if c not in (None, "")}
+    results.append(("отчёт HTML с обходом", "", ", ".join(sorted(c for c in cells if c not in got_html))))
+    norm_x = lambda d: {k: {r: norm(v) for r, v in c.items()} for k, c in d.items()}   # noqa: E731
+    want_x = norm_x(xlsx_values(py_export(st, "xlsx", "all"), ""))
+    got_x = norm_x(xlsx_values(rs.raw("/api/export/xlsx", body), ""))
     results.append(("отчёт Excel с обходом", json.dumps(want_x, sort_keys=True), json.dumps(got_x, sort_keys=True)))
     bad = [(p, a, b) for p, a, b in results if a != b]
     print("%s обход: проверок %d, расхождений %d" % (lang, len(results), len(bad)))
