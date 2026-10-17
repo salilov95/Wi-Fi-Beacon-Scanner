@@ -7,6 +7,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+- New look of the HTML and PDF report: a channel map per band at the top (each BSS drawn as its occupied
+  bandwidth, height is the signal, your SSIDs in colour, the DFS range shaded), problem counters, a list of
+  sections, problems as "what is wrong / what to check / affected BSSs", event badges in the connection journal,
+  all BSSs grouped by network (your SSIDs first). The capture time is written out in words; the English report
+  no longer has Russian headings.
+- Excel report: header row in the app colour, banded rows, critical and warning problems in colour, readable
+  column names on the BSS sheet, landscape printing fitted to the page width. The data is the same as before.
+
+### Development
+- `tools/compare_state.py` checks reports by content: everything the 1.x report contains (BSSs, problem texts,
+  journal and sessions, survey points) is in the 2.x HTML, and the Excel cell values match 1.x.
+
 ## [2.0.0] - 2026-10-17
 
 Version 2 is the same app rewritten in Rust + Tauri 2: its own window instead of a local server and an Edge window,

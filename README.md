@@ -145,8 +145,8 @@ Number of APs per channel, distribution by signal level, security, Wi-Fi generat
 
 ### Reports and themes
 
-PDF and Excel reports (with color scales for signal and load), HTML, CSV, measurement history, connection
-journal, JSON snapshot. Seven color themes: the screenshots above use the dark one, below is the light one.
+PDF and HTML reports open with a channel map of every band and list problems with what to check; Excel has
+color scales for signal and load. Also CSV, measurement history, connection journal, JSON snapshot. Seven color themes: the screenshots above use the dark one, below is the light one.
 
 <table>
   <tr>
