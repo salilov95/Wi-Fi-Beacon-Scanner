@@ -3,6 +3,11 @@
 # Запускается только когда меняются rust/, contract/, интерфейс (он зашит в exe 2.x) или этот файл - сборку
 # и релизы 1.x (ci.yml, release.yml) не трогает. Итог каждого шага пишется аннотацией (::notice / ::error),
 # чтобы его было видно без логов.
+#
+# Выпуск версии 2.x: поднять версию (rust/app/tauri.conf.json, rust/app/Cargo.toml, rust/crates/wbs-core/Cargo.toml),
+# раздел в обоих CHANGELOG, слить в main, затем Actions → Rust → Run workflow на main с галочкой «publish»:
+# тесты, сборка, проверки и GitHub Release v<версия> (тег - на собранном коммите, текст - из CHANGELOG).
+# Версия с дефисом (2.1.0-rc.1) публикуется как pre-release и «последней» не становится.
 name: Rust
 
 on:
@@ -14,6 +19,7 @@ on:
       - "wifi_beacon_scanner/web/static/**"
       - "tools/compare_state.py"
       - "tools/journal_contract.py"
+      - "tools/release_notes.py"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
@@ -22,7 +28,14 @@ on:
       - "wifi_beacon_scanner/web/static/**"
       - "tools/compare_state.py"
       - "tools/journal_contract.py"
+      - "tools/release_notes.py"
       - ".github/workflows/rust.yml"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Опубликовать GitHub Release v<версия из rust/app/tauri.conf.json> (только с main)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -172,11 +185,52 @@ jobs:
           kill $pid 2>/dev/null || taskkill //F //IM WiFiBeaconScanner2.exe || true
           echo "::notice title=smoke log::$(tr '\n' '|' < "$log" 2>/dev/null | head -c 3000)"
           if [ $ok = 1 ]; then echo "::notice title=smoke::окно открылось и подключилось к ядру"; else echo "::error title=smoke::окно не подключилось за 40 с"; exit 1; fi
+      # Тихая установка и удаление, как при раздаче через SCCM/Intune: куда ставится, что видно в «Программах»,
+      # что остаётся после удаления. Итог - в аннотациях (по ним написан docs/*/deployment.md).
+      - name: Silent install and uninstall (NSIS /S)
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem ../../dist2/WiFiBeaconScanner2-Setup-*.exe | Select-Object -First 1
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait -PassThru
+          $key = Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty |
+            Where-Object { $_.DisplayName -like 'Wi-Fi Beacon Scanner 2*' } | Select-Object -First 1
+          if (-not $key) { Write-Output "::error title=install::установщик (код $($p.ExitCode)) не создал запись в «Программах»"; exit 1 }
+          $uninst = $key.UninstallString.Trim('"')
+          $dir = if ($key.InstallLocation) { $key.InstallLocation.Trim('"') } else { Split-Path $uninst }
+          $files = (Get-ChildItem $dir -File | ForEach-Object Name) -join ', '
+          $lnk = (Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Recurse -Filter *.lnk |
+            Where-Object { $_.Name -like '*Beacon*' } | ForEach-Object FullName) -join '; '
+          Write-Output "::notice title=install::код $($p.ExitCode); $($key.DisplayName) $($key.DisplayVersion), издатель $($key.Publisher); папка $dir; файлы: $files; ярлык: $lnk; удаление: $($key.UninstallString)"
+          Start-Process -FilePath $uninst -ArgumentList '/S' -Wait
+          # деинсталлятор NSIS доделывает работу из своей копии во временной папке - ждём, пока exe исчезнут
+          for ($i = 0; $i -lt 30 -and (Test-Path (Join-Path $dir '*.exe')); $i++) { Start-Sleep 1 }
+          if (Test-Path (Join-Path $dir '*.exe')) { Write-Output "::error title=uninstall::после удаления в $dir остались exe"; exit 1 }
+          $settings = Test-Path "$env:APPDATA\WiFiBeaconScanner2"
+          $logs = Test-Path "$env:LOCALAPPDATA\WiFiBeaconScanner2\logs"
+          Write-Output "::notice title=uninstall::удалено; настройки %APPDATA%\WiFiBeaconScanner2 остались: $settings; журнал остался: $logs"
       - uses: actions/upload-artifact@v4
         with:
           name: WiFiBeaconScanner2
           path: dist2/*
           if-no-files-found: error
+      # Выпуск: Run workflow на main с «publish». Черновик этой версии заменяется настоящим релизом.
+      - name: Publish release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: dist2
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error title=publish::публикуется только main, а не $GITHUB_REF"; exit 1; fi
+          tag="v$VERSION"
+          if [ "$(gh release view "$tag" --json isDraft -q .isDraft 2>/dev/null)" = "true" ]; then gh release delete "$tag" --yes; fi
+          if gh release view "$tag" > /dev/null 2>&1; then echo "::error title=publish::$tag уже опубликован"; exit 1; fi
+          # MSYS_NO_PATHCONV: иначе bash в Windows превратит «/S» в путь
+          MSYS_NO_PATHCONV=1 python ../tools/release_notes.py "$VERSION" --setup "WiFiBeaconScanner2-Setup-$VERSION.exe" \
+            --portable WiFiBeaconScanner2.exe --silent /S --out notes.md
+          case "$VERSION" in *-*) kind="--prerelease --latest=false" ;; *) kind="--latest" ;; esac
+          gh release create "$tag" WiFiBeaconScanner2-Setup-*.exe WiFiBeaconScanner2.exe SHA256SUMS.txt \
+            --target "$GITHUB_SHA" --title "Wi-Fi Beacon Scanner $VERSION" --notes-file notes.md $kind
+          echo "::notice title=publish::$tag опубликован ($kind)"
       - name: Draft pre-release (not published)
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         env:
@@ -189,21 +243,10 @@ jobs:
           if gh release view "$tag" > /dev/null 2>&1; then
             echo "::notice title=draft::$tag уже опубликован - черновик не создаю"; exit 0
           fi
-          cat > notes.md <<EOF
-          **Альфа-версия 2.x на Rust + Tauri 2 - для проверки.** Рабочая версия - 1.x, она ставится и работает рядом, эта сборка её не трогает.
-
-          Что есть: скан через Windows Native Wifi API, таблица сетей, каналы, обзор, загрузка каналов, сигнал во времени, проблемы, Beacon (дерево IE), сравнение «до/после», «Мои SSID», журнал подключения и сессии (802.1X, IP/DHCP), журнал Windows, проверка обновлений, отчёты HTML/PDF/Excel, обход с планом этажа, демо-режим (`--demo`), выгрузка CSV/JSON. Результаты совпадают с 1.x на эталонах (contract/).
-
-          Перенесено всё, что есть у exe 1.1; командная строка `python -m wifi_beacon_scanner` - только в 1.x.
-
-          - \`WiFiBeaconScanner2-Setup-$VERSION.exe\` - установщик (для текущего пользователя, без прав администратора);
-          - \`WiFiBeaconScanner2.exe\` - переносная версия (нужен WebView2, в Windows 11 он есть).
-
-          Файлы не подписаны: SmartScreen покажет предупреждение («Подробнее» → «Выполнить в любом случае»).
-          Настройки: %APPDATA%\\WiFiBeaconScanner2, журнал: %LOCALAPPDATA%\\WiFiBeaconScanner2\\logs\\app.log.
-
-          Сборка: ${SHA:0:7}
-          EOF
+          # текст - из CHANGELOG (раздел версии или «Не выпущено»), сверху - пометка о черновике
+          MSYS_NO_PATHCONV=1 python ../tools/release_notes.py "$VERSION" --setup "WiFiBeaconScanner2-Setup-$VERSION.exe" \
+            --portable WiFiBeaconScanner2.exe --silent /S --out body.md
+          { printf '**Черновая сборка для проверки, не опубликована** (коммит %s).\n\n' "${SHA:0:7}"; cat body.md; } > notes.md
           gh release create "$tag" WiFiBeaconScanner2-Setup-*.exe WiFiBeaconScanner2.exe SHA256SUMS.txt \
             --draft --prerelease --target "$SHA" --title "Wi-Fi Beacon Scanner $tag (черновик)" --notes-file notes.md
           echo "::notice title=draft::черновик $tag создан (не опубликован)"
