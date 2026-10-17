@@ -46,7 +46,8 @@ The app log: `%LOCALAPPDATA%\WiFiBeaconScanner2\logs\app.log` - send it if somet
 | WebView2 profile of the window | `%LOCALAPPDATA%\io.github.salilov95.wifibeaconscanner2` |
 | Exports | wherever the user saved them; the app writes nothing else |
 
-Uninstall removes the program and the shortcut and keeps the settings and the log.
+Uninstall removes the program and the shortcut; the settings, the log and the WebView2 profile stay (delete the
+three folders above by hand if needed).
 
 ## Interface language
 
