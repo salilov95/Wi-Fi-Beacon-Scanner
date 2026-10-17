@@ -172,6 +172,54 @@ fn scan_history_and_exports() {
     assert_eq!(s.get("baseline"), Some(&Value::Null));
 }
 
+/// Отчёт на английском: ни одной строки интерфейса по-русски (данные - SSID, причины Windows - тут латиницей).
+/// Журнал и сессии - из сценария contract/journal/scenarios/demo.json, проигранного на английском.
+#[test]
+fn english_report_has_no_russian() {
+    use wbs_core::app::ConnSink;
+    let a = app();
+    assert_eq!(call(&a, "POST", "/api/prefs", r#"{"lang":"en"}"#).0, 200);
+    assert_eq!(call(&a, "POST", "/api/config", r#"{"focus":["CORP"]}"#).0, 200);
+    assert_eq!(call(&a, "POST", "/api/scan", "{}").0, 202);
+    wait_scan(&a);
+    let p = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../contract/journal/scenarios/demo.json");
+    let text = std::fs::read_to_string(p).unwrap();
+    let src = parse(&text).unwrap();
+    let ops = src.get("ops").and_then(Value::as_array).unwrap().clone();
+    wbs_core::i18n::with_lang(Lang::En, || {
+        a.with_conn(&mut |c| {
+            for o in &ops {
+                wbs_core::conn::replay_op(c, o).unwrap();
+            }
+        })
+    });
+    for scope in ["all", "focus"] {
+        let r = a.handle(
+            "POST",
+            "/api/export/html",
+            format!(r#"{{"scope":"{scope}"}}"#).as_bytes(),
+        );
+        let html = String::from_utf8(r.body).unwrap();
+        for section in [
+            "id='problems'",
+            "id='load'",
+            "id='connection'",
+            "id='sessions'",
+            "id='bss'",
+            "<svg",
+        ] {
+            assert!(html.contains(section), "{scope}: нет {section}");
+        }
+        let ru: Vec<&str> = html
+            .split(['<', '>'])
+            .filter(|t| t.chars().any(|c| ('\u{0400}'..='\u{04FF}').contains(&c)))
+            // причины из самого сценария (так их пишет русская Windows) - данные, а не интерфейс
+            .filter(|t| !text.contains(t.rsplit(": ").next().unwrap_or(t)))
+            .collect();
+        assert!(ru.is_empty(), "{scope}: русский текст в английском отчёте: {ru:?}");
+    }
+}
+
 #[test]
 fn config_and_prefs_files() {
     let dir = tmpdir("prefs");

@@ -918,6 +918,7 @@ impl App {
                 history: Some(&hist),
                 survey: &points,
                 offset_min: self.cfg.tz_offset_min,
+                version: &self.cfg.version,
             };
             return match fmt {
                 "html" => Reply::file(

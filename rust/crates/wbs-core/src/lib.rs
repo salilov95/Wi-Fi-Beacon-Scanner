@@ -51,6 +51,7 @@ pub mod oui;
 pub mod pdf;
 pub mod prefs;
 pub mod report;
+pub mod report_html;
 pub mod row;
 pub mod rules;
 pub mod session;
